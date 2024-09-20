@@ -84,12 +84,11 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
       mm_rqs[rq].size = GetUniform(max_memory - total - 1) + 1;
       mm_rqs[rq].address = my_malloc(mm_rqs[rq].size);
       if (mm_rqs[rq].address) {
-        printf("puntero: %p , tamaño:%d\n",mm_rqs[rq].address,mm_rqs[rq].size );
         total += mm_rqs[rq].size;
         rq++;
       }
     }
-    printf("total:%d\n", total);
+
     // Set
     uint32_t i;
     for (i = 0; i < rq; i++)

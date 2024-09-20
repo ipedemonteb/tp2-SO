@@ -91,9 +91,6 @@ void* mm_alloc(mmADT mm, uint64_t size) {
                 p->next = newFreeBlock;
                 
             }
-                
-            newFreeBlock->next = p;
-            newFreeBlock->prev = p->prev;
         }
 
         iter->size = size;
@@ -107,7 +104,7 @@ void* mm_alloc(mmADT mm, uint64_t size) {
 
         if(iter->next != NULL)
             iter->next->prev = iter->prev;
-        mm->avail -= size - remaining;
+        mm->avail -= size + remaining;
     }
 
 
