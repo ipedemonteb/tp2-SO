@@ -1,4 +1,3 @@
-
 #ifndef _ELIMINATOR_H
 #define _ELIMINATOR_H
 

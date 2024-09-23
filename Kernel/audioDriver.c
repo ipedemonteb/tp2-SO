@@ -1,10 +1,8 @@
 #include <audioDriver.h>
-
 #include <time.h>
 #include <lib.h>
 
-static void play_sound(uint32_t nFrequence)
-{
+static void play_sound(uint32_t nFrequence) {
 	uint32_t Div;
 	uint8_t tmp;
 
@@ -14,20 +12,17 @@ static void play_sound(uint32_t nFrequence)
 	outb(0x42, (uint8_t)(Div >> 8));
 
 	tmp = inb(0x61);
-	if (tmp != (tmp | 3))
-	{
+	if (tmp != (tmp | 3)) {
 		outb(0x61, tmp | 3);
 	}
 }
 
-static void nosound()
-{
+static void nosound() {
 	uint8_t tmp = inb(0x61) & 0xFC;
 	outb(0x61, tmp);
 }
 
-void beep(uint32_t frequence, uint32_t waitTicks)
-{
+void beep(uint32_t frequence, uint32_t waitTicks) {
 	play_sound(frequence);
 	timer_wait(waitTicks);
 	nosound();

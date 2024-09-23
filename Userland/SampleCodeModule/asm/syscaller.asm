@@ -12,7 +12,6 @@ GLOBAL fontSizeUpCaller
 GLOBAL fontSizeDownCaller
 GLOBAL getTimeCaller
 
-
 section .text
 
 %macro syscaller 1
@@ -27,23 +26,30 @@ section .text
     ret
 %endmacro
 
-
 readCaller:
     syscaller 0
+
 writeCaller:
     syscaller 1
+
 printRectangleCaller:
     syscaller 2
+
 getScreenWidthCaller:
     syscaller 3
+
 getScreenHeightCaller:
     syscaller 4
+
 printCharCaller:
     syscaller 5
+
 waitCaller:
     syscaller 6
+
 keyboardStatusCaller:
     syscaller 7
+
 keyboardKeyCaller:
     syscaller 8
 
@@ -55,6 +61,6 @@ fontSizeUpCaller:
 
 fontSizeDownCaller:
     syscaller 11
+
 getTimeCaller:
     syscaller 12
-

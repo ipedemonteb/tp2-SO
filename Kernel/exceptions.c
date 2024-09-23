@@ -2,17 +2,23 @@
 #include <syscalls.h>
 #include <interrupts.h>
 #include <regsDump.h>
+
 #define ZERO_EXCEPTION_ID 0
 #define INVALID_OPCODE_ID 6
 
-static void zero_division();
-static void invalid_opcode();
+static void zero_division(const uint64_t regs[19]) {
+	printRegisters("Division by zero exception", regs);
+	return;
+}
 
-void exceptionDispatcher(uint8_t exception, const uint64_t regs[19])
-{
+static void invalid_opcode(const uint64_t regs[19]) {
+	printRegisters("Invalid opcode exception", regs);
+	return;
+}
+
+void exceptionDispatcher(uint8_t exception, const uint64_t regs[19]) {
 	_sti();
-	switch (exception)
-	{
+	switch (exception) {
 	case ZERO_EXCEPTION_ID:
 		zero_division(regs);
 		break;
@@ -20,16 +26,4 @@ void exceptionDispatcher(uint8_t exception, const uint64_t regs[19])
 		invalid_opcode(regs);
 		break;
 	}
-}
-
-static void zero_division(const uint64_t regs[19])
-{
-	printRegisters("Division by zero exception", regs);
-	return;
-}
-
-static void invalid_opcode(const uint64_t regs[19])
-{
-	printRegisters("Invalid opcode exception", regs);
-	return;
 }

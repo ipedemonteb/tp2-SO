@@ -8,24 +8,18 @@
 #include <libc.h>
 
 #define BUFF_MAX 4096
-
 #define WHITE 0x00FFFFFF
 #define BLACK 0
-
 #define DELETE 127
 #define LEFT_ARROW 251
 #define RIGHT_ARROW 252
 #define UP_ARROW 253
 #define DOWN_ARROW 254
-
 #define LETTERS 'i' - 'a' + 1
 #define WORDS 2
 
-// ###################################################################
-// definiciones para los commandos
-typedef struct command
-{
-    char *name;
+typedef struct command {
+    uint8_t * name;
     void (*function)();
 } command;
 
@@ -41,12 +35,11 @@ static void invalidOpCode();
 
 static command commands[LETTERS][WORDS] = {{{"clear", clearCmd}, {0, 0}}, {{"div0", div0}, {0, 0}}, {{"eliminator", eliminator}, {"exit", exit}}, {{"fontBig", fontBig}, {"fontSmall", fontSmall}}, {{"getTime", getTime}, {0, 0}}, {{"help", help}, {0, 0}}, {{"invalidOpCode", invalidOpCode}, {0, 0}}};
 
-static char *commandNotFoundMsg = "Command not found. Type help for a list of commands";
+static uint8_t * commandNotFoundMsg = "Command not found. Type help for a list of commands";
 static uint8_t cNotFoundSize = 51;
-static char *helpMsg = "List of commands: clear, div0, eliminator, exit, fontBig, fontSmall, getTime, help, invalidOpCode";
+static uint8_t * helpMsg = "List of commands: clear, div0, eliminator, exit, fontBig, fontSmall, getTime, help, invalidOpCode";
 static uint8_t hMsgSize = 97;
-static char *waitMsg = "Press any key to continue";
-// ###################################################################
+static uint8_t * waitMsg = "Press any key to continue";
 
 static uint16_t currentY;
 static uint16_t currentX;
@@ -64,18 +57,15 @@ static uint8_t exitFlag;
 static uint8_t fontSize;
 static uint8_t reset;
 
-void sPrintChar(uint8_t c)
-{
+void sPrintChar(uint8_t c) {
     printCharCaller(UNUSED, c, currentX, currentY, WHITE, BLACK);
 }
 
-void sPrintSelected(uint8_t c)
-{
+void sPrintSelected(uint8_t c) {
     printCharCaller(UNUSED, c, currentX, currentY, BLACK, WHITE);
 }
 
-void startNewLine()
-{
+void startNewLine() {
     currentX = 0;
     sPrintChar('$');
     currentX++;
@@ -83,24 +73,21 @@ void startNewLine()
     currentX++;
 }
 
-void clearLineFrom(uint16_t x, uint16_t to)
-{
+void clearLineFrom(uint16_t x, uint16_t to) {
     uint16_t auxX = currentX;
     currentX = x;
-    while (currentX < width)
-    {
+    while (currentX < width) {
         printRectangleCaller(UNUSED, currentX * (8 * fontSize), currentY * (16 * fontSize), 8 * fontSize, 16 * fontSize, BLACK);
         currentX++;
     }
     currentX = auxX;
 }
-void clear()
-{
+
+void clear() {
     uint16_t auxX = currentX, auxY = currentY;
     currentX = 0;
     currentY = 0;
-    while (currentY < height)
-    {
+    while (currentY < height) {
         clearLineFrom(0, width);
         currentY++;
     }
@@ -108,118 +95,104 @@ void clear()
     currentY = auxY;
 }
 
-void sMoveScreenUp(uint8_t n)
-{
+void sMoveScreenUp(uint8_t n) {
     clear();
     uint16_t y = currentY - n + 1, l = firstLineOnScreen + n;
     currentY = 0;
 
-    while (y != currentY)
-    {
+    while (y != currentY) {
         startNewLine();
-        for (uint16_t i = 0; i < offsets[l + 1] - offsets[l]; i++)
-        {
-            if (currentX == width)
-            {
+        for (uint16_t i = 0; i < offsets[l + 1] - offsets[l]; i++) {
+            if (currentX == width) {
                 currentY++;
                 currentX = 0;
             }
             sPrintChar(buffer[offsets[l] + i]);
-
             currentX++;
         }
         l++;
         currentY++;
     }
-
     firstLineOnScreen += n;
 }
 
-void sPrintNewLine()
-{
-    if (!reset)
-    {
-        if (currentY < height - 1)
+void sPrintNewLine() {
+    if (!reset) {
+        if (currentY < height - 1) {
             currentY++;
-        else
+        }
+        else {
             sMoveScreenUp(1);
+        }
     }
     startNewLine();
     reset = 0;
 }
 
-void printMsgAndWait(const char *msg, uint8_t size)
-{
-    if (currentY < height - 2)
+void printMsgAndWait(const uint8_t * msg, uint8_t size) {
+    if (currentY < height - 2) {
         currentY++;
-    else
+    }
+    else {
         sMoveScreenUp(2 + size / width);
+    }
     currentX = 0;
-    for (uint16_t i = 0; i < size; i++)
-    {
+    for (uint16_t i = 0; i < size; i++) {
         sPrintChar(msg[i]);
-        if (currentX == width - 1)
-        {
+        if (currentX == width - 1) {
             currentX = 0;
             currentY++;
         }
-        else
+        else {
             currentX++;
+        }
     }
     currentY++;
     currentX = 0;
-    for (uint8_t j = 0; waitMsg[j]; j++)
-    {
+    for (uint8_t j = 0; waitMsg[j]; j++) {
         sPrintChar(waitMsg[j]);
         currentX++;
     }
-    char c = 0;
-    while (!(c = getChar()))
+    uint8_t c = 0;
+    while (!(c = getChar())) {
         ;
-    for (uint8_t i = 0; i < 2 + size / width; i++)
-    {
+    }
+    for (uint8_t i = 0; i < 2 + size / width; i++) {
         clearLineFrom(0, i);
         currentY--;
     }
 }
 
-char getCommandIdx(char c)
-{
+uint8_t getCommandIdx(uint8_t c) {
     return c - 'c';
 }
 
-void sCheckCommand()
-{
-    if (offsets[lineCount] == offsets[lineCount - 1])
+void sCheckCommand() {
+    if (offsets[lineCount] == offsets[lineCount - 1]) {
         return;
+    }
     uint8_t aux = buffer[offsets[lineCount]];
-    char c = getCommandIdx(buffer[offsets[lineCount - 1]]);
-    if (c < 0 || c >= LETTERS)
-    {
+    uint8_t c = getCommandIdx(buffer[offsets[lineCount - 1]]);
+    if (c < 0 || c >= LETTERS) {
         printMsgAndWait(commandNotFoundMsg, cNotFoundSize);
         return;
     }
 
     buffer[offsets[lineCount]] = 0;
-    command *auxC = commands[c];
-    for (int i = 0; i < WORDS; i++)
-    {
-        if (auxC[i].name != NULL)
-        {
+    command * auxC = commands[c];
+    for (int i = 0; i < WORDS; i++) {
+        if (auxC[i].name != NULL) {
             int cmp = strcmp(buffer + offsets[lineCount - 1], auxC[i].name);
-            if (cmp < 0)
-            {
+            if (cmp < 0) {
                 break;
             }
-            else if (cmp == 0)
-            {
+            else if (cmp == 0) {
                 auxC[i].function();
                 buffer[offsets[lineCount]] = aux;
                 return;
             }
         }
-        else
-        {
+        else {
             break;
         }
     }
@@ -227,29 +200,28 @@ void sCheckCommand()
     buffer[offsets[lineCount]] = aux;
 }
 
-void sDeleteChar()
-{
-    if (offsets[lineCount - 1] == count - leftSteps)
+void sDeleteChar() {
+    if (offsets[lineCount - 1] == count - leftSteps) {
         return;
-    if (currentX == 0)
-    {
+    }
+    if (currentX == 0) {
         currentY--;
         currentX = width - 1;
     }
-    else
+    else {
         currentX--;
+    }
     uint16_t auxX = currentX, auxY = currentY;
-    for (uint16_t i = 0; i <= leftSteps; i++)
-    {
+    for (uint16_t i = 0; i <= leftSteps; i++) {
         buffer[count - leftSteps + i - 1] = buffer[count - leftSteps + i];
         sPrintChar(buffer[count - leftSteps + i]);
-        if (currentX == width - 1)
-        {
+        if (currentX == width - 1) {
             currentX = 0;
             currentY++;
         }
-        else
+        else {
             currentX++;
+        }
     }
     sPrintChar(buffer[count]);
     currentX = auxX;
@@ -260,67 +232,63 @@ void sDeleteChar()
     offsets[lineCount]--;
 }
 
-void sMoveLeft()
-{
-    if (offsets[lineCount - 1] == count - leftSteps)
-    {
+void sMoveLeft() {
+    if (offsets[lineCount - 1] == count - leftSteps) {
         shellErrSound();
         return;
     }
     sPrintChar(buffer[count - leftSteps]);
-    if (currentX == 0)
-    {
+    if (currentX == 0) {
         currentX = width - 1;
         currentY--;
     }
-    else
+    else {
         currentX--;
+    }
     leftSteps++;
     sPrintSelected(buffer[count - leftSteps]);
 }
 
-void sMoveRight()
-{
-    if (leftSteps == 0)
-    {
+void sMoveRight() {
+    if (leftSteps == 0) {
         shellErrSound();
         return;
     }
     sPrintChar(buffer[count - leftSteps]);
-    if (currentX == width)
-    {
+    if (currentX == width) {
         currentX = 0;
         currentY++;
     }
-    else
+    else {
         currentX++;
+    }
     leftSteps--;
     sPrintSelected(buffer[count - leftSteps]);
 }
 
-void sGetLastLine()
-{
+void sGetLastLine() {
     uint16_t currentOffset = offsets[lineCount] - offsets[lineCount - 1], l;
-    do
-    {
-        if (currentLine)
+    do {
+        if (currentLine) {
             currentLine--;
-        else
+        }
+        else {
             return;
+        }
         l = offsets[currentLine + 1] - offsets[currentLine];
     } while (!l);
     previousCount += l;
     clearLineFrom(2, width);
     count -= currentOffset;
     currentX = 2;
-    for (uint16_t i = 0; i < l; i++)
-    {
-        if (currentX == width)
-        {
-            if (currentY < height - 1)
+    for (uint16_t i = 0; i < l; i++) {
+        if (currentX == width) {
+            if (currentY < height - 1) {
                 currentY++;
-            else
+            }
+            else {
                 sMoveScreenUp(1);
+            }
             currentX = 0;
         }
         uint8_t aux = buffer[count - previousCount];
@@ -333,17 +301,14 @@ void sGetLastLine()
     sPrintSelected(' ');
 }
 
-void printBufferFrom(uint16_t start, uint16_t end)
-{
-    for (int i = start; i < end; i++)
-    {
+void printBufferFrom(uint16_t start, uint16_t end) {
+    for (int i = start; i < end; i++) {
         sPrintChar(buffer[i]);
         currentX++;
     }
 }
 
-void launchShell()
-{
+void launchShell() {
     count = 0;
     lineCount = 1;
     firstLineOnScreen = 0;
@@ -363,103 +328,98 @@ void launchShell()
     buffer[count] = ' ';
 
     uint8_t key;
-    while (!exitFlag)
-    {
+    while (!exitFlag) {
         key = getChar();
-        switch (key)
-        {
-        case RIGHT_ARROW:
-            sMoveRight();
-            break;
-        case LEFT_ARROW:
-            sMoveLeft();
-            break;
-        case UP_ARROW:
-            sGetLastLine();
-            break;
-        case DOWN_ARROW:
-            shellErrSound();
-            break;
-        case DELETE:
-            sDeleteChar();
-            break;
-        case '\n':
-            sPrintChar(buffer[count - leftSteps]);
-            sCheckCommand();
-            leftSteps = 0;
-            previousCount = 0;
-            sPrintNewLine();
-            sPrintSelected(buffer[count]);
-            offsets[lineCount++] = count;
-            offsets[lineCount] = offsets[lineCount - 1]; // la linea esta vacia
-            currentLine = lineCount;
-            break;
-        case '\t':
-            if (offsets[lineCount] - offsets[lineCount - 1] == 1)
-            {
-                char c = getCommandIdx(buffer[count - 1]);
-                char *aux = commands[c][0].name + 1;
-                while (*aux)
-                {
-                    sPrintChar(*aux);
-                    buffer[count++] = *aux;
-                    aux++;
-                    currentX++;
+        switch (key) {
+            case RIGHT_ARROW:
+                sMoveRight();
+                break;
+            case LEFT_ARROW:
+                sMoveLeft();
+                break;
+            case UP_ARROW:
+                sGetLastLine();
+                break;
+            case DOWN_ARROW:
+                shellErrSound();
+                break;
+            case DELETE:
+                sDeleteChar();
+                break;
+            case '\n':
+                sPrintChar(buffer[count - leftSteps]);
+                sCheckCommand();
+                leftSteps = 0;
+                previousCount = 0;
+                sPrintNewLine();
+                sPrintSelected(buffer[count]);
+                offsets[lineCount++] = count;
+                offsets[lineCount] = offsets[lineCount - 1]; // la linea esta vacia
+                currentLine = lineCount;
+                break;
+            case '\t':
+                if (offsets[lineCount] - offsets[lineCount - 1] == 1) {
+                    uint8_t c = getCommandIdx(buffer[count - 1]);
+                    uint8_t * aux = commands[c][0].name + 1;
+                    while (*aux) {
+                        sPrintChar(*aux);
+                        buffer[count++] = *aux;
+                        aux++;
+                        currentX++;
+                    }
+                    offsets[lineCount] = count;
+                    buffer[count] = ' ';
+                    sPrintSelected(' ');
                 }
+            case 0:
+                break;
+            default: {
+                uint16_t auxX = currentX, auxY = currentY;
+                if (currentX + leftSteps >= width) {
+                    currentY++;
+                }
+                currentX = (currentX + leftSteps) % width;
+                for (uint16_t i = 0; i < leftSteps; i++) {
+                    buffer[count - i] = buffer[count - i - 1];
+                    sPrintChar(buffer[count - i]);
+                    if (currentX == 0) {
+                        currentX = width - 1;
+                        currentY--;
+                    }
+                    else {
+                        currentX--;
+                    }
+                }
+                currentX = auxX;
+                currentY = auxY;
+                buffer[count - leftSteps] = key;
+                count++;
                 offsets[lineCount] = count;
                 buffer[count] = ' ';
-                sPrintSelected(' ');
-            }
-        case 0:
-            break;
-        default:
-        {
-            uint16_t auxX = currentX, auxY = currentY;
-            if (currentX + leftSteps >= width)
-                currentY++;
-            currentX = (currentX + leftSteps) % width;
-            for (uint16_t i = 0; i < leftSteps; i++)
-            {
-                buffer[count - i] = buffer[count - i - 1];
-                sPrintChar(buffer[count - i]);
-                if (currentX == 0)
-                {
-                    currentX = width - 1;
-                    currentY--;
+                sPrintChar(key);
+                currentX++;
+                if (currentX == width) {
+                    if (currentY < height - 1) {
+                        currentY++;
+                    }
+                    else {
+                        sMoveScreenUp(1);
+                    }
+                    currentX = 0;
                 }
-                else
-                    currentX--;
+                sPrintSelected(buffer[count - leftSteps]);
             }
-            currentX = auxX;
-            currentY = auxY;
-            buffer[count - leftSteps] = key;
-            count++;
-            offsets[lineCount] = count;
-            buffer[count] = ' ';
-            sPrintChar(key);
-            currentX++;
-            if (currentX == width)
-            {
-                if (currentY < height - 1)
-                    currentY++;
-                else
-                    sMoveScreenUp(1);
-                currentX = 0;
-            }
-            sPrintSelected(buffer[count - leftSteps]);
-        }
         }
     }
-    while (fontSizeDownCaller(UNUSED))
+    while (fontSizeDownCaller(UNUSED)) {
         fontSize--;
+    }
 }
 
 // comandos de la terminal
 
-void fontBig()
-{
-    if (fontSize == 2)
-    {
+void fontBig() {
+    if (fontSize == 2) {
         shellErrSound();
         return;
     }
@@ -471,24 +431,20 @@ void fontBig()
     reset = 1;
 }
 
-void exit()
-{
+void exit() {
     exitFlag = 1;
     firstLineOnScreen = lineCount - 1;
     currentX = 0;
     currentY = 0;
 }
 
-void div0()
-{
+void div0() {
     fontSize = 1;
     divZero();
 }
 
-void fontSmall()
-{
-    if (fontSize == 1)
-    {
+void fontSmall() {
+    if (fontSize == 1) {
         shellErrSound();
         return;
     }
@@ -500,16 +456,14 @@ void fontSmall()
     reset = 1;
 }
 
-void eliminator()
-{
+void eliminator() {
     gameMain();
     cleanBuffer();
     sMoveScreenUp(0);
     reset = 1;
 }
 
-void clearCmd()
-{
+void clearCmd() {
     clear();
     reset = 1;
     firstLineOnScreen = lineCount - 1;
@@ -517,20 +471,17 @@ void clearCmd()
     currentY = 0;
 }
 
-void getTime()
-{
+void getTime() {
     uint8_t clock[20];
     getTimeCaller(UNUSED, clock);
     printMsgAndWait(clock, 8);
 }
 
-void help()
-{
+void help() {
     printMsgAndWait(helpMsg, hMsgSize);
 }
 
-void invalidOpCode()
-{
+void invalidOpCode() {
     fontSize = 1;
     opcode();
 }

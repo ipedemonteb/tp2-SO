@@ -5,8 +5,8 @@
 
 #define UNUSED 0
 
-uint32_t readCaller(uint8_t __unused, uint8_t *buffer, uint32_t size);
-long int writeCaller(uint8_t __unused, uint8_t fd, const uint8_t *string, uint32_t size);
+uint32_t readCaller(uint8_t __unused, uint8_t * buffer, uint32_t size);
+long int writeCaller(uint8_t __unused, uint8_t fd, const uint8_t * string, uint32_t size);
 void printRectangleCaller(uint8_t __unused, uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color);
 uint64_t getScreenWidthCaller(uint8_t __unused);
 uint64_t getScreenHeightCaller(uint8_t __unused);
