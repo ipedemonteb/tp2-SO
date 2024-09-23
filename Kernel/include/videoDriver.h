@@ -7,8 +7,7 @@
 #define BLACK 0x00000000
 #define RED 0x00FF0000
 
-struct vbe_mode_info_structure
-{
+struct vbe_mode_info_structure {
 	uint16_t attributes;  // deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.
 	uint8_t window_a;	  // deprecated
 	uint8_t window_b;	  // deprecated
@@ -46,15 +45,15 @@ struct vbe_mode_info_structure
 	uint8_t reserved1[206];
 } __attribute__((packed));
 
-typedef struct vbe_mode_info_structure *VBEInfoPtr;
+typedef struct vbe_mode_info_structure * VBEInfoPtr;
 
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
 void drawchar(uint8_t c, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
-void drawString(const uint8_t *string, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
+void drawString(uint8_t * string, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
 void printBit(uint32_t hexColor, uint64_t x, uint64_t y);
 uint64_t getWidth();
 uint64_t getHeight();
-void printInPopUp(uint8_t *msg, uint16_t x, uint16_t y);
+void printInPopUp(uint8_t * msg, uint16_t x, uint16_t y);
 void clearPopUp();
 void resetPopUp();
 void savePopUpWindow();

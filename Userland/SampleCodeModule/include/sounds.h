@@ -1,8 +1,7 @@
 #ifndef NOTES_H
 #define NOTES_H
 
-typedef enum FIGURES
-{
+typedef enum FIGURES {
     BLANCA,
     NEGRA,
     CORCHEA,

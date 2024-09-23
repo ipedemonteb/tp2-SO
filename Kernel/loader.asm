@@ -1,4 +1,4 @@
-global loader
+GLOBAL loader
 extern main
 extern initializeKernelBinary
 
@@ -8,5 +8,5 @@ loader:
 	call main
 hang:
 	cli
-	hlt	; halt machine should kernel return
+	hlt							; Halt machine should kernel return
 	jmp hang

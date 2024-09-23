@@ -1,8 +1,9 @@
 #ifndef REGSDUMP_H
 #define REGSDUMP_H
+
 #include <stdint.h>
 
-static const char *registers[19] = {
+static const uint8_t * registers[19] = {
     "RAX:",
     "RBX:",
     "RCX:",
@@ -24,5 +25,6 @@ static const char *registers[19] = {
     "RFLAGS:",
 };
 
-void printRegisters(const uint8_t *message, const uint64_t regs[19]);
+void printRegisters(uint8_t * message, const uint64_t regs[19]);
+
 #endif

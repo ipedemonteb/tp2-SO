@@ -1,11 +1,9 @@
-
 GLOBAL _cli
 GLOBAL _sti
 GLOBAL picMasterMask
 GLOBAL picSlaveMask
 GLOBAL haltcpu
 GLOBAL _hlt
-
 GLOBAL _irq00Handler
 GLOBAL _irq01Handler
 GLOBAL _irq02Handler
@@ -13,19 +11,16 @@ GLOBAL _irq03Handler
 GLOBAL _irq04Handler
 GLOBAL _irq05Handler
 GLOBAL _irq80Handler
-
 GLOBAL _exception0Handler
 GLOBAL _exception06Handler
-
 GLOBAL regs
-
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN sysCallDispatcher
 EXTERN getStackBase
 
-SECTION .text
+section .text
 
 %macro pushState 0
 	push rax
@@ -64,7 +59,6 @@ SECTION .text
 %endmacro
 
 %macro irqHandlerMaster 1
-
 	pushState
 
 	mov rdi, %1 ; pasaje de parametro
@@ -103,8 +97,6 @@ mov [regs], rax ; General Purpose Registers
 	mov [regs+8*18], rax
 %endmacro
 
-
-
 %macro exceptionHandler 1
 	getRegs
 	pushState
@@ -119,7 +111,6 @@ mov [regs], rax ; General Purpose Registers
 	iretq
 %endmacro
 
-
 _hlt:
 	sti
 	hlt
@@ -128,7 +119,6 @@ _hlt:
 _cli:
 	cli
 	ret
-
 
 _sti:
 	sti
@@ -150,29 +140,28 @@ picSlaveMask:
     pop     rbp
     retn
 
-
-;8254 Timer (Timer Tick)
+; 8254 Timer (Timer Tick)
 _irq00Handler:
 	irqHandlerMaster 0
 
-;Keyboard
+; Keyboard
 _irq01Handler:
 	getRegs
 	irqHandlerMaster 1
 
-;Cascade pic never called
+; Cascade pic never called
 _irq02Handler:
 	irqHandlerMaster 2
 
-;Serial Port 2 and 4
+; Serial Port 2 and 4
 _irq03Handler:
 	irqHandlerMaster 3
 
-;Serial Port 1 and 3
+; Serial Port 1 and 3
 _irq04Handler:
 	irqHandlerMaster 4
 
-;USB
+; USB
 _irq05Handler:
 	irqHandlerMaster 5
 
@@ -184,10 +173,11 @@ _irq80Handler:
 	pop rbp
 	iretq
 
-;Zero Division Exception
+; Zero Division Exception
 _exception0Handler:
 	exceptionHandler 0
-;Invalid Opcode Exception	
+
+; Invalid Opcode Exception	
 _exception06Handler
 	exceptionHandler 6
 
@@ -196,10 +186,9 @@ haltcpu:
 	hlt
 	ret
 
-
-
-SECTION .bss
+section .bss
 	aux resq 1
 	regs resq 19
-SECTION .rodata
+
+section .rodata
 	userland equ 0x400000

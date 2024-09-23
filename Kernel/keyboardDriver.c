@@ -76,36 +76,31 @@ char extendedKey = 0;
 char capsLock = 0;
 
 // rutina de atencion de la interrupcion 21h
-void keyboard_handler()
-{
+void keyboard_handler() {
 	uint8_t keyVal = getKeyboardKey();
-
-	if (keyVal == 0xE0)
-	{
+	if (keyVal == 0xE0) {
 		extendedKey = 1;
 		keyVal = getKeyboardKey();
 	}
-
-	if (keyVal == LEFT_SHIFT || keyVal == RIGHT_SHIFT)
+	if (keyVal == LEFT_SHIFT || keyVal == RIGHT_SHIFT) {
 		shiftOn = 1;
-	else if (keyVal == LEFT_SHIFT_B || keyVal == RIGHT_SHIFT_B)
+	}
+	else if (keyVal == LEFT_SHIFT_B || keyVal == RIGHT_SHIFT_B) {
 		shiftOn = 0;
-	else if (keyVal == LEFT_CTRL)
+	}
+	else if (keyVal == LEFT_CTRL) {
 		ctrlOn = 1;
-	else if (keyVal == LEFT_CTRL_B)
-	{
+	}
+	else if (keyVal == LEFT_CTRL_B) {
 		ctrlOn = 0;
 	}
-	else if (keyVal == CAPS_LOCK)
-	{
+	else if (keyVal == CAPS_LOCK) {
 		capsLock = !capsLock;
 	}
-	else if (extendedKey)
-	{
+	else if (extendedKey) {
 		extendedKey = 0; // Reset the extended key flag
 		uint8_t aux;
-		switch (keyVal)
-		{
+		switch (keyVal) {
 		case DOWNKEY:
 			aux = DOWN_ARROW;
 			break;
@@ -124,24 +119,20 @@ void keyboard_handler()
 		charBuffer[last % BUFF_SIZE] = aux;
 		last++;
 	}
-	else if (keyVal > 58)
-	{
+	else if (keyVal > 58) {
 	}
-	else
-	{
-		if (ctrlOn && keyVal == R_MAKE_CODE)
-		{
+	else {
+		if (ctrlOn && keyVal == R_MAKE_CODE) {
 			printRegisters("REGISTERS", regs);
 			ctrlOn = 0;
 		}
-		else
-		{
+		else {
 			charBuffer[last % BUFF_SIZE] = asccode[keyVal][shiftOn + capsLock * 2];
 			last++;
 		}
 	}
 }
-uint8_t nextFromBuffer()
-{
+
+uint8_t nextFromBuffer() {
 	return last <= next ? 0 : charBuffer[(next++) % BUFF_SIZE];
 }
