@@ -1,6 +1,7 @@
 include Makefile.inc
 
 KERNEL=kernel.bin
+KERNEL_ELF=$(KERNEL:.bin=.elf)
 SOURCES=$(wildcard *.c)
 SOURCES_ASM=$(wildcard asm/*.asm)
 OBJECTS=$(SOURCES:.c=.o)
@@ -11,6 +12,9 @@ LOADEROBJECT=$(LOADERSRC:.asm=.o)
 STATICLIBS=
 
 all: $(KERNEL)
+
+debug: all
+	$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o $(KERNEL_ELF) $(LOADEROBJECT) $(STATICLIBS) $(OBJECTS) $(OBJECTS_ASM)
 
 $(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
 	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
@@ -25,6 +29,6 @@ $(LOADEROBJECT):
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf asm/*.o *.o *.bin
+	rm -rf asm/*.o *.o *.bin *.elf
 
 .PHONY: all clean

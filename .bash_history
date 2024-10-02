@@ -111,3 +111,14 @@ gcc -g -pedantic -Wall -std=c99 main.c memory_manager.c mmADT.c test_mm.c test_u
 ./a.out
 gdb a.out
 exit
+ls
+cd
+ls
+exit
+cd
+gdb
+gdb
+q
+exit
+gdb
+exit

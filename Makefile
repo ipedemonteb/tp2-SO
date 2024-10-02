@@ -1,5 +1,8 @@
 
 all:  bootloader kernel userland image
+debug: all
+	cd Kernel; make debug
+	cd Userland; make debug
 
 bootloader:
 	cd Bootloader; make all
