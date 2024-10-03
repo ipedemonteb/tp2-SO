@@ -1,7 +1,7 @@
-#include <time.h>
+#include "../include/time.h"
 #include <stdint.h>
-#include <syscalls.h>
-#include <keyboardDriver.h>
+#include "../include/syscalls.h"
+#include "../include/keyboardDriver.h"
 
 static void int_20();
 static void int_21();

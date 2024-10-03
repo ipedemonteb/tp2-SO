@@ -1,7 +1,7 @@
-#include <regsDump.h>
-#include <keyboardDriver.h>
-#include <videoDriver.h>
-#include <interrupts.h>
+#include "../include/regsDump.h"
+#include "../include/keyboardDriver.h"
+#include "../include/videoDriver.h"
+#include "../include/interrupts.h"
 
 void uint64ToHex(uint64_t num, uint8_t buf[17]) {
     int i = 15;

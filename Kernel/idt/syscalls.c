@@ -1,8 +1,8 @@
-#include <syscalls.h>
-#include <time.h>
-#include <audioDriver.h>
-#include <keyboardDriver.h>
-#include <videoDriver.h>
+#include "../include/syscalls.h"
+#include "../include/time.h"
+#include "../include/audioDriver.h"
+#include "../include/keyboardDriver.h"
+#include "../include/videoDriver.h"
 
 static uint32_t uintToBase(uint64_t value, uint8_t * buffer, uint32_t base);
 

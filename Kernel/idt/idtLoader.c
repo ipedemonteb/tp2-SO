@@ -1,6 +1,6 @@
-#include <idtLoader.h>
-#include <defs.h>
-#include <interrupts.h>
+#include "../include/idtLoader.h"
+#include "../include/defs.h"
+#include "../include/interrupts.h"
 
 #pragma pack(push) // push of current alignment
 #pragma pack(1)    // align following structures to one byte

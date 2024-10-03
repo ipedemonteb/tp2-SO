@@ -1,6 +1,6 @@
-#include <audioDriver.h>
-#include <time.h>
-#include <lib.h>
+#include "../include/audioDriver.h"
+#include "../include/time.h"
+#include "../include/lib.h"
 
 static void play_sound(uint32_t nFrequence) {
 	uint32_t Div;

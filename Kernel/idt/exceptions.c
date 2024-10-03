@@ -1,7 +1,7 @@
 #include <stdint.h>
-#include <syscalls.h>
-#include <interrupts.h>
-#include <regsDump.h>
+#include "../include/syscalls.h"
+#include "../include/interrupts.h"
+#include "../include/regsDump.h"
 
 #define ZERO_EXCEPTION_ID 0
 #define INVALID_OPCODE_ID 6

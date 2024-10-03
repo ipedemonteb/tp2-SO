@@ -1,6 +1,6 @@
-#include <time.h>
-#include <lib.h>
-#include <interrupts.h>
+#include "../include/time.h"
+#include "../include/lib.h"
+#include "../include/interrupts.h"
 
 static unsigned long ticks = 0;
 

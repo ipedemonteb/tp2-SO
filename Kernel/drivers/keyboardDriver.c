@@ -1,6 +1,6 @@
-#include <keyboardDriver.h>
-#include <lib.h>
-#include <regsDump.h>
+#include "../include/keyboardDriver.h"
+#include "../include/lib.h"
+#include "../include/regsDump.h"
 
 static uint8_t charBuffer[BUFF_SIZE];
 static uint64_t last = 0;
