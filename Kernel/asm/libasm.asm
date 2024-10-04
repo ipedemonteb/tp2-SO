@@ -6,6 +6,7 @@ GLOBAL outb
 GLOBAL inb
 GLOBAL getCurrentTime
 GLOBAL setTimerTick
+GLOBAL int20
 
 section .text
 cpuVendor:
@@ -208,6 +209,9 @@ setTimerTick:
 	mov rsp, rbp
 	pop rbp
     ret
+
+int20:
+    int 20h
 
 section .bss
     IRQ0_frequency:          resd 1          ; Actual frequency of PIT

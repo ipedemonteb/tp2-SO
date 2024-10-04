@@ -10,5 +10,6 @@ char *cpuVendor(char *result);
 
 void outb(uint8_t X, uint8_t Y);
 uint8_t inb(uint8_t X);
+void int20();
 
 #endif

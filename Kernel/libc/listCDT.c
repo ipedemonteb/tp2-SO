@@ -29,7 +29,7 @@ static void freeListRec(TList list) {
 }
 
 void add(listADT list, void * elem) {
-    TList aux = my_malloc(sizeof(TList));
+    TList aux = my_malloc(sizeof(node));
     aux->head = elem;
     if(list->first == NULL) {
         list->first = aux;
@@ -63,4 +63,17 @@ void * next(listADT list) {
     void * aux = list->it->head;
     list->it = list->it->tail;
     return aux;
+}
+
+void * poll(listADT list){
+    TList aux = list->first;
+    list->first = list->first->tail;
+    return aux->head;
+}
+
+void queue(listADT list , void * elem){
+    TList aux = my_malloc(sizeof(node));
+    aux->head = elem;
+    list->last->tail = aux;
+    list->last = aux;
 }

@@ -19,6 +19,7 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN sysCallDispatcher
 EXTERN getStackBase
+EXTERN schedule
 
 section .text
 
@@ -142,7 +143,21 @@ picSlaveMask:
 
 ; 8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+	pushState
+
+	mov rdi, 0
+	call irqDispatcher
+
+	mov rdi, rsp
+	call schedule
+	mov rsp, rax
+
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
+
+	popState
+	iretq
 
 ; Keyboard
 _irq01Handler:
@@ -166,11 +181,17 @@ _irq05Handler:
 	irqHandlerMaster 5
 
 _irq80Handler:
-	push rbp
-	mov rbp,rsp
+	pushState
+
 	call sysCallDispatcher
-	mov rsp,rbp
-	pop rbp
+	
+	push rax
+
+	mov al, 20h
+	out 20h, al
+
+	pop rax 
+	popState
 	iretq
 
 ; Zero Division Exception

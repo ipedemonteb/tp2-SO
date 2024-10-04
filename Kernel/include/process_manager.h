@@ -1,9 +1,12 @@
-#ifndef _PROCESS_H
-#define _PROCESS_H
+#ifndef _PROCESS_MANAGER_H
+#define _PROCESS_MANAGER_H
 
 #include <stdint.h>
 #include "memory_manager.h"
+#include "process.h"
 #include "scheduler.h"
+#include "lib.h"
+
 #define QUANT		100
 #define STACKSIZE   4096
 
