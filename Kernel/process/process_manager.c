@@ -30,13 +30,14 @@ uint8_t kill(uint16_t pid) {
     if (get_current_pid() == pid) {
         int20();
     }
-    
     // free_process_struct(); // TODO: crear esta funcion que libere el struct (que hacemos con el espacio en el vector??)
 }
 
 uint8_t block(uint16_t pid) {
     processes[pid]->status = BLOCKED;
-    int20(); //ver que onda tema contextos ( se estarian guardando repetidos ahora )
+    if (get_current_pid() == pid) {
+        int20(); //ver que onda tema contextos ( se estarian guardando repetidos ahora )
+    }
 }
 
 uint8_t unblock(uint16_t pid) {
