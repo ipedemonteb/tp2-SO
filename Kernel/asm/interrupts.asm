@@ -181,13 +181,17 @@ _irq05Handler:
 	irqHandlerMaster 5
 
 _irq80Handler:
+	pushState
+
 	call sysCallDispatcher
+	
 	push rax
 
 	mov al, 20h
 	out 20h, al
 
 	pop rax 
+	popState
 	iretq
 
 ; Zero Division Exception

@@ -7,19 +7,34 @@
 #include "scheduler.h"
 #include "lib.h"
 
-#define QUANT		100
+#define QUANT		512
 #define STACKSIZE   4096
 
 typedef struct process_stack {
-    uint8_t argc;
-    uint8_t ** argv;
+    void * r15;
+	void * r14;
+	void * r13;
+	void * r12;
+	void * r11;
+	void * r10;
+	void * r9;
+	void * r8;
+	void * rsi;
+	void * rdi;
+	void * rbp;
+	void * rdx;
+	void * rcx;
+	void * rbx;
+	void * rax;
     void * rip;
     void * cs;
     void * rflags;
+    void * rsp;
     void * ss;
 } process_stack;
 
-uint16_t createProcess(void * fn, uint8_t argc, uint8_t * argv[]);
+void init_process(void * stack_base);
+int32_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t * argv[]);
 uint8_t kill(uint16_t pid);
 uint8_t block(uint16_t pid);
 uint8_t unblock(uint16_t pid);

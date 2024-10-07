@@ -1,5 +1,5 @@
 #include "../include/listADT.h"
-
+//@todo: CAMMELLLL CASEEE
 typedef struct node {
     void * head;
     struct node * tail;
@@ -68,6 +68,7 @@ void * next(listADT list) {
 void * poll(listADT list){
     TList aux = list->first;
     list->first = list->first->tail;
+    my_free(aux);
     return aux->head;
 }
 
@@ -75,5 +76,13 @@ void queue(listADT list , void * elem){
     TList aux = my_malloc(sizeof(node));
     aux->head = elem;
     list->last->tail = aux;
+    list->last = aux;
+    aux->tail = NULL;
+}
+
+void queue_first(listADT list , void * elem) {
+    TList aux = my_malloc(sizeof(node));
+    aux->head = elem;
+    list->first = aux;
     list->last = aux;
 }

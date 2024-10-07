@@ -7,7 +7,7 @@ mmADT mm;
 char mem[END-START];
 
 void start_mm() {
-    mm = init_mm(mem, 2048);
+    mm = init_mm(START, END - START);
 }
 
 void * my_malloc(uint64_t size) {

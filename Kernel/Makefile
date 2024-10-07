@@ -2,7 +2,7 @@ include Makefile.inc
 
 KERNEL=kernel.bin
 KERNEL_ELF=$(KERNEL:.bin=.elf)
-SOURCES=$(wildcard *.c) $(wildcard drivers/*.c) $(wildcard idt/*.c) $(wildcard libc/*.c) $(wildcard memory/*.c) $(wildcard process/*.c)
+SOURCES=$(wildcard *.c) $(wildcard drivers/*.c) $(wildcard idt/*.c) $(wildcard libc/*.c) $(wildcard memory/*.c) $(wildcard process/*.c) $(wildcard tests/*.c)
 SOURCES_ASM=$(wildcard asm/*.asm)
 OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)

@@ -7,8 +7,12 @@
 #include <videoDriver.h>
 #include <idtLoader.h>
 #include <time.h>
+#include "./include/process_manager.h"
+#include "./include/test_mm.h"
+#include "./include/test_process.h"
+#include "./include/interrupts.h"
+#include "./include/memory_manager.h"
 
-#include "test_mm.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -45,10 +49,15 @@ void * initializeKernelBinary() {
 }
 
 int main() {
-	char * argv[] = {"1000"};
-    test_mm(1 , argv);
 	load_idt();
-	setTimerTick(1000);
+	start_mm();
+	init_process(getStackBase());
+	uint8_t * argv[] = {"16" , 0}; 
+	create_process(test_processes,1,argv);
+	_sti();
+
+	while(1);
+	//halt_cpu();
 	((EntryPoint)sampleCodeModuleAddress)();
 	return 0;
 }

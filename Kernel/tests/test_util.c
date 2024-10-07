@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "../include/syscalls.h"
 #include "../include/syscall.h"
-
+#include "../include/videoDriver.h"
 // Random
 static uint32_t m_z = 362436069;
 static uint32_t m_w = 521288629;
@@ -62,8 +62,15 @@ void bussy_wait(uint64_t n) {
 }
 
 void endless_loop() {
-  while (1)
-    ;
+  int i = 0 , j = 10;
+  while (1){
+    if (i == 3)
+    {
+      drawchar('0', j , j , WHITE , BLACK);
+      j += 1;
+    }
+    i++;
+  }
 }
 
 void numToStr(int num, uint8_t * str) {

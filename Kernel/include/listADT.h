@@ -17,4 +17,5 @@ uint8_t hasNext(const listADT list);
 void * next(listADT list);
 void * poll(listADT list);
 void queue(listADT list , void * elem);
+void queue_first(listADT list, void * elem);
 #endif

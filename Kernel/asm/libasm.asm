@@ -7,8 +7,14 @@ GLOBAL inb
 GLOBAL getCurrentTime
 GLOBAL setTimerTick
 GLOBAL int20
+GLOBAL halt_cpu
 
 section .text
+
+halt_cpu:
+    hlt
+    jmp halt_cpu
+
 cpuVendor:
 	push rbp
 	mov rbp, rsp
