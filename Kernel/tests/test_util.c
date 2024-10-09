@@ -93,7 +93,7 @@ void endless_loop_print(uint64_t wait) {
   uint8_t buffer[20];
   numToStr(pid, buffer);
   while (1) {
-    write(1, buffer, sizeof(buffer));
+    drawString(buffer, 25 , pid , WHITE , BLACK);
     bussy_wait(wait);
   }
 }

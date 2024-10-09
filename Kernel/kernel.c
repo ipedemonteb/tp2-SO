@@ -81,10 +81,12 @@ int main() {
 	start_mm();
 	init_scheduler(getStackBase());
 	uint8_t * argv[] = {"16" , 0}; 
+	create_process(test_prio,0,argv);
 	create_process(test1,0,argv);
 	create_process(test2,0,argv);
 	create_process(sampleCodeModuleAddress,0,argv);
 	_sti();
+	halt_cpu();
 	uint64_t i = 0;
 	uint8_t j = 0;
 	while(1){
@@ -97,7 +99,6 @@ int main() {
 		}
 		else if ((i % 150000000) == 0) unblock(1);
 	}
-	//halt_cpu();
 	((EntryPoint)sampleCodeModuleAddress)();
 	return 0;
 }

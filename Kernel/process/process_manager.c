@@ -15,9 +15,10 @@ void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * arg
 void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_base = stack;
     p_struct->pid = current_pid++;
-    p_struct->priority = 1;  // TODO: ver
+    p_struct->priority = 1; 
     p_struct->status = READY;
     p_struct->children_processes = 0;
+    p_struct->count = 1;
     process_stack * p_stack = stack - sizeof(process_stack);
     p_stack->rsp = stack;
     p_stack->cs = (void *)0x8;
@@ -55,6 +56,10 @@ void exit(){
 }
 
 uint8_t kill(uint16_t pid) {
+    if (pid > get_current_pid()) {
+        return -1;
+    }
+    
     processes[pid]->status = KILLED;
     if (get_current_pid() == pid) {
         int20();
@@ -79,6 +84,10 @@ void nice(uint16_t pid, uint8_t priority) {
 
 void yield() {
     int20(); //ver que onda tema prioridades
+}
+
+void ps() {
+    
 }
 
 void wait_children() {
