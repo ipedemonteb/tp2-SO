@@ -11,7 +11,7 @@ int main()
 {
 	while (1)
 	{
-		welcome();
+		//welcome();
 		uint8_t *msg2[] = {"Please select a program to run:\0", "1. Eliminator\0", "2. Shell\0"};
 		for (uint8_t i = 0; i < 3; i++)
 		{

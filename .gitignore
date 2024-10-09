@@ -6,6 +6,8 @@
 *.ko
 *.obj
 *.elf
+**/*.o
+**/*.elf
 
 # Linker output
 *.ilk
@@ -35,7 +37,8 @@
 *.i*86
 *.x86_64
 *.hex
-
+**/*.bin
+**/*.sys
 # Debug files
 *.dSYM/
 *.su
@@ -55,3 +58,8 @@ dkms.conf
 .gdb_history
 
 .bash_history
+
+#qemu
+**/*.img
+**/*.qcow2
+**/*.vmdk

@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define STACKSIZE   4096
+
 enum Status {READY, BLOCKED, KILLED};
 
 typedef struct process_struct {

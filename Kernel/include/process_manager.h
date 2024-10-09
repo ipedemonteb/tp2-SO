@@ -8,7 +8,6 @@
 #include "lib.h"
 
 #define QUANT		512
-#define STACKSIZE   4096
 
 typedef struct process_stack {
     void * r15;
@@ -33,7 +32,6 @@ typedef struct process_stack {
     void * ss;
 } process_stack;
 
-void init_process(void * stack_base);
 int32_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t * argv[]);
 uint8_t kill(uint16_t pid);
 uint8_t block(uint16_t pid);

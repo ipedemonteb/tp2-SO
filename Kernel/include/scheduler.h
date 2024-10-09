@@ -11,7 +11,7 @@ typedef struct scheduler_struct {
     process_struct * current_running_pcb;
 } scheduler_struct;
 
-void init_scheduler();
+void init_scheduler(void * stack_base);
 void schedule_process();
 void * schedule();
 uint16_t get_current_pid();

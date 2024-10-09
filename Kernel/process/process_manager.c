@@ -4,21 +4,12 @@
 
 #define ALIGN 7
 
-uint16_t current_pid = 0;
+uint16_t current_pid = 1;
 process_struct * processes[QUANT] = {0};
 
 void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * argv[]) {
     fn(argc, argv);
     exit();
-}
-
-void init_process(void * stack_base){
-    process_struct * p_struct = my_malloc(sizeof(process_struct));
-    processes[current_pid++] = p_struct;
-    p_struct->argv = NULL;
-    p_struct->name = "init";
-    p_struct->stack_base = stack_base;
-    init_scheduler(p_struct);
 }
 
 void load_proc_stack(process_struct * p_struct, void * stack) {
