@@ -5,7 +5,10 @@
 #define ALIGN 7
 
 uint16_t current_pid = 1;
-process_struct * processes[QUANT] = {0};
+process_struct processes[QUANT] = {0};
+
+uint64_t ocuppied_low = ~0;
+uint64_t ocuppied_high = ~0;
 
 void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * argv[]) {
     fn(argc, argv);
@@ -36,13 +39,13 @@ void load_proc_args(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv
 }
 
 int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[]) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
-    if (current_pid >= QUANT)
-    {
+    if (current_pid >= QUANT) {
         return -1;
     }
     
-    process_struct * p_struct = my_malloc(sizeof(process_struct));
-    processes[current_pid] = p_struct;
+    //process_struct * p_struct = my_malloc(sizeof(process_struct));
+    //processes[current_pid] = p_struct;
+    process_struct * p_struct = &processes[current_pid];
     p_struct->argv = argv;
     void * stack = (uint64_t)(my_malloc(STACKSIZE) + STACKSIZE) & ~ALIGN;
     load_proc_stack(p_struct,stack);
@@ -56,11 +59,11 @@ void exit(){
 }
 
 uint8_t kill(uint16_t pid) {
-    if (pid > get_current_pid()) {
+    if (pid > current_pid) {
         return -1;
     }
     
-    processes[pid]->status = KILLED;
+    processes[pid].status = KILLED;
     if (get_current_pid() == pid) {
         int20();
     }
@@ -68,18 +71,18 @@ uint8_t kill(uint16_t pid) {
 }
 
 uint8_t block(uint16_t pid) {
-    processes[pid]->status = BLOCKED;
+    processes[pid].status = BLOCKED;
     if (get_current_pid() == pid) {
         int20(); //ver que onda tema contextos ( se estarian guardando repetidos ahora )
     }
 }
 
 uint8_t unblock(uint16_t pid) {
-    processes[pid]->status = READY;
+    processes[pid].status = READY;
 }
 
 void nice(uint16_t pid, uint8_t priority) {
-    processes[pid]->priority = priority;
+    processes[pid].priority = priority;
 }
 
 void yield() {

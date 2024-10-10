@@ -3,6 +3,10 @@
 #define AVAILABLE 1
 #define MAX_INPUT 4
 #include "../include/videoDriver.h"
+
+#include "test_util.h" // TODO: borrar
+
+
 uint8_t avail_inputs[MAX_INPUT];
 
 int cmp(void * elem1, void * elem2) {
@@ -45,16 +49,7 @@ void * schedule(void * rsp) {   // round robin with priorities scheduling
             } else {
                 add(scheduler->schedule, current_pcb);
             }
-        } else if (current_pcb->status == KILLED ) {
-            //my_free(current_pcb->stack_base - STACKSIZE);   //@todo: ver tema alineacion 
-            current_pcb->count--;
-            drawString("hola" , 5 , 5 + debug % 10 , WHITE,BLACK);
-            drawchar(get_current_pid() + '0' , 0 ,5 + debug % 10 + 1 , WHITE , BLACK );
-
-            if (current_pcb->count == 1) {
-                my_free(current_pcb); 
-            }
-        }
+        } 
     } while(current_pcb->status == BLOCKED || current_pcb->status == KILLED);
     scheduler->current_running_pcb = current_pcb;
     return current_pcb->stack_ptr;

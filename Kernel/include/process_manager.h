@@ -7,7 +7,7 @@
 #include "scheduler.h"
 #include "lib.h"
 
-#define QUANT		512
+#define QUANT		128
 
 typedef struct process_stack {
     void * r15;

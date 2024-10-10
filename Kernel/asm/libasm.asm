@@ -219,6 +219,31 @@ setTimerTick:
 int20:
     int 20h
 
+first_set_bit_64:
+    mov rax, 32
+
+    mov r8, 0xFFFFFFFF00000000
+    mov rdx, 0x00000000FFFFFFFF
+
+    mov rsi, rdi 
+    and rsi, r8  ;rsi high
+    and rdi, rdx  ;rdi low
+    shr rsi, 32
+
+    cmp rsi, rdi
+    jae .low 
+    mov ecx, rsi 
+    mov rax, 48
+    jmp .cont 
+.low:
+    shr eax, 1 
+    mov r8, rdi
+.cont:
+    mov r8, 0x00000000FFFF0000
+    shr rdx, 4
+    
+
+
 section .bss
     IRQ0_frequency:          resd 1          ; Actual frequency of PIT
     PIT_reload_value:        resw 1          ; Current PIT reload value

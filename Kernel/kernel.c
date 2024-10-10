@@ -58,7 +58,6 @@ void test1(){
 			drawchar(get_current_pid() + '0' , 0 , (j * 3) + 1  , WHITE , BLACK );
 			j++;
 		}
-		
 	}
 }
 
@@ -72,7 +71,6 @@ void test2(){
 			drawchar(get_current_pid() + '0' , 0 , (j * 3) , WHITE , BLACK );
 			j++;
 		}
-		
 	}
 }
 
