@@ -12,5 +12,7 @@ char *cpuVendor(char *result);
 void outb(uint8_t X, uint8_t Y);
 uint8_t inb(uint8_t X);
 void int20();
+uint8_t find_off_bit_64(uint64_t set);
+uint8_t find_off_bit_128(uint64_t set1 , uint64_t set2);
 
 #endif
