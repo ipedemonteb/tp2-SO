@@ -43,3 +43,10 @@ void * memcpy(void * destination, const void * source, uint64_t length){
 	}
 	return destination;
 }
+
+uint64_t set_n_bit_64(uint64_t set, uint8_t n){
+	return set | ((uint64_t)1 << n);
+}
+uint64_t off_n_bit_64(uint64_t set, uint8_t n){
+	return set & ~((uint64_t)1 << n);
+}

@@ -10,6 +10,8 @@ GLOBAL int20
 GLOBAL halt_cpu
 GLOBAL find_off_bit_64
 GLOBAL find_off_bit_128
+GLOBAL set_n_bit_64
+GLOBAL off_n_bit_64
 
 section .text
 
@@ -225,15 +227,16 @@ find_off_bit_128:
     mov rax, 64
     cmp rsi, rdi
     jae .low64
-
     ;high 64
-    jmp find_off_bit_64
+    add rax, 32
     mov rdi, rsi
-
+    jmp on128
+.low64:
+    sub rax, 32
 
 find_off_bit_64:
     mov rax, 32
-
+on128:
     mov rsi, rdi 
     shr rsi, 32 
     ;esi = high edi = low
@@ -242,13 +245,13 @@ find_off_bit_64:
     ;high 32
     mov ecx, esi 
     mov edx, esi
-    mov rax, 48
+    add rax, 16
     jmp .cont32 
 
 .low32:
     mov ecx, edi
     mov edx, edi
-    shr rax, 1 ; rax = 16
+    sub rax, 16 
 
 .cont32:
     shr ecx, 16
@@ -315,7 +318,6 @@ find_off_bit_64:
 
 .end_search:
     ret
-
 
 section .bss
     IRQ0_frequency:          resd 1          ; Actual frequency of PIT

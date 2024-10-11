@@ -74,11 +74,7 @@ void test2(){
 	}
 }
 
-#define TEST 0xFFFFEFFFFFFFFFFF
 int main() {
-	drawchar(find_off_bit_64(TEST)/10 + '0', 10 , 10 , WHITE , BLACK );
-	drawchar(find_off_bit_64(TEST)%10 + '0', 11 , 10 , WHITE , BLACK );
-	halt_cpu();
 	load_idt();
 	start_mm();
 	init_scheduler(getStackBase());
@@ -88,6 +84,7 @@ int main() {
 	create_process(test2,0,argv);
 	create_process(sampleCodeModuleAddress,0,argv);
 	_sti();
+	halt_cpu();
 	uint64_t i = 0;
 	uint8_t j = 0;
 	while(1){

@@ -7,8 +7,8 @@
 uint16_t current_pid = 1;
 process_struct processes[QUANT] = {0};
 
-uint64_t ocuppied_low = ~0;
-uint64_t ocuppied_high = ~0;
+uint64_t ocuppied_low = 0;
+uint64_t ocuppied_high = 0;
 
 void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * argv[]) {
     fn(argc, argv);

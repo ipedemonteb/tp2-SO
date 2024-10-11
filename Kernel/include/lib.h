@@ -14,5 +14,6 @@ uint8_t inb(uint8_t X);
 void int20();
 uint8_t find_off_bit_64(uint64_t set);
 uint8_t find_off_bit_128(uint64_t set1 , uint64_t set2);
-
+uint64_t set_n_bit_64(uint64_t set, uint8_t n);
+uint64_t off_n_bit_64(uint64_t set, uint8_t n);
 #endif
