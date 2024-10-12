@@ -17,7 +17,9 @@ typedef struct process_struct {
     uint8_t count; // TODO: ver que onda
 	enum Status status;
     uint8_t blocked_in;
-	void * children_processes; // todo: son void * ?? es una lista de procesos
+	struct process_struct * parent_pcb;
+	uint64_t children_processes[2];
+	uint64_t killed_children[2];
 } process_struct;
 
 #endif

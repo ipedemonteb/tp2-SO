@@ -74,15 +74,22 @@ void test2(){
 	}
 }
 
+void init(){
+	uint8_t * argv[] = {"16" , 0}; 
+	create_process(halt_cpu,0,argv);
+	create_process(test_processes,1,argv);
+	//create_process(test1,0,argv);
+	//create_process(test2,0,argv);
+	//create_process(sampleCodeModuleAddress,0,argv);
+	wait_children();
+}
+
 int main() {
 	load_idt();
 	start_mm();
 	init_scheduler(getStackBase());
-	uint8_t * argv[] = {"16" , 0}; 
-	create_process(test_prio,0,argv);
-	create_process(test1,0,argv);
-	create_process(test2,0,argv);
-	create_process(sampleCodeModuleAddress,0,argv);
+	uint8_t * argv[] = {0}; 
+	create_process(init,0,argv);
 	_sti();
 	halt_cpu();
 	uint64_t i = 0;

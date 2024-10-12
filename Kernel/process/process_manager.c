@@ -2,13 +2,11 @@
 #include "../include/process_manager.h"
 #include "../include/lib.h"
 
-#define ALIGN 7
+#define ALIGN 7 
 
-uint16_t current_pid = 1;
 process_struct processes[QUANT] = {0};
 
-uint64_t ocuppied_low = 0;
-uint64_t ocuppied_high = 0;
+uint64_t occupied[2];
 
 void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * argv[]) {
     fn(argc, argv);
@@ -17,10 +15,15 @@ void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * arg
 
 void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_base = stack;
-    p_struct->pid = current_pid++;
+    occupied[p_struct->pid/64] = set_n_bit_64(occupied[p_struct->pid/64],p_struct->pid % 64);
     p_struct->priority = 1; 
     p_struct->status = READY;
-    p_struct->children_processes = 0;
+    p_struct->parent_pcb = &processes[get_current_pid() % QUANT];
+    p_struct->children_processes[(p_struct->pid)/64] = set_n_bit_64(p_struct->children_processes[(p_struct->pid)/64], (p_struct->pid) % 64);
+    p_struct->children_processes[0] = 0;
+    p_struct->children_processes[1] = 0;
+    p_struct->killed_children[0] = 0;
+    p_struct->killed_children[1] = 0;
     p_struct->count = 1;
     process_stack * p_stack = stack - sizeof(process_stack);
     p_stack->rsp = stack;
@@ -39,19 +42,21 @@ void load_proc_args(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv
 }
 
 int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[]) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
-    if (current_pid >= QUANT) {
+    /* if (current_pid >= QUANT) {
         return -1;
-    }
+    } */
     
     //process_struct * p_struct = my_malloc(sizeof(process_struct));
     //processes[current_pid] = p_struct;
-    process_struct * p_struct = &processes[current_pid];
+    uint16_t pid = find_off_bit_128(occupied[0], occupied[1]);
+    process_struct * p_struct = &processes[pid];
+    p_struct->pid = pid;
     p_struct->argv = argv;
     void * stack = (uint64_t)(my_malloc(STACKSIZE) + STACKSIZE) & ~ALIGN;
     load_proc_stack(p_struct,stack);
     load_proc_args(fn, argc, argv, stack);
     schedule_process(p_struct);
-    return current_pid - 1;
+    return p_struct->pid;
 }
 
 void exit(){
@@ -59,30 +64,29 @@ void exit(){
 }
 
 uint8_t kill(uint16_t pid) {
-    if (pid > current_pid) {
+    /* if (pid > current_pid) {
         return -1;
-    }
+    } */
     
-    processes[pid].status = KILLED;
+    processes[pid % QUANT].status = KILLED;
     if (get_current_pid() == pid) {
         int20();
     }
-    // free_process_struct(); // TODO: crear esta funcion que libere el struct (que hacemos con el espacio en el vector??)
 }
 
 uint8_t block(uint16_t pid) {
-    processes[pid].status = BLOCKED;
+    processes[pid % QUANT].status = BLOCKED;
     if (get_current_pid() == pid) {
         int20(); //ver que onda tema contextos ( se estarian guardando repetidos ahora )
     }
 }
 
 uint8_t unblock(uint16_t pid) {
-    processes[pid].status = READY;
+    processes[pid % QUANT].status = READY;
 }
 
 void nice(uint16_t pid, uint8_t priority) {
-    processes[pid].priority = priority;
+    processes[pid % QUANT].priority = priority;
 }
 
 void yield() {
@@ -94,5 +98,17 @@ void ps() {
 }
 
 void wait_children() {
-    // TODO: hacer
+    uint16_t pid = get_current_pid();
+    uint8_t child, idx;
+    process_struct * pcb = &processes[pid % QUANT];
+    while(pcb->children_processes[0] && pcb->children_processes[1]){
+        pcb->status = BLOCKED; //@todo: ver esto de bloquear de antemano
+        yield();
+        while (pcb->killed_children[0] || pcb->killed_children[1]) {
+            child = find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
+            idx = child/64;
+            pcb->children_processes[idx] = off_n_bit_64(pcb->children_processes[idx],child);
+            occupied[idx] = off_n_bit_64(occupied[idx],child);
+        }
+    }
 }
