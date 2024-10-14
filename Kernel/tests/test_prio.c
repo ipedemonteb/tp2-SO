@@ -1,7 +1,5 @@
 #include <stdint.h>
-#include <stdio.h>
-#include "syscall.h"
-#include "test_util.h"
+#include "../include/test_util.h"
 #include "../include/videoDriver.h"
 #include "../include/process_manager.h"
 
@@ -22,33 +20,33 @@ void test_prio() {
   uint64_t i;
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    pids[i] = create_process(endless_loop_print, 1, argv, "funcion");
+    pids[i] = create_process(endless_loop_print, 1, argv, (int8_t *)"funcion");
 
   bussy_wait(WAIT);
-  drawString("\nCHANGING PRIORITIES...\n",0,y++,WHITE,BLACK);
+  drawString((int8_t *)"\nCHANGING PRIORITIES...\n",0,y++,WHITE,BLACK);
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     nice(pids[i], prio[i]);
 
   bussy_wait(WAIT);
-  drawString("\nBLOCKING...\n",0,y++,WHITE,BLACK);
+  drawString((int8_t *)"\nBLOCKING...\n",0,y++,WHITE,BLACK);
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     block(pids[i]);
 
-  drawString("CHANGING PRIORITIES WHILE BLOCKED...\n",0,y++,WHITE,BLACK);
+  drawString((int8_t *)"CHANGING PRIORITIES WHILE BLOCKED...\n",0,y++,WHITE,BLACK);
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     nice(pids[i], MEDIUM);
 
-  drawString("UNBLOCKING...\n",0,y++,WHITE,BLACK);
+  drawString((int8_t *)"UNBLOCKING...\n",0,y++,WHITE,BLACK);
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     unblock(pids[i]);
 
 
   bussy_wait(WAIT);
-  drawString("\nKILLING...\n",0,y++,WHITE,BLACK);
+  drawString((int8_t *)"\nKILLING...\n",0,y++,WHITE,BLACK);
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     kill(pids[i]);

@@ -1,10 +1,10 @@
-#include <eliminator.h>
 #include <stdint.h>
-#include <syscaller.h>
-#include <font.h>
-#include <libc.h>
-#include <sounds.h>
 #include <stdarg.h>
+#include "./include/eliminator.h"
+#include "./include/syscaller.h"
+#include "./include/font.h"
+#include "./include/libc.h"
+#include "./include/sounds.h"
 
 typedef enum DIRECTION {
     UP,
@@ -47,7 +47,7 @@ void printBigPixel(uint16_t x, uint16_t y, uint32_t color) {
     return;
 }
 
-void gamePrintf(uint32_t x, uint32_t y, const uint8_t * fmt, ...) {
+void gamePrintf(uint32_t x, uint32_t y, const int8_t * fmt, ...) {
     uint32_t x0 = x;
     uint32_t y0 = y;
     va_list args;
@@ -57,8 +57,8 @@ void gamePrintf(uint32_t x, uint32_t y, const uint8_t * fmt, ...) {
             fmt++;
             switch (*fmt) {
                 case 's': {
-                    uint8_t * toPrintStr;
-                    toPrintStr = va_arg(args, uint8_t *);
+                    int8_t * toPrintStr;
+                    toPrintStr = va_arg(args, int8_t *);
                     while (*toPrintStr) {
                         drawBigChar(*toPrintStr, x0, y0, RED, BLACK);
                         x0++;
@@ -83,36 +83,10 @@ void gamePrintf(uint32_t x, uint32_t y, const uint8_t * fmt, ...) {
     va_end(args);
 }
 
-void eliminatorMenu() {
-    initializeGameScene();
-    gameSpeed = 0;
-    uint8_t flag = 1;
-    gamePrintf(720, 9, "\tLa Vibora: El Juego\n\nIntroduzca la cantidad de jugadores\n\t\t[ 1 - 2 ]");
-    uint8_t c;
-    while (flag) {
-        c = getChar();
-        if (c >= '1' && c <= '2') {
-            amountPlayers = c - '0';
-            drawScene();
-            flag = 0;
-            eliminatorChoiceSound();
-        }
-    }
-    snake1.losses = 0;
-    if (amountPlayers == 2) {
-        snake2.losses = 0;
-    }
-    flag = 1;
-    gamePrintf(720, 9, "Ingrese la velocidad de la vibora:\n\n\t\t[ 1 - 4 ]");
-    while (flag) {
-        c = getChar();
-        if (c >= '1' && c <= '4') {
-            gameSpeed = 20 - (c - '0') * 2;
-            drawScene();
-            flag = 0;
-            eliminatorChoiceSound();
-        }
-    }
+void drawScene() {
+    for (uint32_t i = 0; i < WIDTH; i++)
+        for (uint32_t j = 0; j < HEIGHT; j++)
+            printBigPixel(i, j, gameState[i][j]);
     return;
 }
 
@@ -148,10 +122,92 @@ void initializeGameScene() {
     return;
 }
 
-void drawScene() {
-    for (uint32_t i = 0; i < WIDTH; i++)
-        for (uint32_t j = 0; j < HEIGHT; j++)
-            printBigPixel(i, j, gameState[i][j]);
+void eliminatorMenu() {
+    initializeGameScene();
+    gameSpeed = 0;
+    uint8_t flag = 1;
+    gamePrintf(720, 9, (int8_t *)"\tLa Vibora: El Juego\n\nIntroduzca la cantidad de jugadores\n\t\t[ 1 - 2 ]");
+    uint8_t c;
+    while (flag) {
+        c = getChar();
+        if (c >= '1' && c <= '2') {
+            amountPlayers = c - '0';
+            drawScene();
+            flag = 0;
+            eliminatorChoiceSound();
+        }
+    }
+    snake1.losses = 0;
+    if (amountPlayers == 2) {
+        snake2.losses = 0;
+    }
+    flag = 1;
+    gamePrintf(720, 9, (int8_t *)"Ingrese la velocidad de la vibora:\n\n\t\t[ 1 - 4 ]");
+    while (flag) {
+        c = getChar();
+        if (c >= '1' && c <= '4') {
+            gameSpeed = 20 - (c - '0') * 2;
+            drawScene();
+            flag = 0;
+            eliminatorChoiceSound();
+        }
+    }
+    return;
+}
+
+void updatePos(SNAKE *snake) {
+    switch (snake->direction) {
+        case UP: {
+            snake->y--;
+            break;
+        }
+        case DOWN: {
+            snake->y++;
+            break;
+        }
+        case LEFT: {
+            snake->x--;
+            break;
+        }
+        case RIGHT: {
+            snake->x++;
+            break;
+        }
+    }
+    return;
+}
+
+void checkDir() {
+    uint8_t key = 0;
+    readCaller(UNUSED, &key, 1);
+    if (key) {
+        if (key == snake1.keys[0] && snake1.direction != DOWN) {
+            snake1.direction = UP;
+        }
+        else if (key == snake1.keys[1] && snake1.direction != UP) {
+            snake1.direction = DOWN;
+        }
+        else if (key == snake1.keys[2] && snake1.direction != RIGHT) {
+            snake1.direction = LEFT;
+        }
+        else if (key == snake1.keys[3] && snake1.direction != LEFT) {
+            snake1.direction = RIGHT;
+        }
+        if (amountPlayers == 2) {
+            if (key == snake2.keys[0] && snake2.direction != DOWN) {
+                snake2.direction = UP;
+            }
+            else if (key == snake2.keys[1] && snake2.direction != UP) {
+                snake2.direction = DOWN;
+            }
+            else if (key == snake2.keys[2] && snake2.direction != RIGHT) {
+                snake2.direction = LEFT;
+            }
+            else if (key == snake2.keys[3] && snake2.direction != LEFT) {
+                snake2.direction = RIGHT;
+            }
+        }
+    }
     return;
 }
 
@@ -215,13 +271,13 @@ void gameMain() {
             if (amountPlayers == 2) {
                 itos(snake2.losses, score2);
                 itos(snake1.losses, score1);
-                gamePrintf(790, 1, "Green %s - %s Purple", score2, score1);
+                gamePrintf(790, 1, (int8_t *)"Green %s - %s Purple", score2, score1);
             }
             else {
                 itos((snake1.timeAlive) / 20, score1);
-                gamePrintf(790, 1, "Your score was: %s", score1);
+                gamePrintf(790, 1, (int8_t *)"Your score was: %s", score1);
             }
-            gamePrintf(720, 9, "\tGame Over, BOT!\n\nPress 'Space' to continue\n  'Esc' to go to menu\n 'E' to exit the game");
+            gamePrintf(720, 9, (int8_t *)"\tGame Over, BOT!\n\nPress 'Space' to continue\n  'Esc' to go to menu\n 'E' to exit the game");
             int validKey = 0;
             while (!validKey) {
                 uint8_t key = keyboardKeyCaller(UNUSED);
@@ -240,60 +296,4 @@ void gameMain() {
             }
         }
     }
-}
-
-void updatePos(SNAKE *snake) {
-    switch (snake->direction) {
-        case UP: {
-            snake->y--;
-            break;
-        }
-        case DOWN: {
-            snake->y++;
-            break;
-        }
-        case LEFT: {
-            snake->x--;
-            break;
-        }
-        case RIGHT: {
-            snake->x++;
-            break;
-        }
-    }
-    return;
-}
-
-void checkDir() {
-    uint8_t key = 0;
-    readCaller(UNUSED, &key, 1);
-    if (key) {
-        if (key == snake1.keys[0] && snake1.direction != DOWN) {
-            snake1.direction = UP;
-        }
-        else if (key == snake1.keys[1] && snake1.direction != UP) {
-            snake1.direction = DOWN;
-        }
-        else if (key == snake1.keys[2] && snake1.direction != RIGHT) {
-            snake1.direction = LEFT;
-        }
-        else if (key == snake1.keys[3] && snake1.direction != LEFT) {
-            snake1.direction = RIGHT;
-        }
-        if (amountPlayers == 2) {
-            if (key == snake2.keys[0] && snake2.direction != DOWN) {
-                snake2.direction = UP;
-            }
-            else if (key == snake2.keys[1] && snake2.direction != UP) {
-                snake2.direction = DOWN;
-            }
-            else if (key == snake2.keys[2] && snake2.direction != RIGHT) {
-                snake2.direction = LEFT;
-            }
-            else if (key == snake2.keys[3] && snake2.direction != LEFT) {
-                snake2.direction = RIGHT;
-            }
-        }
-    }
-    return;
 }

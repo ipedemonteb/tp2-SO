@@ -52,7 +52,7 @@ uint64_t my_strlen(const char * string) {
 	return i;
 }
 
-void uint64ToHexStr(uint64_t value, uint8_t *buffer) {
+void uint64ToHexStr(uint64_t value, int8_t *buffer) {
     buffer[0] = '0';
     buffer[1] = 'x';
 

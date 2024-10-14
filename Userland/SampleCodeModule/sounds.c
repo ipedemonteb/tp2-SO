@@ -1,5 +1,5 @@
-#include <syscaller.h>
-#include <sounds.h>
+#include "./include/syscaller.h"
+#include "./include/sounds.h"
 
 uint32_t bpm = 90;
 

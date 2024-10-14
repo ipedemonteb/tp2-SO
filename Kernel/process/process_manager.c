@@ -3,15 +3,22 @@
 #include "../include/lib.h"
 #include <stdint.h>
 
+#include "../include/videoDriver.h"
+#include "../include/test_util.h"
+
 #define ALIGN 7 
 
 process_struct processes[QUANT] = {0};
 
 uint64_t occupied[2];
 
+void my_exit() {
+    kill(get_current_pid());
+}
+
 void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * argv[]) {
     fn(argc, argv);
-    exit();
+    my_exit();
 }
 
 void load_proc_stack(process_struct * p_struct, void * stack) {
@@ -20,7 +27,7 @@ void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->priority = 1; 
     p_struct->status = READY;
     p_struct->parent_pcb = &processes[get_current_pid() % QUANT];
-    p_struct->parent_pcb->children_processes[(p_struct->pid)/64] = set_n_bit_64(p_struct->parent_pcb->children_processes [(p_struct->pid)/64], (p_struct->pid) % 64);
+    p_struct->parent_pcb->children_processes[(p_struct->pid)/64] = set_n_bit_64(p_struct->parent_pcb->children_processes[(p_struct->pid)/64], (p_struct->pid) % 64);
     p_struct->children_processes[1] = 0;
     p_struct->killed_children[0] = 0;
     p_struct->killed_children[1] = 0;
@@ -55,10 +62,6 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
     return p_struct->pid;
 }
 
-void exit() {
-    kill(get_current_pid());
-}
-
 uint8_t kill(uint16_t pid) {
     processes[pid % QUANT].status = KILLED;
     if (get_current_pid() == pid) {
@@ -86,10 +89,10 @@ void yield() {
     int20();
 }
 
-uint16_t ps(process_info * info) {
-    uint16_t process_count = 0;
+uint8_t ps(process_info * info) {
+    uint8_t process_count = 0;
     for(int i = 0; i < QUANT; i++) {
-        if (occupied[i / 64] & (1UL << (i % 64))) {
+        if(occupied[i / 64] & (1UL << (i % 64))) {
             process_struct * p = &processes[i];
             memcpy(info[process_count].name, p->name, my_strlen(p->name));
             info[process_count].pid = p->pid;
@@ -104,18 +107,33 @@ uint16_t ps(process_info * info) {
     return process_count;
 }
 
+uint16_t help = 0;
+
 void wait_children() {
     uint16_t pid = get_current_pid();
     uint8_t child, idx;
     process_struct * pcb = &processes[pid % QUANT];
     while(pcb->children_processes[0] && pcb->children_processes[1]){
-        pcb->status = BLOCKED; //@todo: ver esto de bloquear de antemano
+        pcb->status = BLOCKED;
         yield();
+        uint16_t p = 0;
+        int8_t aux[30];
+        numToStr(pcb->killed_children[0], aux);
+        drawString(aux, 0, 23 + help, WHITE, BLACK);
+        numToStr(pcb->killed_children[1], aux);
+        drawString(aux, 0, 24 + help, WHITE, BLACK);
         while (pcb->killed_children[0] || pcb->killed_children[1]) {
             child = find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
             idx = child/64;
-            pcb->children_processes[idx] = off_n_bit_64(pcb->children_processes[idx],child);
-            occupied[idx] = off_n_bit_64(occupied[idx],child);
+            pcb->children_processes[idx] = off_n_bit_64(pcb->children_processes[idx],child%64);
+            pcb->killed_children[idx] = off_n_bit_64(pcb->killed_children[idx],child%64);
+            occupied[idx] = off_n_bit_64(occupied[idx],child%64);
+            //drawchar('x', p++, 20, WHITE, BLACK);
+            numToStr(pcb->killed_children[idx], aux);
+            drawString(aux, 0, 25 + help, WHITE, BLACK);
+            numToStr(child, aux);
+            drawString(aux, 0, 26 + help, WHITE, BLACK);
+            help += 4;
         }
     }
 }

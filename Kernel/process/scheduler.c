@@ -1,11 +1,12 @@
 #include "../include/scheduler.h"
 #include <stdint.h>
-#define AVAILABLE 1
-#define MAX_INPUT 4
 #include "../include/lib.h"
 #include "../include/videoDriver.h"
 
-#include "../include/test_util.h" // TODO: borrar
+#include "../include/test_util.h"
+
+#define AVAILABLE 1
+#define MAX_INPUT 4
 
 
 uint8_t avail_inputs[MAX_INPUT];
@@ -28,18 +29,15 @@ void init_scheduler(void * stack_base) {
     scheduler->current_running_pcb->stack_base = stack_base;
 }
 
-void schedule_process(process_struct * pcb){
+void schedule_process(process_struct * pcb) {
     add(scheduler->schedule,pcb);
 }
 
+uint64_t t = 8;
+
 void * schedule(void * rsp) {
-    //print pid correctly
-    uint8_t str[10];
-    numToStr(get_current_pid(), str);
-    drawString(str, debug , 0 , WHITE , BLACK );
-    debug += my_strlen(str);
-    drawchar(' ', debug++, 0, WHITE, BLACK);
-    //end print
+    //print feaso
+    drawchar(get_current_pid() + '0', debug++, 0, WHITE, BLACK);
     scheduler->current_running_pcb->stack_ptr = rsp;
     while (scheduler->current_running_pcb->count <= scheduler->current_running_pcb->priority) {
         add(scheduler->schedule, scheduler->current_running_pcb);
@@ -57,9 +55,11 @@ void * schedule(void * rsp) {
             }
         } else if(current_pcb->status == KILLED) {
             current_pcb->count--;
-            if (current_pcb->count == 0)
-            {
+            if (current_pcb->count == 0) {
                 uint8_t pid = current_pcb->pid, idx = pid/64;
+                int8_t aux[30];
+                numToStr(pid, aux);
+                drawString(aux, 0, t++, WHITE, BLACK);
                 current_pcb->parent_pcb->killed_children[idx] = set_n_bit_64(current_pcb->parent_pcb->killed_children[idx],pid);
                 current_pcb->parent_pcb->status = READY;
                 current_pcb->parent_pcb->children_processes[0] &= current_pcb->children_processes[0];
@@ -76,8 +76,8 @@ uint16_t get_current_pid() {
 }
 
 void get_next_process() {
-    while(scheduler->current_running_pcb->pid == ((process_struct*)poll(scheduler->schedule))->pid) {
-        poll(scheduler->schedule);
-        add(scheduler->schedule, poll(scheduler->schedule));
+    while(scheduler->current_running_pcb->pid == ((process_struct*)peek(scheduler->schedule))->pid) {
+        process_struct * aux = poll(scheduler->schedule);
+        add(scheduler->schedule, aux);
     }
 }

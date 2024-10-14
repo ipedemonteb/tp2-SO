@@ -1,5 +1,4 @@
-#include <stdio.h>
-
+#include <stdint.h>
 #include "../include/test_util.h"
 #include "../include/process_manager.h"
 #include "../include/videoDriver.h"
@@ -35,7 +34,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
       p_rqs[rq].pid = create_process(endless_loop, 0, argvAux, "endless_loop");
 
       if (p_rqs[rq].pid == -1) {
-        drawString("test_processes: ERROR creating process\n",0,0,WHITE,BLACK);
+        drawString((int8_t *)"test_processes: ERROR creating process\n",0,0,WHITE,BLACK);
         return -1;
       } else {
         p_rqs[rq].state = RUNNING;
@@ -82,6 +81,8 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           p_rqs[rq].state = RUNNING;
         }
     }
+    drawchar('x', 0, 20, WHITE, BLACK);
     wait_children();
+    drawchar('y', 0, 21, WHITE, BLACK);
   }
 }

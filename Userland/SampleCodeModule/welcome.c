@@ -1,6 +1,7 @@
-#include <welcome.h>
-#include <syscaller.h>
-#include <font.h>
+#include "./include/welcome.h"
+#include "./include/syscaller.h"
+#include "./include/font.h"
+#include <stdint.h>
 
 void welcome()
 {
@@ -29,18 +30,18 @@ void welcome()
     printRectangleCaller(UNUSED, 225, 60, 600, 105, WHITE);
     uint8_t i = 0;
 
-    uint8_t *msg = "Welcome to PinguinOS\0";
+    int8_t *msg = (int8_t *)"Welcome to PinguinOS\0";
     while (*msg)
     {
         drawBigChar(*msg++, 86 + i++, 1, WHITE, ORANGE);
     }
-    uint8_t *msg2 = "Pedro    Federico\0";
+    int8_t *msg2 = (int8_t *)"Pedro    Federico\0";
     i = 0;
     while (*msg2)
     {
         drawBigChar(*msg2++, 10 + i++, 23, WHITE, ORANGE);
     }
-    uint8_t *msg3 = "Filipo    Agustin\0";
+    int8_t *msg3 = (int8_t *)"Filipo    Agustin\0";
     i = 0;
     while (*msg3)
     {

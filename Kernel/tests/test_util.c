@@ -76,9 +76,9 @@ void endless_loop() {
   }
 }
 
-void numToStr(int num, uint8_t * str) {
+void numToStr(int num, int8_t * str) {
     int i = 0, j;
-    uint8_t temp;
+    int8_t temp;
     do {
         str[i++] = (num % 10) + '0';
         num /= 10;
@@ -93,7 +93,7 @@ void numToStr(int num, uint8_t * str) {
 
 void endless_loop_print(uint64_t wait) {
   int64_t pid = my_getpid();
-  uint8_t buffer[20];
+  int8_t buffer[20];
   numToStr(pid, buffer);
   while (1) {
     drawString(buffer, 25 , pid , WHITE , BLACK);
@@ -109,35 +109,34 @@ void print_process_info() {
 
   uint32_t x = 0;
   uint32_t y = 20;
-  drawString((uint8_t *)"PID    NAME    PRIORITY    STATUS    STCK B    STCK PTR", x, y, WHITE, BLACK);
+  drawString((int8_t *)"PID    NAME    PRIORITY    STATUS    STCK B    STCK PTR", x, y, WHITE, BLACK);
   y += 1;
+
+  uint8_t s = ps(p_info);
   
-  ps(p_info);
-  for (uint16_t i = 0; i < QUANT; i++) {
-    if (p_info[i].pid != 0) {
-      //id
-      void * id = my_malloc(20);
-      numToStr(p_info[i].pid, id);
-      drawString(id, x, y, WHITE, BLACK);
-      //name
-      drawString(p_info[i].name, x + 10, y, WHITE, BLACK);
-      //priority
-      void * prio = my_malloc(20);
-      numToStr(p_info[i].priority, prio);
-      drawString(prio, x + 20, y, WHITE, BLACK);
-      //status
-      void * stat = my_malloc(20);
-      numToStr(p_info[i].status, stat);
-      drawString(stat, x + 30, y, WHITE, BLACK);
-      //stack base
-      char stack_base[10];
-      uint64ToHexStr((uint64_t)p_info[i].stack_base, stack_base);
-      drawString((uint8_t *)stack_base, x + 40, y, WHITE, BLACK);
-      //stack ptr
-      char stack_ptr[10];
-      uint64ToHexStr((uint64_t)p_info[i].stack_ptr, stack_ptr);
-      drawString((uint8_t *)stack_ptr, x + 50, y, WHITE, BLACK);
-      y += 1;
-    }
+  for(uint16_t i = 0; i < s; i++) {
+    //id
+    void * id = my_malloc(20);
+    numToStr(p_info[i].pid, id);
+    drawString(id, x, y, WHITE, BLACK);
+    //name
+    drawString((int8_t *)p_info[i].name, x + 5, y, WHITE, BLACK);
+    //priority
+    void * prio = my_malloc(20);
+    numToStr(p_info[i].priority, prio);
+    drawString(prio, x + 20, y, WHITE, BLACK);
+    //status
+    void * stat = my_malloc(20);
+    numToStr(p_info[i].status, stat);
+    drawString(stat, x + 30, y, WHITE, BLACK);
+    //stack base
+    int8_t stack_base[10];
+    uint64ToHexStr((uint64_t)p_info[i].stack_base, stack_base);
+    drawString((int8_t *)stack_base, x + 40, y, WHITE, BLACK);
+    //stack ptr
+    int8_t stack_ptr[10];
+    uint64ToHexStr((uint64_t)p_info[i].stack_ptr, stack_ptr);
+    drawString((int8_t *)stack_ptr, x + 50, y, WHITE, BLACK);
+    y += 1;
   }
 }

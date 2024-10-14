@@ -313,7 +313,7 @@ on128:
 .cont2:
 
     cmp cl, 1
-    jae .end_search
+    ja .end_search
     dec rax 
 
 .end_search:

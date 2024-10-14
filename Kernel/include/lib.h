@@ -7,7 +7,7 @@ void * memset(void * destination, int32_t character, uint64_t length);
 void * memcpy(void * destination, const void *source, uint64_t length);
 
 uint64_t my_strlen(const char * string);
-void uint64ToHexStr(uint64_t value, uint8_t *buffer);
+void uint64ToHexStr(uint64_t value, int8_t *buffer);
 
 void halt_cpu();
 char *cpuVendor(char *result);
@@ -19,4 +19,5 @@ uint8_t find_off_bit_64(uint64_t set);
 uint8_t find_off_bit_128(uint64_t set1 , uint64_t set2);
 uint64_t set_n_bit_64(uint64_t set, uint8_t n);
 uint64_t off_n_bit_64(uint64_t set, uint8_t n);
+
 #endif

@@ -1,5 +1,5 @@
-#include <videoDriver.h>
-#include <font.h>
+#include "../include/videoDriver.h"
+#include "../include/font.h"
 
 // pop up window's size
 #define POP_UP_WIDTH 712
@@ -26,8 +26,8 @@ VBEInfoPtr VBE_mode_info = (VBEInfoPtr)0x0000000000005C00;
 uint8_t font_size = 1;
 
 // prints in pop up window message 'msg' starting at positions 'x' and 'y'
-void printInPopUp(uint8_t * msg, uint16_t x, uint16_t y) {
-	uint8_t aux = font_size;
+void printInPopUp(int8_t * msg, uint16_t x, uint16_t y) {
+	int8_t aux = font_size;
 	font_size = 1;
 	drawString(msg, x + TOP_LEFT_X / 8 + LEFT_MARGIN, y + TOP_LEFT_Y / 16 + TOP_MARGIN, WHITE, BLACK);
 	font_size = aux;
@@ -90,7 +90,7 @@ void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
 
 const unsigned char * fontArr = __font_bitmap__;
 
-void drawchar(uint8_t c, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor) {
+void drawchar(int8_t c, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor) {
 	x *= 8 * font_size;
 	y *= 16 * font_size;
 	uint32_t cx, cy;
@@ -106,7 +106,7 @@ void drawchar(uint8_t c, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgco
 	}
 }
 
-void drawString(uint8_t * string, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor) {
+void drawString(int8_t * string, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor) {
 	uint32_t w = x, h = y;
 	while (*string != 0) {
 		if ((w * 8) >= VBE_mode_info->width) {

@@ -17,6 +17,6 @@ uint8_t keyboardKeyCaller(uint8_t __unused);
 void beepSysCaller(uint8_t __unused, uint32_t frequence, int waitTicks);
 uint8_t fontSizeUpCaller(uint8_t __unused);
 uint8_t fontSizeDownCaller(uint8_t __unused);
-void getTimeCaller(uint8_t __unused, uint8_t bp[]);
+void getTimeCaller(uint8_t __unused, int8_t bp[]);
 
 #endif

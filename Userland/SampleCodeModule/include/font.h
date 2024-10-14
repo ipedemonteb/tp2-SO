@@ -1,5 +1,5 @@
 // (c) 2009, 2010 Lutz Sammer, License: AGPLv3
-#include <syscaller.h>
+#include "./syscaller.h"
 
 /// bitmap font structure
 struct bitmap_font

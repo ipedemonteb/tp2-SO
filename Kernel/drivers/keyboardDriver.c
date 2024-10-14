@@ -1,6 +1,6 @@
 #include "../include/keyboardDriver.h"
-#include "../include/lib.h"
 #include "../include/regsDump.h"
+#include <stdint.h>
 
 static uint8_t charBuffer[BUFF_SIZE];
 static uint64_t last = 0;
@@ -123,7 +123,7 @@ void keyboard_handler() {
 	}
 	else {
 		if (ctrlOn && keyVal == R_MAKE_CODE) {
-			printRegisters("REGISTERS", regs);
+			printRegisters((int8_t *)"REGISTERS", regs);
 			ctrlOn = 0;
 		}
 		else {

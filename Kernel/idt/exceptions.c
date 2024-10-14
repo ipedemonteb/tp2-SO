@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include "../include/syscalls.h"
 #include "../include/interrupts.h"
 #include "../include/regsDump.h"
 
@@ -7,12 +6,12 @@
 #define INVALID_OPCODE_ID 6
 
 static void zero_division(const uint64_t regs[19]) {
-	printRegisters("Division by zero exception", regs);
+	printRegisters((int8_t *)"Division by zero exception", regs);
 	return;
 }
 
 static void invalid_opcode(const uint64_t regs[19]) {
-	printRegisters("Invalid opcode exception", regs);
+	printRegisters((int8_t *)"Invalid opcode exception", regs);
 	return;
 }
 

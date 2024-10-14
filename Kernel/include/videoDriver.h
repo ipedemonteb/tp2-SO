@@ -48,12 +48,12 @@ struct vbe_mode_info_structure {
 typedef struct vbe_mode_info_structure * VBEInfoPtr;
 
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
-void drawchar(uint8_t c, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
-void drawString(uint8_t * string, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
+void drawchar(int8_t c, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
+void drawString(int8_t * string, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
 void printBit(uint32_t hexColor, uint64_t x, uint64_t y);
 uint64_t getWidth();
 uint64_t getHeight();
-void printInPopUp(uint8_t * msg, uint16_t x, uint16_t y);
+void printInPopUp(int8_t * msg, uint16_t x, uint16_t y);
 void clearPopUp();
 void resetPopUp();
 void savePopUpWindow();

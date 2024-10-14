@@ -1,5 +1,5 @@
-#ifndef _PROCESS_MANAGER_H
-#define _PROCESS_MANAGER_H
+#ifndef PROCESS_MANAGER_H
+#define PROCESS_MANAGER_H
 
 #include <stdint.h>
 #include "memory_manager.h"
@@ -34,11 +34,12 @@ typedef struct process_stack {
 
 int32_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t * argv[], int8_t * name);
 uint8_t kill(uint16_t pid);
+void my_exit();
 uint8_t block(uint16_t pid);
 uint8_t unblock(uint16_t pid);
 void nice(uint16_t pid, uint8_t priority);
 void yield(); // es la que libera al CPU voluntariamente
-uint16_t ps(process_info * info);
+uint8_t ps(process_info * info);
 void wait_children();
 
 #endif

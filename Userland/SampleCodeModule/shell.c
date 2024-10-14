@@ -1,11 +1,10 @@
-#include <shell.h>
 #include <stdint.h>
-#include <syscaller.h>
-#include <libc.h>
-#include <userLib.h>
-#include <sounds.h>
-#include <eliminator.h>
-#include <libc.h>
+#include "./include/shell.h"
+#include "./include/syscaller.h"
+#include "./include/libc.h"
+#include "./include/userLib.h"
+#include "./include/sounds.h"
+#include "./include/eliminator.h"
 
 #define BUFF_MAX 4096
 #define WHITE 0x00FFFFFF
@@ -19,7 +18,7 @@
 #define WORDS 2
 
 typedef struct command {
-    uint8_t * name;
+    int8_t * name;
     void (*function)();
 } command;
 
@@ -33,19 +32,19 @@ static void getTime();
 static void help();
 static void invalidOpCode();
 
-static command commands[LETTERS][WORDS] = {{{"clear", clearCmd}, {0, 0}}, {{"div0", div0}, {0, 0}}, {{"eliminator", eliminator}, {"exit", exit}}, {{"fontBig", fontBig}, {"fontSmall", fontSmall}}, {{"getTime", getTime}, {0, 0}}, {{"help", help}, {0, 0}}, {{"invalidOpCode", invalidOpCode}, {0, 0}}};
+static command commands[LETTERS][WORDS] = {{{(int8_t *)"clear", clearCmd}, {0, 0}}, {{(int8_t *)"div0", div0}, {0, 0}}, {{(int8_t *)"eliminator", eliminator}, {(int8_t *)"exit", exit}}, {{(int8_t *)"fontBig", fontBig}, {(int8_t *)"fontSmall", fontSmall}}, {{(int8_t *)"getTime", getTime}, {0, 0}}, {{(int8_t *)"help", help}, {0, 0}}, {{(int8_t *)"invalidOpCode", invalidOpCode}, {0, 0}}};
 
-static uint8_t * commandNotFoundMsg = "Command not found. Type help for a list of commands";
+static int8_t * commandNotFoundMsg = (int8_t *)"Command not found. Type help for a list of commands";
 static uint8_t cNotFoundSize = 51;
-static uint8_t * helpMsg = "List of commands: clear, div0, eliminator, exit, fontBig, fontSmall, getTime, help, invalidOpCode";
+static int8_t * helpMsg = (int8_t *)"List of commands: clear, div0, eliminator, exit, fontBig, fontSmall, getTime, help, invalidOpCode";
 static uint8_t hMsgSize = 97;
-static uint8_t * waitMsg = "Press any key to continue";
+static int8_t * waitMsg = (int8_t *)"Press any key to continue";
 
 static uint16_t currentY;
 static uint16_t currentX;
 static uint16_t width;
 static uint16_t height;
-static uint8_t buffer[4096];
+static int8_t buffer[4096];
 static uint16_t count;
 static uint16_t offsets[4096] = {0};
 static uint16_t lineCount;
@@ -129,7 +128,7 @@ void sPrintNewLine() {
     reset = 0;
 }
 
-void printMsgAndWait(const uint8_t * msg, uint8_t size) {
+void printMsgAndWait(const int8_t * msg, uint8_t size) {
     if (currentY < height - 2) {
         currentY++;
     }
@@ -360,7 +359,7 @@ void launchShell() {
             case '\t':
                 if (offsets[lineCount] - offsets[lineCount - 1] == 1) {
                     uint8_t c = getCommandIdx(buffer[count - 1]);
-                    uint8_t * aux = commands[c][0].name + 1;
+                    int8_t * aux = commands[c][0].name + 1;
                     while (*aux) {
                         sPrintChar(*aux);
                         buffer[count++] = *aux;
@@ -472,7 +471,7 @@ void clearCmd() {
 }
 
 void getTime() {
-    uint8_t clock[20];
+    int8_t clock[20];
     getTimeCaller(UNUSED, clock);
     printMsgAndWait(clock, 8);
 }
