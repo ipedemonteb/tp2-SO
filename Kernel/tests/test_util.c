@@ -1,8 +1,11 @@
 #include <stdint.h>
-#include <stdio.h>
-#include "../include/syscalls.h"
 #include "../include/syscall.h"
 #include "../include/videoDriver.h"
+#include "../include/lib.h"
+#include "../include/process.h" // Assuming process_info is defined here
+#include "../include/process_manager.h"
+#include "../include/memory_manager.h"   // Assuming my_malloc is declared here
+
 // Random
 static uint32_t m_z = 362436069;
 static uint32_t m_w = 521288629;
@@ -95,5 +98,46 @@ void endless_loop_print(uint64_t wait) {
   while (1) {
     drawString(buffer, 25 , pid , WHITE , BLACK);
     bussy_wait(wait);
+  }
+}
+
+void print_process_info() {
+  process_info * p_info = my_malloc(sizeof(process_info) * QUANT);
+  for(int i = 0; i < QUANT; i++) {
+    p_info[i].name = my_malloc(20);
+  }
+
+  uint32_t x = 0;
+  uint32_t y = 20;
+  drawString((uint8_t *)"PID    NAME    PRIORITY    STATUS    STCK B    STCK PTR", x, y, WHITE, BLACK);
+  y += 1;
+  
+  ps(p_info);
+  for (uint16_t i = 0; i < QUANT; i++) {
+    if (p_info[i].pid != 0) {
+      //id
+      void * id = my_malloc(20);
+      numToStr(p_info[i].pid, id);
+      drawString(id, x, y, WHITE, BLACK);
+      //name
+      drawString(p_info[i].name, x + 10, y, WHITE, BLACK);
+      //priority
+      void * prio = my_malloc(20);
+      numToStr(p_info[i].priority, prio);
+      drawString(prio, x + 20, y, WHITE, BLACK);
+      //status
+      void * stat = my_malloc(20);
+      numToStr(p_info[i].status, stat);
+      drawString(stat, x + 30, y, WHITE, BLACK);
+      //stack base
+      char stack_base[10];
+      uint64ToHexStr((uint64_t)p_info[i].stack_base, stack_base);
+      drawString((uint8_t *)stack_base, x + 40, y, WHITE, BLACK);
+      //stack ptr
+      char stack_ptr[10];
+      uint64ToHexStr((uint64_t)p_info[i].stack_ptr, stack_ptr);
+      drawString((uint8_t *)stack_ptr, x + 50, y, WHITE, BLACK);
+      y += 1;
+    }
   }
 }

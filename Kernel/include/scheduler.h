@@ -15,5 +15,6 @@ void init_scheduler(void * stack_base);
 void schedule_process();
 void * schedule();
 uint16_t get_current_pid();
+void get_next_process();
 
 #endif

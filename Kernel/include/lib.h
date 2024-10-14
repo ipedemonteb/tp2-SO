@@ -6,6 +6,9 @@
 void * memset(void * destination, int32_t character, uint64_t length);
 void * memcpy(void * destination, const void *source, uint64_t length);
 
+uint64_t my_strlen(const char * string);
+void uint64ToHexStr(uint64_t value, uint8_t *buffer);
+
 void halt_cpu();
 char *cpuVendor(char *result);
 

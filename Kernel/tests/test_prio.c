@@ -22,7 +22,7 @@ void test_prio() {
   uint64_t i;
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    pids[i] = create_process(endless_loop_print, 1, argv);
+    pids[i] = create_process(endless_loop_print, 1, argv, "funcion");
 
   bussy_wait(WAIT);
   drawString("\nCHANGING PRIORITIES...\n",0,y++,WHITE,BLACK);
@@ -45,6 +45,7 @@ void test_prio() {
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     unblock(pids[i]);
+
 
   bussy_wait(WAIT);
   drawString("\nKILLING...\n",0,y++,WHITE,BLACK);

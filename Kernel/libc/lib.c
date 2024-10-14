@@ -44,6 +44,38 @@ void * memcpy(void * destination, const void * source, uint64_t length){
 	return destination;
 }
 
+uint64_t my_strlen(const char * string) {
+	uint64_t i = 0;
+	while(string[i] != 0) {
+		i++;
+	}
+	return i;
+}
+
+void uint64ToHexStr(uint64_t value, uint8_t *buffer) {
+    buffer[0] = '0';
+    buffer[1] = 'x';
+
+    int index = 2;
+    int start = 0;
+    
+
+    for (int i = 15; i >= 0; i--) {
+        uint8_t nibble = (value >> (i * 4)) & 0xF;
+        
+        if (nibble > 0 || start || i == 0) {
+            start = 1;
+            if (nibble < 10) {
+                buffer[index++] = nibble + '0';
+            } else {
+                buffer[index++] = nibble - 10 + 'A';
+            }
+        }
+    }
+
+    buffer[index] = '\0';
+}
+
 uint64_t set_n_bit_64(uint64_t set, uint8_t n){
 	return set | ((uint64_t)1 << n);
 }

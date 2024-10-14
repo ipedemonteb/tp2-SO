@@ -10,8 +10,10 @@
 #include "./include/process_manager.h"
 #include "./include/test_mm.h"
 #include "./include/test_process.h"
+#include "./include/test_util.h"
 #include "./include/interrupts.h"
 #include "./include/memory_manager.h"
+#include "include/videoDriver.h"
 
 
 extern uint8_t text;
@@ -76,8 +78,9 @@ void test2(){
 
 void init(){
 	uint8_t * argv[] = {"16" , 0}; 
-	create_process(halt_cpu,0,argv);
-	create_process(test_processes,1,argv);
+	//create_process(halt_cpu,0,argv);
+	create_process(test_processes,1,argv, "test_pro");
+	create_process(test_prio,1,argv, "test_prio");
 	//create_process(test1,0,argv);
 	//create_process(test2,0,argv);
 	//create_process(sampleCodeModuleAddress,0,argv);
@@ -89,21 +92,9 @@ int main() {
 	start_mm();
 	init_scheduler(getStackBase());
 	uint8_t * argv[] = {0}; 
-	create_process(init,0,argv);
+	create_process(init,0,argv, "init");
+	print_process_info();
 	_sti();
-	halt_cpu();
-	uint64_t i = 0;
-	uint8_t j = 0;
-	while(1){
-		i++;
-		if ((i % 100000000) == 0)
-		{
-			block(1);
-			drawchar(get_current_pid() + '0' , 0 , j * 3 + 2, WHITE , BLACK );
-			j++;
-		}
-		else if ((i % 150000000) == 0) unblock(1);
-	}
 	((EntryPoint)sampleCodeModuleAddress)();
 	return 0;
 }

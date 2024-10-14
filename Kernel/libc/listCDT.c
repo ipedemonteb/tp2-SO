@@ -72,6 +72,10 @@ void * poll(listADT list){
     return aux->head;
 }
 
+void * peek(listADT list) {
+    return list->first->head;
+}
+
 void queue(listADT list , void * elem){
     TList aux = my_malloc(sizeof(node));
     aux->head = elem;

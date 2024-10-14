@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-static const uint8_t * registers[19] = {
+static const int8_t * registers[19] = {
     "RAX:",
     "RBX:",
     "RCX:",

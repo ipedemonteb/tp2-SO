@@ -12,7 +12,7 @@ typedef struct process_struct {
 	void * stack_base;
 	void * stack_ptr;
 	uint8_t ** argv;
-	char * name; // TODO: esto va o no? no seria el ptr a la funcion?
+	int8_t * name;
 	uint8_t priority;
     uint8_t count; // TODO: ver que onda
 	enum Status status;
@@ -21,5 +21,15 @@ typedef struct process_struct {
 	uint64_t children_processes[2];
 	uint64_t killed_children[2];
 } process_struct;
+
+typedef struct process_info {
+	char * name;
+	uint16_t pid;
+	uint8_t priority;
+	char * stack_base;
+	char * stack_ptr;
+	uint8_t foreground;
+	enum Status status;
+} process_info;
 
 #endif

@@ -5,7 +5,7 @@
 #include "../include/lib.h"
 #include "../include/videoDriver.h"
 
-#include "test_util.h" // TODO: borrar
+#include "../include/test_util.h" // TODO: borrar
 
 
 uint8_t avail_inputs[MAX_INPUT];
@@ -32,8 +32,14 @@ void schedule_process(process_struct * pcb){
     add(scheduler->schedule,pcb);
 }
 
-void * schedule(void * rsp) {   // round robin with priorities scheduling
-    drawchar(get_current_pid() + '0' , debug++ , 0 , WHITE , BLACK );
+void * schedule(void * rsp) {
+    //print pid correctly
+    uint8_t str[10];
+    numToStr(get_current_pid(), str);
+    drawString(str, debug , 0 , WHITE , BLACK );
+    debug += my_strlen(str);
+    drawchar(' ', debug++, 0, WHITE, BLACK);
+    //end print
     scheduler->current_running_pcb->stack_ptr = rsp;
     while (scheduler->current_running_pcb->count <= scheduler->current_running_pcb->priority) {
         add(scheduler->schedule, scheduler->current_running_pcb);
@@ -67,4 +73,11 @@ void * schedule(void * rsp) {   // round robin with priorities scheduling
 
 uint16_t get_current_pid() {
     return scheduler->current_running_pcb->pid;
+}
+
+void get_next_process() {
+    while(scheduler->current_running_pcb->pid == ((process_struct*)poll(scheduler->schedule))->pid) {
+        poll(scheduler->schedule);
+        add(scheduler->schedule, poll(scheduler->schedule));
+    }
 }
