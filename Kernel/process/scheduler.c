@@ -57,16 +57,16 @@ void * schedule(void * rsp) {
         }
         else if(current_pcb->status == KILLED) {
             current_pcb->count--;
-            if (current_pcb->count == 0) {
+            /* if (current_pcb->count == 0) {
                 uint8_t pid = current_pcb->pid, idx = pid/64;
                 int8_t aux[30];
-                /* numToStr(pid, aux);
-                drawString(aux, 0, t++, WHITE, BLACK); */
+                numToStr(pid, aux);
+                drawString(aux, 0, t++, WHITE, BLACK); 
                 current_pcb->parent_pcb->killed_children[idx] = set_n_bit_64(current_pcb->parent_pcb->killed_children[idx],pid % 64);
                 current_pcb->parent_pcb->status = READY;
                 current_pcb->parent_pcb->children_processes[0] |= current_pcb->children_processes[0];
                 current_pcb->parent_pcb->children_processes[1] |= current_pcb->children_processes[1];
-            }
+            } */
         }
     } while(current_pcb->status == BLOCKED || current_pcb->status == KILLED);
     scheduler->current_running_pcb = current_pcb;

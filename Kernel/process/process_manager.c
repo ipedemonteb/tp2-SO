@@ -27,12 +27,12 @@ void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_base = stack;
     p_struct->priority = 1; 
     p_struct->status = READY;
-    p_struct->parent_pcb = &processes[get_current_pid() % QUANT];
+    /*p_struct->parent_pcb = &processes[get_current_pid()];
     p_struct->parent_pcb->children_processes[(p_struct->pid)/64] = set_n_bit_64(p_struct->parent_pcb->children_processes[(p_struct->pid)/64], (p_struct->pid) % 64);
     p_struct->children_processes[0] = 0;
     p_struct->children_processes[1] = 0;
     p_struct->killed_children[0] = 0;
-    p_struct->killed_children[1] = 0;
+    p_struct->killed_children[1] = 0; */
     p_struct->count = 1;
     process_stack * p_stack = stack - sizeof(process_stack);
     p_stack->rsp = stack;
@@ -54,11 +54,10 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
     if(proc_count >= QUANT){
         return -1;
     }
-    uint16_t pid = find_off_bit_128(occupied[0], occupied[1]);
-    occupied[pid/64] = set_n_bit_64(occupied[pid/64], pid % 64);
-    proc_count++;
-    process_struct * p_struct = &processes[pid];
-    p_struct->pid = pid;
+    /* uint16_t pid = find_off_bit_128(occupied[0], occupied[1]);
+    occupied[pid/64] = set_n_bit_64(occupied[pid/64], pid % 64); */
+    process_struct * p_struct = &processes[proc_count];
+    p_struct->pid = proc_count++;
     p_struct->argv = argv;
     p_struct->name = my_malloc(my_strlen(name) + 1);
     memcpy(p_struct->name, name, my_strlen(name));
@@ -70,25 +69,25 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
 }
 
 uint8_t kill(uint16_t pid) {
-    processes[pid % QUANT].status = KILLED;
+    processes[pid].status = KILLED;
     if (get_current_pid() == pid) {
         yield();
     }
 }
 
 uint8_t block(uint16_t pid) {
-    processes[pid % QUANT].status = BLOCKED;
+    processes[pid].status = BLOCKED;
     if (get_current_pid() == pid) {
         yield();
     }
 }
 
 uint8_t unblock(uint16_t pid) {
-    processes[pid % QUANT].status = READY;
+    processes[pid].status = READY;
 }
 
 void nice(uint16_t pid, uint8_t priority) {
-    processes[pid % QUANT].priority = priority;
+    processes[pid].priority = priority;
 }
 
 void yield() {
@@ -114,12 +113,11 @@ uint8_t ps(process_info * info) {
     return process_count;
 }
 
-uint16_t help = 0;
 
 void wait_children() {
     uint16_t pid = get_current_pid();
     uint8_t child, idx;
-    process_struct * pcb = &processes[pid % QUANT];
+    process_struct * pcb = &processes[pid];
     while(pcb->children_processes[0] && pcb->children_processes[1]){
         uint16_t p = 0;
         int8_t aux[30];
