@@ -6,6 +6,7 @@
 #include "process.h"
 #include "scheduler.h"
 #include "lib.h"
+#include "syscall.h"
 
 #define QUANT		128
 

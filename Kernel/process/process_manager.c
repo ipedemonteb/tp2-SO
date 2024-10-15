@@ -5,9 +5,11 @@
 
 #include "../include/videoDriver.h"
 #include "../include/test_util.h"
+#include "../include/interrupts.h"
 
 #define ALIGN 7 
 
+uint8_t proc_count = 0;
 process_struct processes[QUANT] = {0};
 
 uint64_t occupied[2];
@@ -23,11 +25,11 @@ void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * arg
 
 void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_base = stack;
-    occupied[p_struct->pid/64] = set_n_bit_64(occupied[p_struct->pid/64],p_struct->pid % 64);
     p_struct->priority = 1; 
     p_struct->status = READY;
     p_struct->parent_pcb = &processes[get_current_pid() % QUANT];
     p_struct->parent_pcb->children_processes[(p_struct->pid)/64] = set_n_bit_64(p_struct->parent_pcb->children_processes[(p_struct->pid)/64], (p_struct->pid) % 64);
+    p_struct->children_processes[0] = 0;
     p_struct->children_processes[1] = 0;
     p_struct->killed_children[0] = 0;
     p_struct->killed_children[1] = 0;
@@ -49,7 +51,12 @@ void load_proc_args(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv
 }
 
 int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], int8_t * name) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
+    if(proc_count >= QUANT){
+        return -1;
+    }
     uint16_t pid = find_off_bit_128(occupied[0], occupied[1]);
+    occupied[pid/64] = set_n_bit_64(occupied[pid/64], pid % 64);
+    proc_count++;
     process_struct * p_struct = &processes[pid];
     p_struct->pid = pid;
     p_struct->argv = argv;
@@ -114,14 +121,12 @@ void wait_children() {
     uint8_t child, idx;
     process_struct * pcb = &processes[pid % QUANT];
     while(pcb->children_processes[0] && pcb->children_processes[1]){
-        pcb->status = BLOCKED;
-        yield();
         uint16_t p = 0;
         int8_t aux[30];
-        numToStr(pcb->killed_children[0], aux);
+       /*  numToStr(pcb->killed_children[0], aux);
         drawString(aux, 0, 23 + help, WHITE, BLACK);
         numToStr(pcb->killed_children[1], aux);
-        drawString(aux, 0, 24 + help, WHITE, BLACK);
+        drawString(aux, 0, 24 + help, WHITE, BLACK); */
         while (pcb->killed_children[0] || pcb->killed_children[1]) {
             child = find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
             idx = child/64;
@@ -129,11 +134,15 @@ void wait_children() {
             pcb->killed_children[idx] = off_n_bit_64(pcb->killed_children[idx],child%64);
             occupied[idx] = off_n_bit_64(occupied[idx],child%64);
             //drawchar('x', p++, 20, WHITE, BLACK);
-            numToStr(pcb->killed_children[idx], aux);
+            /* numToStr(pcb->killed_children[idx], aux);
             drawString(aux, 0, 25 + help, WHITE, BLACK);
             numToStr(child, aux);
             drawString(aux, 0, 26 + help, WHITE, BLACK);
-            help += 4;
+            help += 4; */
         }
+        if (pcb->children_processes[0] && pcb->children_processes[1]) {
+            pcb->status = BLOCKED; 
+            yield();
+        }    
     }
 }

@@ -41,6 +41,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         alive++;
       }
     }
+    bussy_wait(3000000);
     // Randomly kills, blocks or unblocks processes until every one has been KILL
     while (alive > 0) {
 
@@ -82,7 +83,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         }
     }
     drawchar('x', 0, 20, WHITE, BLACK);
-    wait_children();
+    //wait_children();
     drawchar('y', 0, 21, WHITE, BLACK);
   }
 }

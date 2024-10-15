@@ -76,6 +76,21 @@ void uint64ToHexStr(uint64_t value, int8_t *buffer) {
     buffer[index] = '\0';
 }
 
+uint8_t find_off_bit_128(uint64_t set1 , uint64_t set2){
+	uint64_t aux = set1;
+	uint8_t idx = 0;
+	if (set1 > set2) {
+		aux = set2;
+		idx = 64;
+	}
+	
+	while(aux % 2){
+		aux /= 2;
+		idx++;
+	}
+	return idx;
+}
+
 uint64_t set_n_bit_64(uint64_t set, uint8_t n){
 	return set | ((uint64_t)1 << n);
 }

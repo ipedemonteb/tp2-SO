@@ -5,6 +5,7 @@
 #include "memory_manager.h"
 #include "listADT.h"
 #include "process.h"
+#include "syscall.h"
 
 typedef struct scheduler_struct {
     listADT schedule;
