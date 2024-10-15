@@ -1,5 +1,5 @@
 #include "../include/listADT.h"
-//@todo: CAMMELLLL CASEEE
+//@todo: switch case type
 typedef struct node {
     void * head;
     struct node * tail;

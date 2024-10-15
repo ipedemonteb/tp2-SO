@@ -28,13 +28,10 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
   p_rq p_rqs[max_processes];
   int i = 1;
   while (1) {
-
+    char str[30];
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
       p_rqs[rq].pid = create_process(endless_loop, 0, argvAux, "endless_loop");
-      char str[30];
-      numToStr(p_rqs[rq].pid, str);
-      drawString(str, 0,p_rqs[rq].pid % 44, WHITE , BLACK );
       if (p_rqs[rq].pid == -1) {
         drawString((int8_t *)"test_processes: ERROR creating process\n",0,0,WHITE,BLACK);
         return -1;
@@ -43,10 +40,9 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         alive++;
       }
     }
-    bussy_wait(10000000);
+    
     // Randomly kills, blocks or unblocks processes until every one has been KILL
     while (alive > 0) {
-
       for (rq = 0; rq < max_processes; rq++) {
         action = GetUniform(100) % 2;
 
@@ -84,8 +80,5 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           p_rqs[rq].state = RUNNING;
         }
     }
-    drawchar('x', 0, 20, WHITE, BLACK);
-    //wait_children();
-    drawchar('y', 0, 21, WHITE, BLACK);
   }
 }

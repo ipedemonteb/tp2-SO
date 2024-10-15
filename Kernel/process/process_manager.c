@@ -1,11 +1,8 @@
 #include "../include/memory_manager.h"
 #include "../include/process_manager.h"
 #include "../include/lib.h"
-#include <stdint.h>
-
-#include "../include/videoDriver.h"
-#include "../include/test_util.h"
 #include "../include/interrupts.h"
+#include <stdint.h>
 
 #define ALIGN 7 
 
@@ -23,6 +20,7 @@ void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * arg
     my_exit();
 }
 
+//In development
 void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_base = stack;
     p_struct->priority = 1; 
@@ -51,6 +49,7 @@ void load_proc_args(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv
 }
 
 int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], int8_t * name) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
+    _cli();
     if(proc_count >= QUANT){
         return -1;
     }
@@ -65,6 +64,7 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
     load_proc_stack(p_struct, stack);
     load_proc_args(fn, argc, argv, stack);
     schedule_process(p_struct);
+    _sti();
     return p_struct->pid;
 }
 
@@ -95,6 +95,7 @@ void yield() {
     int20();
 }
 
+//In development
 uint8_t ps(process_info * info) {
     uint8_t process_count = 0;
     for(int i = 0; i < QUANT; i++) {
@@ -113,7 +114,7 @@ uint8_t ps(process_info * info) {
     return process_count;
 }
 
-
+//In development
 void wait_children() {
     uint16_t pid = get_current_pid();
     uint8_t child, idx;
@@ -135,8 +136,7 @@ void wait_children() {
             /* numToStr(pcb->killed_children[idx], aux);
             drawString(aux, 0, 25 + help, WHITE, BLACK);
             numToStr(child, aux);
-            drawString(aux, 0, 26 + help, WHITE, BLACK);
-            help += 4; */
+            drawString(aux, 0, 26 + help, WHITE, BLACK);*/
         }
         if (pcb->children_processes[0] && pcb->children_processes[1]) {
             pcb->status = BLOCKED; 

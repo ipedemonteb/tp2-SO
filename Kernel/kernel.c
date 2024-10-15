@@ -8,7 +8,6 @@
 #include "./include/scheduler.h"
 #include "./include/process_manager.h"
 #include "include/test_process.h"
-#include "include/test_util.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -46,9 +45,9 @@ void * initializeKernelBinary() {
 
 void init(){
 	uint8_t * argv[] = {0}; 
-	uint8_t * argv2[] = {"4", 0};
-	create_process(test_processes, 1, argv2, "test_proc");
-	//create_process(test_prio, 0, argv, "test_prio");
+	uint8_t * argv2[] = {(uint8_t *)"4", 0};
+	create_process(test_prio, 0, argv, (int8_t *)"test_prio");
+	create_process(test_processes, 1, argv2, (int8_t *)"test_proc");
 	//create_process(sampleCodeModuleAddress,0, argv, (int8_t *)"Terminal");
 	//print_process_info();
 	halt_cpu();
@@ -59,8 +58,7 @@ int main() {
 	start_mm();
 	init_scheduler(getStackBase());
 	uint8_t * argv[] = {0}; 
-	create_process(init,0, argv, (int8_t*)"init");
-	//create_process(sampleCodeModuleAddress,0, argv, (int8_t *)"Terminal");
+	create_process((void *)init,0, argv, (int8_t*)"init");
 	_sti();
 	while(1) {
 	}

@@ -1,9 +1,5 @@
 #include "../include/scheduler.h"
 #include <stdint.h>
-#include "../include/lib.h"
-#include "../include/videoDriver.h"
-
-#include "../include/test_util.h"
 
 #define AVAILABLE 1
 #define MAX_INPUT 4
@@ -33,11 +29,10 @@ void schedule_process(process_struct * pcb) {
     add(scheduler->schedule,pcb);
 }
 
-uint64_t t = 8;
-
+//In development
 void * schedule(void * rsp) {
-    //print feaso
-    drawchar(get_current_pid() + '0', debug++, 0, WHITE, BLACK);
+    //print
+    //drawchar(get_current_pid() + '0', debug++, 1, WHITE, BLACK);
     scheduler->current_running_pcb->stack_ptr = rsp;
     while (scheduler->current_running_pcb->count <= scheduler->current_running_pcb->priority) {
         add(scheduler->schedule, scheduler->current_running_pcb);
