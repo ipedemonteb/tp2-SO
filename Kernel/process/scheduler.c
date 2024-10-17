@@ -58,7 +58,9 @@ void * schedule(void * rsp) {
                 numToStr(pid, aux);
                 drawString(aux, 0, t++, WHITE, BLACK);  */
                 current_pcb->parent_pcb->killed_children[idx] = set_n_bit_64(current_pcb->parent_pcb->killed_children[idx],pid % 64);
-                current_pcb->parent_pcb->status = READY;
+                if (current_pcb->parent_pcb->status == BLOCKED) {
+                    current_pcb->parent_pcb->status = READY;
+                }
                 current_pcb->parent_pcb->children_processes[0] |= current_pcb->children_processes[0];
                 current_pcb->parent_pcb->children_processes[1] |= current_pcb->children_processes[1];
             }
