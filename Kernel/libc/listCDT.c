@@ -17,6 +17,9 @@ struct listCDT {
 listADT newList(compare cmp) {
     listADT aux = my_malloc(sizeof(struct listCDT));
     aux->cmp = cmp;
+    aux->first = NULL;
+    aux->last = NULL;
+    aux->it = NULL;
     return aux;
 }
 

@@ -46,11 +46,13 @@ void * initializeKernelBinary() {
 void init(){
 	uint8_t * argv[] = {0}; 
 	uint8_t * argv2[] = {(uint8_t *)"4", 0};
+	create_process(halt_cpu, 0, argv, "inactive");
 	create_process(test_prio, 0, argv, (int8_t *)"test_prio");
-	create_process(test_processes, 1, argv2, (int8_t *)"test_proc");
+	//create_process(test_processes, 1, argv2, (int8_t *)"test_proc");
 	//create_process(sampleCodeModuleAddress,0, argv, (int8_t *)"Terminal");
 	//print_process_info();
-	halt_cpu();
+	print_process_info();
+	wait_children();
 }
 
 int main() {

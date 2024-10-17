@@ -40,7 +40,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         alive++;
       }
     }
-    
+    bussy_wait(10000000);
     // Randomly kills, blocks or unblocks processes until every one has been KILL
     while (alive > 0) {
       for (rq = 0; rq < max_processes; rq++) {
@@ -80,5 +80,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           p_rqs[rq].state = RUNNING;
         }
     }
+    wait_children();
   }
 }

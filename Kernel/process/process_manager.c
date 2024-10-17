@@ -9,6 +9,8 @@
 uint8_t proc_count = 0;
 process_struct processes[QUANT] = {0};
 
+void * stacks = 0x1000000;
+
 uint64_t occupied[2];
 
 void my_exit() {
@@ -25,15 +27,16 @@ void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_base = stack;
     p_struct->priority = 1; 
     p_struct->status = READY;
-    /*p_struct->parent_pcb = &processes[get_current_pid()];
+    p_struct->parent_pcb = &processes[get_current_pid()];
     p_struct->parent_pcb->children_processes[(p_struct->pid)/64] = set_n_bit_64(p_struct->parent_pcb->children_processes[(p_struct->pid)/64], (p_struct->pid) % 64);
     p_struct->children_processes[0] = 0;
     p_struct->children_processes[1] = 0;
     p_struct->killed_children[0] = 0;
-    p_struct->killed_children[1] = 0; */
+    p_struct->killed_children[1] = 0;
     p_struct->count = 1;
     process_stack * p_stack = stack - sizeof(process_stack);
     p_stack->rsp = stack;
+    p_stack->rbp = stack;
     p_stack->cs = (void *)0x8;
     p_stack->rflags = (void *)0x202;
     p_stack->ss = 0x0;
@@ -53,14 +56,15 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
     if(proc_count >= QUANT){
         return -1;
     }
-    /* uint16_t pid = find_off_bit_128(occupied[0], occupied[1]);
-    occupied[pid/64] = set_n_bit_64(occupied[pid/64], pid % 64); */
-    process_struct * p_struct = &processes[proc_count];
-    p_struct->pid = proc_count++;
+    uint16_t pid = find_off_bit_128(occupied[0], occupied[1]);
+    occupied[pid/64] = set_n_bit_64(occupied[pid/64], pid % 64);
+    process_struct * p_struct = &processes[pid];
+    //p_struct->pid = proc_count++;
+    p_struct->pid = pid;
     p_struct->argv = argv;
     p_struct->name = my_malloc(my_strlen(name) + 1);
     memcpy(p_struct->name, name, my_strlen(name));
-    void * stack = (uint64_t)(my_malloc(STACKSIZE) + STACKSIZE) & ~ALIGN;
+    void * stack = stacks + STACKSIZE * (pid+1);
     load_proc_stack(p_struct, stack);
     load_proc_args(fn, argc, argv, stack);
     schedule_process(p_struct);
@@ -69,35 +73,46 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
 }
 
 uint8_t kill(uint16_t pid) {
+    _cli();
     processes[pid].status = KILLED;
     if (get_current_pid() == pid) {
         yield();
     }
+    _sti();
 }
 
 uint8_t block(uint16_t pid) {
+    _cli();
     processes[pid].status = BLOCKED;
     if (get_current_pid() == pid) {
         yield();
     }
+    _sti();
 }
 
 uint8_t unblock(uint16_t pid) {
+    _cli();
     processes[pid].status = READY;
+    _sti();
 }
 
 void nice(uint16_t pid, uint8_t priority) {
+    _cli();
     processes[pid].priority = priority;
+    _sti();
 }
 
 void yield() {
+    _cli();
     get_next_process();
+    _sti();
     int20();
 }
 
 //In development
 uint8_t ps(process_info * info) {
     uint8_t process_count = 0;
+    _cli();
     for(int i = 0; i < QUANT; i++) {
         if(occupied[i / 64] & (1UL << (i % 64))) {
             process_struct * p = &processes[i];
@@ -111,6 +126,7 @@ uint8_t ps(process_info * info) {
             process_count++;
         }
     }
+    _sti();
     return process_count;
 }
 
@@ -122,25 +138,19 @@ void wait_children() {
     while(pcb->children_processes[0] && pcb->children_processes[1]){
         uint16_t p = 0;
         int8_t aux[30];
-       /*  numToStr(pcb->killed_children[0], aux);
-        drawString(aux, 0, 23 + help, WHITE, BLACK);
-        numToStr(pcb->killed_children[1], aux);
-        drawString(aux, 0, 24 + help, WHITE, BLACK); */
+        _cli();
         while (pcb->killed_children[0] || pcb->killed_children[1]) {
             child = find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
             idx = child/64;
             pcb->children_processes[idx] = off_n_bit_64(pcb->children_processes[idx],child%64);
             pcb->killed_children[idx] = off_n_bit_64(pcb->killed_children[idx],child%64);
             occupied[idx] = off_n_bit_64(occupied[idx],child%64);
-            //drawchar('x', p++, 20, WHITE, BLACK);
-            /* numToStr(pcb->killed_children[idx], aux);
-            drawString(aux, 0, 25 + help, WHITE, BLACK);
-            numToStr(child, aux);
-            drawString(aux, 0, 26 + help, WHITE, BLACK);*/
+            my_free(processes[child].name);
         }
         if (pcb->children_processes[0] && pcb->children_processes[1]) {
             pcb->status = BLOCKED; 
             yield();
         }    
+        _sti();
     }
 }

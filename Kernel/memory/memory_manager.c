@@ -1,7 +1,8 @@
 #include "../include/mmADT.h"
 
-#define START 0x50000
-#define END 0x9FFFF
+
+#define START 0x0000000000200000
+#define END 0x0000000000400000
 
 mmADT mm;
 char mem[END-START];
