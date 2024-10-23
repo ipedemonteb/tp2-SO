@@ -1,10 +1,12 @@
-#include "test_sync.h"
+#include "../include/test_sync.h"
 
 
 #define SEM_ID 1
-#define TOTAL_PAIR_PROCESSES 2
+#define TOTAL_PAIR_PROCESSES 1
 
 int64_t global; // shared memory
+
+int64_t count = 0;
 
 void slowInc(int64_t *p, int64_t inc) {
   uint64_t aux = *p;
@@ -28,12 +30,13 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   if ((use_sem = satoi(argv[2])) < 0)
     return -1;
 
-  if (use_sem)
-    if (!sem_open(SEM_ID, 1)) {
-      drawString("test_sync: ERROR opening semaphore\n", 20, 20, RED, BLACK);
+  if (use_sem) {
+    count++;
+    if(!sem_open(SEM_ID + count, 1)) {
+      drawString((int8_t *)"test_sync: ERROR opening semaphore", 20, 20, RED, BLACK);
       return -1;
     }
-
+  }
   uint64_t i;
   for (i = 0; i < n; i++) {
     if (use_sem)
@@ -43,14 +46,13 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
       sem_post(SEM_ID);
   }
 
-  if (use_sem)
+  if(use_sem)
     sem_close(SEM_ID);
-
   return 0;
 }
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
-  drawString("Starting test_sync", 20, 20, WHITE, BLACK);
+  drawString((int8_t *)"Starting test_sync", 20, 20, WHITE, BLACK);
   uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
 
   if (argc != 2)
@@ -63,15 +65,22 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    pids[i] = create_process(&my_process_inc, 3, argvDec, "my_process_inc");
-    pids[i + TOTAL_PAIR_PROCESSES] = create_process(&my_process_inc, 3, argvInc, "my_process_inc");
+    pids[i] = create_process(my_process_inc, 3, argvDec, "my_process_inc");
+    pids[i + TOTAL_PAIR_PROCESSES] = create_process(my_process_inc, 3, argvInc, "my_process_inc");
   }
 
-  for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    wait_children();
-  }
+  drawString((int8_t *)"Llegue", 25, 25, WHITE, BLACK);
+
+  /* for (i = 0; i < TOTAL_PAIR_PROCESSESxw; i++) {
+    wait_pid(pids[i]);
+    wait_pid(pids[i + TOTAL_PAIR_PROCESSES]);
+  } */
+
+  wait_children();
+
   drawString("Final value", 30, 30, WHITE, BLACK);
-  drawString(global + '0', 40, 40, WHITE, BLACK);
+  drawString(global + "0", 45, 30, WHITE, BLACK);
 
+  drawString("Sali del test", 30, 33, WHITE, BLACK);
   return 0;
 }

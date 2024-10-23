@@ -1,4 +1,4 @@
-#include "sem.h"
+#include "../include/sem.h"
 
 semaphore semaphores[SEM_MAX] = {0};
 
@@ -18,6 +18,11 @@ extern void release(int * lock);
 // por ende, para soltar el mutex podria hacer xchg(lock, 1) y ya estaría pero como soy el unico que tiene acceso al mutex no
 // necesito que la operación sea atómica nadie puede cambiar su valor hasta que yo no lo libere -> por eso puedo hacer sem->mutex=1
 
+void init_semaphores() {
+  for (int i = 0; i < SEM_MAX; i++) {
+    semaphores[i].value = NOT_INIT;
+  }
+}
 
 void enable_list(listADT list) {      // itera por la lista y marca a los procesos como ready y los saca de la lista
   while (peek(list) != NULL) {
@@ -35,7 +40,7 @@ void release_sem_lock(semaphore * sem) {
 }
 
 int8_t sem_open(int8_t id, int8_t value) {
-  if(semaphores[id].value != NULL) {  // ya existe el semáforo con ese id 
+  if(id > SEM_MAX || semaphores[id].value == NOT_INIT) {  // ya existe el semáforo con ese id
     return -1;
   }
   semaphore * sem = &semaphores[id];
@@ -46,7 +51,7 @@ int8_t sem_open(int8_t id, int8_t value) {
 }
 
 int8_t sem_close(int8_t id) {
-  if (semaphores[id].value == NULL) {     // no existe el semáforo  
+  if (semaphores[id].value == NOT_INIT) {     // no existe el semáforo  
     return -1;
   }
   free_list(semaphores[id].waiting_sem);
@@ -54,7 +59,7 @@ int8_t sem_close(int8_t id) {
 }
 
 int8_t sem_post(int8_t id) {
-  if (semaphores[id].value == NULL) {   // no existe el semaforo 
+  if (semaphores[id].value == NOT_INIT) {   // no existe el semaforo 
     return -1;
   }
   acquire_sem_lock(&semaphores[id]);   // obtengo control absoluto sobre el semaforo para poder modificar el valor
@@ -67,21 +72,23 @@ int8_t sem_post(int8_t id) {
 }
 
 int8_t sem_wait(int8_t id) {
-  if (semaphores[id].value == NULL) {     // no existe el semáforo
+  if(semaphores[id].value == NOT_INIT) {     // no existe el semáforo
     return -1;
   }
+
   acquire_sem_lock(&semaphores[id]);   // obtengo control absoluto sobre el semaforo para poder modificar su valor
+
   while(semaphores[id].value == 0) {   // si el valor del semaforo es 0 no puedo disminuirlo, por ende libero el sem lock y me bloqueo
     int16_t my_pid = get_current_pid();
     add(semaphores[id].waiting_sem, (void *) my_pid);     // me agrego a la lista de los que estan esperando al semaforo
     release_sem_lock(&semaphores[id]);  // suelto el control del semaforo ya que no voy a seguir modificando el valor
     block(my_pid);        // me bloqueo
-    yield();            // libero el cpu
-
+    
     acquire_sem_lock(&semaphores[id]);   // vuelvo a intentar acceder a valor del semaforo -> vuelvo a adquirir el sem lock
   }
+
   semaphores[id].value--;      // voy a salir del while cuando el valor del semaforo no sea 0, por ende puedo disminuirlo
   release_sem_lock(&semaphores[id]);   // suelto el control del semaforo ya que no voy a seguir modificando el valor
-  return 0;
 
+  return 0;
 }
