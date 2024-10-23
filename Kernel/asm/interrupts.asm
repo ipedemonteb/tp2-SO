@@ -74,7 +74,7 @@ section .text
 %endmacro
 
 %macro getRegs 0
-	mov [regs], rax ; General Purpose Registers
+	mov [regs], rax 
 	mov [regs+8], rbx
 	mov [regs+8*2], rcx
 	mov [regs+8*3], rdx
@@ -96,6 +96,7 @@ section .text
 	mov [regs+8*17], rax
 	mov rax, [rsp+8*2] 		; RFLAGS
 	mov [regs+8*18], rax
+	mov rax, [regs]
 %endmacro
 
 %macro exceptionHandler 1
@@ -179,9 +180,32 @@ _irq04Handler:
 ; USB
 _irq05Handler:
 	irqHandlerMaster 5
+%macro pushABI 0
+	push rbx
+	push r12
+	push r13
+	push r14
+	push r15
+%endmacro
+
+%macro popABI 0
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+%endmacro
 
 _irq80Handler:
+	pushABI
+	push rbp
+    mov rbp, rsp
+
 	call sysCallDispatcher
+	
+	mov rsp, rbp
+    pop rbp 
+	popABI
 	
 	push rax
 

@@ -52,7 +52,6 @@ void load_proc_args(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv
 }
 
 int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], int8_t * name) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
-    _cli();
     if(proc_count >= QUANT){
         return -1;
     }
@@ -68,51 +67,39 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
     load_proc_stack(p_struct, stack);
     load_proc_args(fn, argc, argv, stack);
     schedule_process(p_struct);
-    _sti();
     return p_struct->pid;
 }
 
 uint8_t kill(uint16_t pid) {
-    _cli();
     processes[pid].status = KILLED;
     if (get_current_pid() == pid) {
         yield();
     }
-    _sti();
 }
 
 uint8_t block(uint16_t pid) {
-    _cli();
     processes[pid].status = BLOCKED;
     if (get_current_pid() == pid) {
         yield();
     }
-    _sti();
 }
 
 uint8_t unblock(uint16_t pid) {
-    _cli();
     processes[pid].status = READY;
-    _sti();
 }
 
 void nice(uint16_t pid, uint8_t priority) {
-    _cli();
     processes[pid].priority = priority;
-    _sti();
 }
 
 void yield() {
-    _cli();
     get_next_process();
-    _sti();
     int20();
 }
 
 //In development
 uint8_t ps(process_info * info) {
     uint8_t process_count = 0;
-    _cli();
     for(int i = 0; i < QUANT; i++) {
         if(occupied[i / 64] & (1UL << (i % 64))) {
             process_struct * p = &processes[i];
@@ -126,7 +113,6 @@ uint8_t ps(process_info * info) {
             process_count++;
         }
     }
-    _sti();
     return process_count;
 }
 
@@ -135,10 +121,9 @@ void wait_children() {
     uint16_t pid = get_current_pid();
     uint8_t child, idx;
     process_struct * pcb = &processes[pid];
-    while(pcb->children_processes[0] && pcb->children_processes[1]){
+    while(pcb->children_processes[0] || pcb->children_processes[1]){
         uint16_t p = 0;
         int8_t aux[30];
-        _cli();
         while (pcb->killed_children[0] || pcb->killed_children[1]) {
             child = find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
             idx = child/64;
@@ -147,10 +132,9 @@ void wait_children() {
             occupied[idx] = off_n_bit_64(occupied[idx],child%64);
             my_free(processes[child].name);
         }
-        if (pcb->children_processes[0] && pcb->children_processes[1]) {
+        if (pcb->children_processes[0] || pcb->children_processes[1]) {
             pcb->status = BLOCKED; 
             yield();
         }    
-        _sti();
     }
 }

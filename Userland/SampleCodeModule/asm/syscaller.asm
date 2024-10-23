@@ -11,10 +11,11 @@ GLOBAL beepSysCaller
 GLOBAL fontSizeUpCaller
 GLOBAL fontSizeDownCaller
 GLOBAL getTimeCaller
-
+GLOBAL syscaller
+GLOBAL create_process_caller
 section .text
 
-%macro syscaller 1
+%macro syscaller_macro 1
     push rbp
     mov rbp, rsp
 
@@ -26,41 +27,54 @@ section .text
     ret
 %endmacro
 
+syscaller: 
+    push rbp
+    mov rbp, rsp
+
+    int 80h
+
+    mov rsp, rbp
+    pop rbp 
+    ret
+
 readCaller:
-    syscaller 0
+    syscaller_macro 0
 
 writeCaller:
-    syscaller 1
+    syscaller_macro 1
 
 printRectangleCaller:
-    syscaller 2
+    syscaller_macro 2
 
 getScreenWidthCaller:
-    syscaller 3
+    syscaller_macro 3
 
 getScreenHeightCaller:
-    syscaller 4
+    syscaller_macro 4
 
 printCharCaller:
-    syscaller 5
+    syscaller_macro 5
 
 waitCaller:
-    syscaller 6
+    syscaller_macro 6
 
 keyboardStatusCaller:
-    syscaller 7
+    syscaller_macro 7
 
 keyboardKeyCaller:
-    syscaller 8
+    syscaller_macro 8
 
 beepSysCaller:
-    syscaller 9
+    syscaller_macro 9
 
 fontSizeUpCaller:
-    syscaller 10
+    syscaller_macro 10
 
 fontSizeDownCaller:
-    syscaller 11
+    syscaller_macro 11
 
 getTimeCaller:
-    syscaller 12
+    syscaller_macro 12
+
+create_process_caller:
+    syscaller_macro 15

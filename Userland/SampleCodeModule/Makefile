@@ -12,7 +12,7 @@ LOADEROBJECT=$(LOADERSRC:.c=.o)
 all: $(MODULE)
 
 debug: all
-	$(GCC) $(GCCFLAGS) -T sampleCodeModule.ld -Wl,--oformat=elf64-x86-64 -o ../$(MODULE_ELF) $(OBJECTS) $(OBJECTS_ASM)
+	$(GCC) $(GCCFLAGS) -T sampleCodeModule.ld -Wl,--oformat=elf64-x86-64 -o ../$(MODULE_ELF) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM)
 $(MODULE): $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM)
 	$(LD) $(LDFLAGS) -T sampleCodeModule.ld -o ../$(MODULE) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM)
 %.o: %.c

@@ -5,10 +5,20 @@
 #include "./include/syscaller.h"
 #include "./include/welcome.h"
 #include "./include/font.h"
+#include "./include/syscall.h"
 
 int main()
 {
+	uint8_t * argv[] = {0};
+	getScreenHeight();
+	create_process(launchShell,0,argv,"Shell");
+	wait_children();
 	while (1)
+	{
+		/* code */
+	}
+	
+	/* while (1)
 	{
 		//welcome();
 		int8_t *msg2[] = {(int8_t *)"Please select a program to run:\0", (int8_t *)"1. Eliminator\0", (int8_t *)"2. Shell\0"};
@@ -34,5 +44,5 @@ int main()
 			launchShell();
 			break;
 		}
-	}
+	} */
 }

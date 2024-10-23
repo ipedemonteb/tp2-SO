@@ -63,6 +63,8 @@ void * schedule(void * rsp) {
                 }
                 current_pcb->parent_pcb->children_processes[0] |= current_pcb->children_processes[0];
                 current_pcb->parent_pcb->children_processes[1] |= current_pcb->children_processes[1];
+                 current_pcb->parent_pcb->killed_children[0] |= current_pcb->killed_children[0];
+                current_pcb->parent_pcb->killed_children[1] |= current_pcb->killed_children[1];
             }
         }
     } while(current_pcb->status == BLOCKED || current_pcb->status == KILLED);

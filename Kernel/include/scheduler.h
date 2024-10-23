@@ -6,6 +6,7 @@
 #include "listADT.h"
 #include "process.h"
 #include "syscall.h"
+#include "lib.h"
 
 typedef struct scheduler_struct {
     listADT schedule;

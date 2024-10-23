@@ -1,10 +1,11 @@
 #include <stdint.h>
 #include "./include/shell.h"
-#include "./include/syscaller.h"
 #include "./include/libc.h"
 #include "./include/userLib.h"
 #include "./include/sounds.h"
 #include "./include/eliminator.h"
+#include "./include/syscall.h"
+#include "./include/test_process.h"
 
 #define BUFF_MAX 4096
 #define WHITE 0x00FFFFFF
@@ -14,8 +15,8 @@
 #define RIGHT_ARROW 252
 #define UP_ARROW 253
 #define DOWN_ARROW 254
-#define LETTERS 'i' - 'a' + 1
-#define WORDS 2
+#define LETTERS 'z' - 'a' + 1
+#define WORDS 4
 
 typedef struct command {
     int8_t * name;
@@ -31,8 +32,32 @@ static void fontBig();
 static void getTime();
 static void help();
 static void invalidOpCode();
+static void prio();
+static void processes();
+static void mm();
 
-static command commands[LETTERS][WORDS] = {{{(int8_t *)"clear", clearCmd}, {0, 0}}, {{(int8_t *)"div0", div0}, {0, 0}}, {{(int8_t *)"eliminator", eliminator}, {(int8_t *)"exit", exit}}, {{(int8_t *)"fontBig", fontBig}, {(int8_t *)"fontSmall", fontSmall}}, {{(int8_t *)"getTime", getTime}, {0, 0}}, {{(int8_t *)"help", help}, {0, 0}}, {{(int8_t *)"invalidOpCode", invalidOpCode}, {0, 0}}};
+static command commands[LETTERS][WORDS] = {
+    {{0,0}},  //a
+    {{0,0}},  //b
+    {{(int8_t *)"clear", clearCmd}, {0, 0}}, 
+    {{(int8_t *)"div0", div0}, {0, 0}}, 
+    {{(int8_t *)"eliminator", eliminator}, {(int8_t *)"exit", exit}}, 
+    {{(int8_t *)"fontBig", fontBig}, {(int8_t *)"fontSmall", fontSmall}}, 
+    {{(int8_t *)"getTime", getTime}, {0, 0}},
+    {{(int8_t *)"help", help}, {0, 0}}, 
+    {{(int8_t *)"invalidOpCode", invalidOpCode}, {0, 0}},
+    {{0,0}},  //j
+    {{0,0}},  //k
+    {{0,0}},  //l
+    {{0,0}},  //m
+    {{0,0}},  //n
+    {{0,0}},  //o
+    {{0,0}},  //p
+    {{0,0}},  //q
+    {{0,0}},  //r
+    {{0,0}},  //s
+    {{"test_mm",mm},{"test_prio",prio},{"test_processes",processes},{0,0}}   //t
+};
 
 static int8_t * commandNotFoundMsg = (int8_t *)"Command not found. Type help for a list of commands";
 static uint8_t cNotFoundSize = 51;
@@ -57,11 +82,11 @@ static uint8_t fontSize;
 static uint8_t reset;
 
 void sPrintChar(uint8_t c) {
-    printCharCaller(UNUSED, c, currentX, currentY, WHITE, BLACK);
+    printChar(c, currentX, currentY, WHITE, BLACK);
 }
 
 void sPrintSelected(uint8_t c) {
-    printCharCaller(UNUSED, c, currentX, currentY, BLACK, WHITE);
+    printChar(c, currentX, currentY, BLACK, WHITE);
 }
 
 void startNewLine() {
@@ -76,7 +101,7 @@ void clearLineFrom(uint16_t x, uint16_t to) {
     uint16_t auxX = currentX;
     currentX = x;
     while (currentX < width) {
-        printRectangleCaller(UNUSED, currentX * (8 * fontSize), currentY * (16 * fontSize), 8 * fontSize, 16 * fontSize, BLACK);
+        printRectangle(currentX * (8 * fontSize), currentY * (16 * fontSize), 8 * fontSize, 16 * fontSize, BLACK);
         currentX++;
     }
     currentX = auxX;
@@ -162,8 +187,15 @@ void printMsgAndWait(const int8_t * msg, uint8_t size) {
     }
 }
 
-uint8_t getCommandIdx(uint8_t c) {
-    return c - 'c';
+int8_t getCommandIdx(uint8_t c) {
+    if (c <= 'Z') {
+        return c - 'A';
+    }
+    if (c <= 'z')
+    {
+        return c - 'a';
+    }
+    return -1;
 }
 
 void sCheckCommand() {
@@ -172,7 +204,7 @@ void sCheckCommand() {
     }
     uint8_t aux = buffer[offsets[lineCount]];
     uint8_t c = getCommandIdx(buffer[offsets[lineCount - 1]]);
-    if (c < 0 || c >= LETTERS) {
+    if (c < 0) {
         printMsgAndWait(commandNotFoundMsg, cNotFoundSize);
         return;
     }
@@ -316,8 +348,8 @@ void launchShell() {
     previousCount = 0;
     fontSize = 1;
     reset = 0;
-    width = getScreenWidthCaller(UNUSED) / 8 / fontSize;
-    height = getScreenHeightCaller(UNUSED) / 16 / fontSize;
+    width = getScreenWidth() / 8 / fontSize;
+    height = getScreenHeight() / 16 / fontSize;
     clear();
     currentX = 0;
     currentY = 0;
@@ -359,6 +391,10 @@ void launchShell() {
             case '\t':
                 if (offsets[lineCount] - offsets[lineCount - 1] == 1) {
                     uint8_t c = getCommandIdx(buffer[count - 1]);
+                    if (c < 0) {
+                        break;
+                    }
+                    
                     int8_t * aux = commands[c][0].name + 1;
                     while (*aux) {
                         sPrintChar(*aux);
@@ -410,7 +446,7 @@ void launchShell() {
             }
         }
     }
-    while (fontSizeDownCaller(UNUSED)) {
+    while (fontSizeDown()) {
         fontSize--;
     }
 }
@@ -422,7 +458,7 @@ void fontBig() {
         shellErrSound();
         return;
     }
-    fontSizeUpCaller(UNUSED);
+    fontSizeUp();
     fontSize = 2;
     height /= 2;
     width /= 2;
@@ -447,7 +483,7 @@ void fontSmall() {
         shellErrSound();
         return;
     }
-    fontSizeDownCaller(UNUSED);
+    fontSizeDown();
     fontSize = 1;
     height *= 2;
     width *= 2;
@@ -456,10 +492,10 @@ void fontSmall() {
 }
 
 void eliminator() {
-    gameMain();
+    /* gameMain();
     cleanBuffer();
     sMoveScreenUp(0);
-    reset = 1;
+    reset = 1; */
 }
 
 void clearCmd() {
@@ -472,7 +508,7 @@ void clearCmd() {
 
 void getTime() {
     int8_t clock[20];
-    getTimeCaller(UNUSED, clock);
+    time(clock);
     printMsgAndWait(clock, 8);
 }
 
@@ -483,4 +519,17 @@ void help() {
 void invalidOpCode() {
     fontSize = 1;
     opcode();
+}
+
+void prio(){
+    create_process(test_prio,0,0,"test_prio");
+    wait_children();
+}
+
+void processes(){
+
+}
+
+void mm(){
+
 }
