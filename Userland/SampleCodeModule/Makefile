@@ -2,7 +2,7 @@ include ../Makefile.inc
 
 MODULE=0000-sampleCodeModule.bin
 MODULE_ELF=$(MODULE:.bin=.elf)
-SOURCES=$(wildcard [^_]*.c)
+SOURCES=$(wildcard [^_]*.c) $(wildcard shell/*.c)
 SOURCES_ASM=$(wildcard asm/*.asm)
 OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)

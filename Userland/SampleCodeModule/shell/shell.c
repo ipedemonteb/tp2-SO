@@ -1,11 +1,11 @@
 #include <stdint.h>
-#include "./include/shell.h"
-#include "./include/libc.h"
-#include "./include/userLib.h"
-#include "./include/sounds.h"
-#include "./include/eliminator.h"
-#include "./include/syscall.h"
-#include "./include/test_process.h"
+#include "../include/shell.h"
+#include "../include/libc.h"
+#include "../include/userLib.h"
+#include "../include/sounds.h"
+#include "../include/eliminator.h"
+#include "../include/syscall.h"
+#include "../include/test_process.h"
 
 #define BUFF_MAX 4096
 #define WHITE 0x00FFFFFF

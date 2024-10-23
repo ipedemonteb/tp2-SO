@@ -184,3 +184,12 @@ int strcmp(int8_t * s1, int8_t * s2) {
     } while (s1[i] && s2[i++] && !ret);
     return ret;
 }
+
+uint32_t strcpy(char * dest, const char * source){
+    uint32_t i = 0;
+    while (source[i]) {
+        dest[i] = source[i++];
+    }
+    dest[i] = 0;
+    return i;
+}
