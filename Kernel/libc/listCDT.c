@@ -14,7 +14,7 @@ struct listCDT {
     TList it;
 };
 
-listADT newList(compare cmp) {
+listADT new_list(compare cmp) {
     listADT aux = my_malloc(sizeof(struct listCDT));
     aux->cmp = cmp;
     aux->first = NULL;
@@ -23,11 +23,11 @@ listADT newList(compare cmp) {
     return aux;
 }
 
-static void freeListRec(TList list) {
+static void free_list_rec(TList list) {
     if (list==NULL) {
         return;
     }
-    freeListRec(list->tail);
+    free_list_rec(list->tail);
     my_free(list);
 }
 
@@ -38,30 +38,28 @@ void add(listADT list, void * elem) {
     if(list->first == NULL) {
         list->first = aux;
         list->last = aux;
-        toBegin(list);
+        to_begin(list);
     } else {
         list->last->tail = aux;
         list->last = aux;
     }
 }
 
-void freeList(listADT list) {
-    freeListRec(list->first);
+void free_list(listADT list) {
+    free_list_rec(list->first);
     my_free(list);
 }
 
-void toBegin(listADT list) {
+void to_begin(listADT list) {
     list->it = list->first;
 }
 
-
-uint8_t hasNext(const listADT list) {
+uint8_t has_next(const listADT list) {
     return list->it != NULL;
 }
 
-
 void * next(listADT list) {
-    if(!hasNext(list)) {
+    if(!has_next(list)) {
         return list->first;
     }
     void * aux = list->it->head;
@@ -69,29 +67,26 @@ void * next(listADT list) {
     return aux;
 }
 
+void * peek(listADT list) {
+    return list->it->head;
+}
+
 void * poll(listADT list){
-    void * rta = list->first->head;
     TList aux = list->first;
     list->first = list->first->tail;
     my_free(aux);
-    return rta;
-}
-
-void * peek(listADT list) {
-    return list->first->head;
+    return aux->head;
 }
 
 void queue(listADT list , void * elem){
     TList aux = my_malloc(sizeof(node));
     aux->head = elem;
-    list->last->tail = aux;
-    list->last = aux;
-    aux->tail = NULL;
-}
-
-void queue_first(listADT list , void * elem) {
-    TList aux = my_malloc(sizeof(node));
-    aux->head = elem;
-    list->first = aux;
-    list->last = aux;
+    if(list->first == NULL) {
+        list->first = aux;
+        list->last = aux;
+        to_begin(list);
+    } else {
+        list->last->tail = aux;
+        list->last = aux;
+    }
 }

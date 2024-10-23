@@ -16,7 +16,7 @@ scheduler_struct * scheduler;
 
 void init_scheduler(void * stack_base) {
     scheduler = my_malloc(sizeof(scheduler_struct));
-    scheduler->schedule = newList(cmp);
+    scheduler->schedule = new_list(cmp);
 
     scheduler->current_running_pcb = my_malloc(sizeof(process_struct));
     scheduler->current_running_pcb->pid = 130;

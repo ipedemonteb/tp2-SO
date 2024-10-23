@@ -85,7 +85,9 @@ uint8_t block(uint16_t pid) {
 }
 
 uint8_t unblock(uint16_t pid) {
+  if (processes[pid].status != KILLED) {
     processes[pid].status = READY;
+  }
 }
 
 void nice(uint16_t pid, uint8_t priority) {
