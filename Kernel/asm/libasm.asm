@@ -6,8 +6,19 @@ GLOBAL outb
 GLOBAL inb
 GLOBAL getCurrentTime
 GLOBAL setTimerTick
+GLOBAL int20
+GLOBAL halt_cpu
+GLOBAL find_off_bit_64
+;GLOBAL find_off_bit_128
+GLOBAL set_n_bit_64
+GLOBAL off_n_bit_64
 
 section .text
+
+halt_cpu:
+    hlt
+    jmp halt_cpu
+
 cpuVendor:
 	push rbp
 	mov rbp, rsp
@@ -207,6 +218,106 @@ setTimerTick:
 
 	mov rsp, rbp
 	pop rbp
+    ret
+
+int20:
+    int 20h
+    ret
+
+find_off_bit_128:
+    mov rax, 64
+    cmp rsi, rdi
+    jae .low64
+    ;high 64
+    add rax, 32
+    mov rdi, rsi
+    jmp on128
+.low64:
+    sub rax, 32
+
+find_off_bit_64:
+    mov rax, 32
+on128:
+    mov rsi, rdi 
+    shr rsi, 32 
+    ;esi = high edi = low
+    cmp esi, edi
+    jae .low32 
+    ;high 32
+    mov ecx, esi 
+    mov edx, esi
+    add rax, 16
+    jmp .cont32 
+
+.low32:
+    mov ecx, edi
+    mov edx, edi
+    sub rax, 16 
+
+.cont32:
+    shr ecx, 16
+    ;cx = high dx = low
+    cmp cx, dx  
+    jae .low16 
+
+    ;high 16
+    add rax, 8
+    jmp .cont16 
+
+.low16:
+    sub rax, 8
+    mov cx, dx
+
+.cont16:
+    cmp ch, cl
+    jae .low8
+    ;high 8
+    add rax, 4
+    mov cl, ch
+    jmp .cont8
+
+.low8:
+    sub rax, 4
+
+.cont8:
+    mov dl, cl
+    shr cl, 4
+    and dl, 0x0F
+    ;cl = high dl = low
+    cmp cl, dl
+    jae .low4
+
+    ;high 4
+    add rax, 2
+    mov dl, cl
+    jmp .cont4
+
+.low4:
+    sub rax, 2
+    mov cl, dl
+
+.cont4:
+    shr cl, 2
+    and dl, 0x03
+    ;cl = high dl = low
+    cmp cl, dl
+    jae .low2 
+
+    ;high 2
+    inc rax
+    jmp .cont2
+
+.low2:
+    dec rax
+    mov cl, dl
+
+.cont2:
+
+    cmp cl, 1
+    ja .end_search
+    dec rax 
+
+.end_search:
     ret
 
 section .bss

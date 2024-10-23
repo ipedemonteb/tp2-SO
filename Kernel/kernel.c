@@ -1,14 +1,13 @@
 #include <stdint.h>
 #include <string.h>
-#include <lib.h>
-#include <moduleLoader.h>
-#include <naiveConsole.h>
-#include <audioDriver.h>
-#include <videoDriver.h>
-#include <idtLoader.h>
-#include <time.h>
-
-#include "test_mm.h"
+#include "./include/moduleLoader.h"
+#include "./include/naiveConsole.h"
+#include "./include/idtLoader.h"
+#include "./include/interrupts.h"
+#include "./include/memory_manager.h"
+#include "./include/scheduler.h"
+#include "./include/process_manager.h"
+#include "include/test_process.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -44,11 +43,27 @@ void * initializeKernelBinary() {
 	return getStackBase();
 }
 
+void init(){
+	uint8_t * argv[] = {0}; 
+	uint8_t * argv2[] = {(uint8_t *)"4", 0};
+	//create_process(halt_cpu, 0, argv, "inactive");
+	//create_process(test_prio, 0, argv, (int8_t *)"test_prio");
+	//create_process(test_processes, 1, argv2, (int8_t *)"test_proc");
+	create_process(sampleCodeModuleAddress,0, argv, (int8_t *)"Terminal");
+	print_process_info();
+	wait_children();
+}
+
 int main() {
-	char * argv[] = {"1000"};
-    test_mm(1 , argv);
 	load_idt();
-	setTimerTick(1000);
-	((EntryPoint)sampleCodeModuleAddress)();
+	//_sti();
+	//((EntryPoint)sampleCodeModuleAddress)();
+	start_mm();
+	init_scheduler(getStackBase());
+	uint8_t * argv[] = {0}; 
+	create_process((void *)sampleCodeModuleAddress,0, argv, (int8_t*)"init");
+	_sti();
+	while(1) {
+	}
 	return 0;
 }

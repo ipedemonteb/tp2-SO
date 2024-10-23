@@ -19,6 +19,7 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN sysCallDispatcher
 EXTERN getStackBase
+EXTERN schedule
 
 section .text
 
@@ -73,7 +74,7 @@ section .text
 %endmacro
 
 %macro getRegs 0
-mov [regs], rax ; General Purpose Registers
+	mov [regs], rax 
 	mov [regs+8], rbx
 	mov [regs+8*2], rcx
 	mov [regs+8*3], rdx
@@ -95,6 +96,7 @@ mov [regs], rax ; General Purpose Registers
 	mov [regs+8*17], rax
 	mov rax, [rsp+8*2] 		; RFLAGS
 	mov [regs+8*18], rax
+	mov rax, [regs]
 %endmacro
 
 %macro exceptionHandler 1
@@ -142,7 +144,21 @@ picSlaveMask:
 
 ; 8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+	pushState
+
+	mov rdi, 0
+	call irqDispatcher
+
+	mov rdi, rsp
+	call schedule
+	mov rsp, rax
+
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
+
+	popState
+	iretq
 
 ; Keyboard
 _irq01Handler:
@@ -164,13 +180,39 @@ _irq04Handler:
 ; USB
 _irq05Handler:
 	irqHandlerMaster 5
+%macro pushABI 0
+	push rbx
+	push r12
+	push r13
+	push r14
+	push r15
+%endmacro
+
+%macro popABI 0
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
+%endmacro
 
 _irq80Handler:
+	pushABI
 	push rbp
-	mov rbp,rsp
+    mov rbp, rsp
+
 	call sysCallDispatcher
-	mov rsp,rbp
-	pop rbp
+	
+	mov rsp, rbp
+    pop rbp 
+	popABI
+	
+	push rax
+
+	mov al, 20h
+	out 20h, al
+
+	pop rax 
 	iretq
 
 ; Zero Division Exception

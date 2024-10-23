@@ -8,6 +8,8 @@
 #include <string.h>
 #include <unistd.h>
 
-uint64_t test_mm(uint64_t argc, uint8_t * argv[]);
+uint64_t test_mm(uint64_t argc, uint64_t max_memory);
+
+uint64_t test_mm1(uint64_t argc, uint8_t * argv[]);
 
 #endif

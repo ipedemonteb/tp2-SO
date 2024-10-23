@@ -1,7 +1,7 @@
 #include "mmADT.h"
 #include "memory_manager.h"
 
-#define START 0x50000
+#define START 0x10000
 #define END 0x9FFFF
 
 mmADT mm;
