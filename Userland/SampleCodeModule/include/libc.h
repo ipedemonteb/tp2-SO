@@ -14,5 +14,5 @@ void scanf(const uint8_t * fmt, ...);
 int atoi(const uint8_t * str);
 void itos(int num, uint8_t * buffer);
 int strcmp(int8_t * s1, int8_t * s2);
-uint32_t strcpy(char * dest, char * source);
+uint32_t strcpy(char * dest, const char * source);
 #endif

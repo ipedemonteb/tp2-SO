@@ -6,6 +6,7 @@
 #include "../include/eliminator.h"
 #include "../include/syscall.h"
 #include "../include/test_process.h"
+#include "../include/string_arrayADT.h"
 
 #define BUFF_MAX 4096
 #define WHITE 0x00FFFFFF
@@ -17,11 +18,22 @@
 #define DOWN_ARROW 254
 #define LETTERS 'z' - 'a' + 1
 #define WORDS 4
+#define MAX_COMMAND 128
 
 typedef struct command {
     int8_t * name;
     void (*function)();
 } command;
+
+string_arrayADT saved_commands;
+
+char current_command[MAX_COMMAND];
+
+uint8_t current_command_length;
+
+uint8_t current_command_pos;
+
+string_arrayADT command_output;
 
 static void clearCmd();
 static void div0();
