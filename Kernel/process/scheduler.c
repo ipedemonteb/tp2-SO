@@ -29,9 +29,7 @@ void schedule_process(process_struct * pcb) {
     add(scheduler->schedule,pcb);
 }
 
-//In development
 void * schedule(void * rsp) {
-    //print
     drawchar(get_current_pid() + '0', debug++, 1, WHITE, BLACK);
     scheduler->current_running_pcb->stack_ptr = rsp;
     while (scheduler->current_running_pcb->count <= scheduler->current_running_pcb->priority) {
@@ -58,12 +56,13 @@ void * schedule(void * rsp) {
                 numToStr(pid, aux);
                 drawString(aux, 0, t++, WHITE, BLACK);  */
                 current_pcb->parent_pcb->killed_children[idx] = set_n_bit_64(current_pcb->parent_pcb->killed_children[idx],pid % 64);
-                if (current_pcb->parent_pcb->status == BLOCKED) {
+                if (current_pcb->parent_pcb->status == BLOCKED) { // si esta esperando a que terminen sus hijos @todo: status mas creativo
                     current_pcb->parent_pcb->status = READY;
                 }
+                // @todo: ver si hacemos un ciclo 
                 current_pcb->parent_pcb->children_processes[0] |= current_pcb->children_processes[0];
                 current_pcb->parent_pcb->children_processes[1] |= current_pcb->children_processes[1];
-                 current_pcb->parent_pcb->killed_children[0] |= current_pcb->killed_children[0];
+                current_pcb->parent_pcb->killed_children[0] |= current_pcb->killed_children[0];
                 current_pcb->parent_pcb->killed_children[1] |= current_pcb->killed_children[1];
             }
         }

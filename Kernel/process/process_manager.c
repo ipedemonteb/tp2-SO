@@ -22,7 +22,6 @@ void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * arg
     my_exit();
 }
 
-//In development
 void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_base = stack;
     p_struct->priority = 1; 
@@ -58,7 +57,6 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
     uint16_t pid = find_off_bit_128(occupied[0], occupied[1]);
     occupied[pid/64] = set_n_bit_64(occupied[pid/64], pid % 64);
     process_struct * p_struct = &processes[pid];
-    //p_struct->pid = proc_count++;
     p_struct->pid = pid;
     p_struct->argv = argv;
     p_struct->name = my_malloc(my_strlen(name) + 1);
@@ -124,8 +122,6 @@ void wait_children() {
     uint8_t child, idx;
     process_struct * pcb = &processes[pid];
     while(pcb->children_processes[0] || pcb->children_processes[1]){
-        uint16_t p = 0;
-        int8_t aux[30];
         while (pcb->killed_children[0] || pcb->killed_children[1]) {
             child = find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
             idx = child/64;
@@ -143,7 +139,7 @@ void wait_children() {
 
 //TODO: Revisar
 void wait_pid(uint16_t pid) {
-    process_struct *parent_pcb = &processes[get_current_pid()];
+    process_struct * parent_pcb = &processes[get_current_pid()];
     if (!(parent_pcb->children_processes[pid / 64] & (1UL << (pid % 64)))) {
         return;
     }

@@ -1,5 +1,7 @@
 #include "../include/sem.h"
 
+#include "videoDriver.h" // @todo: borrar (es para debuggear)
+
 semaphore semaphores[SEM_MAX] = {0};
 
 extern int _xchg(int *lock, int value); // lock es el mutex y value el valor que le quiero poner
@@ -39,27 +41,41 @@ void release_sem_lock(semaphore * sem) {
   release(sem->sem_lock);
 }
 
+// no se puede usar el id 0 porque es el valor de retorno de sem_open cuando ya esta usado ese semaforo
+// --> retorna 0 si ya existia ese semaforo (para avisar que no se setteo el valor)
+// --> retorna -1 si no hay mas semaforos disponibles
 int8_t sem_open(int8_t id, int8_t value) {
-  if(id > SEM_MAX || semaphores[id].value == NOT_INIT) {  // ya existe el semáforo con ese id
+  if (id >= SEM_MAX || id <= 0) {    // no hay mas semaforos disponibles
     return -1;
   }
-  semaphore * sem = &semaphores[id];
+
+  acquire_sem_lock(&semaphores[id]);
+    if (semaphores[id].value != NOT_INIT) {
+        release_sem_lock(&semaphores[id]);
+        return 0;
+    }
+
   semaphores[id].value = value;
   semaphores[id].sem_lock = 1;       // arranca disponible para usar
   semaphores[id].waiting_sem = new_list(NULL);
-  return 0;
+  release_sem_lock(&semaphores[id]);
+  return id;
 }
 
 int8_t sem_close(int8_t id) {
-  if (semaphores[id].value == NOT_INIT) {     // no existe el semáforo  
+  if (id >= SEM_MAX || id <= 0 || semaphores[id].value == NOT_INIT) {    // no hay mas semaforos disponibles
     return -1;
   }
+  acquire_sem_lock(&semaphores[id]);   // obtengo control absoluto sobre el semaforo para poder modificar su valor
+  enable_list(semaphores[id].waiting_sem);   // libero a los procesos que estaban esperando por el semaforo
   free_list(semaphores[id].waiting_sem);
+  semaphores[id].value = NOT_INIT;
+  release_sem_lock(&semaphores[id]);   
   return 0;
 }
 
 int8_t sem_post(int8_t id) {
-  if (semaphores[id].value == NOT_INIT) {   // no existe el semaforo 
+  if (id >= SEM_MAX || id <= 0 || semaphores[id].value == NOT_INIT) {    // no hay mas semaforos disponibles
     return -1;
   }
   acquire_sem_lock(&semaphores[id]);   // obtengo control absoluto sobre el semaforo para poder modificar el valor
@@ -72,14 +88,14 @@ int8_t sem_post(int8_t id) {
 }
 
 int8_t sem_wait(int8_t id) {
-  if(semaphores[id].value == NOT_INIT) {     // no existe el semáforo
+  if (id >= SEM_MAX || id <= 0 || semaphores[id].value == NOT_INIT) {    // no hay mas semaforos disponibles
     return -1;
   }
 
   acquire_sem_lock(&semaphores[id]);   // obtengo control absoluto sobre el semaforo para poder modificar su valor
 
+  int16_t my_pid = get_current_pid();
   while(semaphores[id].value == 0) {   // si el valor del semaforo es 0 no puedo disminuirlo, por ende libero el sem lock y me bloqueo
-    int16_t my_pid = get_current_pid();
     add(semaphores[id].waiting_sem, (void *) my_pid);     // me agrego a la lista de los que estan esperando al semaforo
     release_sem_lock(&semaphores[id]);  // suelto el control del semaforo ya que no voy a seguir modificando el valor
     block(my_pid);        // me bloqueo
@@ -91,4 +107,8 @@ int8_t sem_wait(int8_t id) {
   release_sem_lock(&semaphores[id]);   // suelto el control del semaforo ya que no voy a seguir modificando el valor
 
   return 0;
+}
+
+int8_t get_sem_value(int8_t id) {
+  return semaphores[id].value;
 }

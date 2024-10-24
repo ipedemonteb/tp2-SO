@@ -68,7 +68,10 @@ void * next(listADT list) {
 }
 
 void * peek(listADT list) {
-    return list->it->head;
+  if(list->first == NULL) {
+    return NULL;
+  }
+  return list->first->head;
 }
 
 void * poll(listADT list){
