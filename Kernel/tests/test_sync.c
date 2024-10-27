@@ -4,7 +4,7 @@
 #define SEM_ID                  1
 
 int64_t global; // shared memory
-int64_t debug_sync = 0;
+int64_t debug_sync = 5;
 int k = 0;
 
 void slowInc(int64_t * p, int64_t inc) {
