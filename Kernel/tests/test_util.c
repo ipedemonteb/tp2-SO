@@ -77,13 +77,21 @@ void endless_loop() {
   }
 }
 
-void numToStr(int num, int8_t * str) {
+void numToStr(int num, int8_t *str) {
     int i = 0, j;
     int8_t temp;
+    int isNegative = 0;
+    if (num < 0) {
+        isNegative = 1;
+        num = -num;
+    }
     do {
         str[i++] = (num % 10) + '0';
         num /= 10;
     } while (num > 0);
+    if (isNegative) {
+        str[i++] = '-';
+    }
     str[i] = '\0';
     for (j = 0; j < i / 2; ++j) {
         temp = str[j];

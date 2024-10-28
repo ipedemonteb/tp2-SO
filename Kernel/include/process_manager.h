@@ -42,5 +42,6 @@ void nice(uint16_t pid, uint8_t priority);
 void yield(); // es la que libera al CPU voluntariamente
 uint8_t ps(process_info * info);
 void wait_children();
+void wait_pid(uint16_t pid);
 
 #endif
