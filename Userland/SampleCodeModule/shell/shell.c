@@ -4,9 +4,12 @@
 #include "../include/userLib.h"
 #include "../include/sounds.h"
 #include "../include/eliminator.h"
+
 #include "../include/syscall.h"
 #include "../include/test_process.h"
 #include "../include/string_arrayADT.h"
+#include "../include/shell_graphics.h"
+#include "../include/command_manager.h"
 
 #define BUFF_MAX 4096
 #define WHITE 0x00FFFFFF
@@ -27,13 +30,11 @@ typedef struct command {
 
 string_arrayADT saved_commands;
 
-char current_command[MAX_COMMAND];
+char current_command[MAX_COMMAND] = {0};
 
-uint8_t current_command_length;
+uint8_t current_command_length = 0;
 
-uint8_t current_command_pos;
-
-string_arrayADT command_output;
+uint8_t current_command_pos = 0;
 
 static void clearCmd();
 static void div0();
@@ -53,8 +54,8 @@ static command commands[LETTERS][WORDS] = {
     {{0,0}},  //b
     {{(int8_t *)"clear", clearCmd}, {0, 0}}, 
     {{(int8_t *)"div0", div0}, {0, 0}}, 
-    {{(int8_t *)"eliminator", eliminator}, {(int8_t *)"exit", exit}}, 
-    {{(int8_t *)"fontBig", fontBig}, {(int8_t *)"fontSmall", fontSmall}}, 
+    {{(int8_t *)"eliminator", eliminator}, {(int8_t *)"exit", exit}, {0, 0}}, 
+    {{(int8_t *)"fontBig", fontBig}, {(int8_t *)"fontSmall", fontSmall}, {0, 0}}, 
     {{(int8_t *)"getTime", getTime}, {0, 0}},
     {{(int8_t *)"help", help}, {0, 0}}, 
     {{(int8_t *)"invalidOpCode", invalidOpCode}, {0, 0}},
@@ -351,7 +352,99 @@ void printBufferFrom(uint16_t start, uint16_t end) {
     }
 }
 
+void check_command(){
+    if (current_command_length == 0) {
+        return;
+    }
+    
+    int8_t c = getCommandIdx(current_command[0]);
+    if (c < 0) {
+        s_draw_line(commandNotFoundMsg, 0, 1);
+        s_off_cursor();
+        return;
+    }
+    command * auxC = commands[c];
+    for (int i = 0; i < WORDS; i++) {
+        if (auxC[i].name != NULL) {
+            int cmp = strcmp(current_command, auxC[i].name);
+            if (cmp < 0) {
+                break;
+            }
+            else if (cmp == 0) {
+                auxC[i].function();
+                return;
+            }
+        }
+        else {
+            break;
+        }
+    }
+    s_draw_line(commandNotFoundMsg, 0, 1);
+    s_off_cursor();
+}
+
 void launchShell() {
+    s_char prompt[] = {{'$', WHITE, BLACK},{'>', WHITE, BLACK}, {' ', WHITE, BLACK}};
+    s_start_graphics(prompt, 3);
+    char * empty = "";
+    s_draw_line(empty, 1, 0);
+    saved_commands = start_string_array(BUFF_MAX);
+    uint8_t key;
+    while (!exitFlag) {
+        key = getChar();
+        switch (key) {
+            case RIGHT_ARROW:
+                s_move_cursor(1);
+                if(current_command_pos < current_command_length)
+                    current_command_pos++;
+                break;
+            case LEFT_ARROW:
+                if (current_command_pos > 0){
+                    s_move_cursor(-1);
+                    current_command_pos--;
+                }
+                break;
+            case UP_ARROW:
+                // logica taer comando anterior
+                break;
+            case DOWN_ARROW:
+                // logica taer comando siguiente
+                break;
+            case DELETE:
+                if (current_command_pos > 0){
+                    s_remove_char();
+                    current_command_pos--;
+                    current_command_length--;
+                }
+                break;
+            case '\n':
+                s_off_cursor();
+                add(saved_commands, current_command, current_command_length);
+                check_command();
+                //sCheckCommand();
+                current_command[0] = 0;
+                current_command_length = 0;
+                current_command_pos = 0;
+                s_draw_line(empty, 1, 1);
+                break;
+            case '\t':
+                //logica tab
+            case 0:
+                break;
+            default: 
+                s_insert_char(key);
+                insert_letter(current_command, current_command_length, key, current_command_pos);
+                current_command_length++;
+                current_command_pos++;
+                break;
+        }
+    }
+    while (fontSizeDown()) {
+        fontSize--;
+    }
+}
+
+void launchShell1() {
     count = 0;
     lineCount = 1;
     firstLineOnScreen = 0;
@@ -511,11 +604,7 @@ void eliminator() {
 }
 
 void clearCmd() {
-    clear();
-    reset = 1;
-    firstLineOnScreen = lineCount - 1;
-    currentX = 0;
-    currentY = 0;
+    s_clear();
 }
 
 void getTime() {
@@ -525,7 +614,8 @@ void getTime() {
 }
 
 void help() {
-    printMsgAndWait(helpMsg, hMsgSize);
+    s_draw_line(helpMsg,0,1);
+    s_off_cursor();
 }
 
 void invalidOpCode() {

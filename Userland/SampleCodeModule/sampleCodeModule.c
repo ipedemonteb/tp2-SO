@@ -10,7 +10,6 @@
 int main()
 {
 	uint8_t * argv[] = {0};
-	getScreenHeight();
 	create_process(launchShell,0,argv,"Shell");
 	wait_children();
 	while (1)

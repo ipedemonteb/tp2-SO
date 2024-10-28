@@ -33,15 +33,8 @@ int8_t add(string_arrayADT arr, char * string, uint32_t len) {
         return -1;
     }
     uint32_t count = strcpy(&arr->array[arr->offsets[arr->count++]], string);
-    /* char * dest = &arr->array[arr->offsets[arr->count++]], * source = string;
-    uint32_t count = 0;
-    while (source[count]) {
-        dest[count] = source[count];
-        count++;
-    }
-    dest[count] = 0; */
     arr->written += count + 1;
-    arr->array[arr->written] = 0; //el ultimo debe apuntar a un string vacío
+    arr->array[arr->written] = 0;
     arr->offsets[arr->count] = arr->written;
     return len - count;
 }
@@ -58,22 +51,29 @@ int8_t has_next(string_arrayADT arr) {
     return arr->it < arr->count;
 }
 
-char * next(string_arrayADT arr) {
+char * next(string_arrayADT arr, uint16_t * len) {
     if (!has_next(arr)){
         return (void*) 0;
     }
-    arr->it++;
-    return &arr->array[arr->offsets[arr->it - 1]];
+    if (len) {
+        *len = arr->offsets[arr->it + 1] - arr->offsets[arr->it] - 1;
+    }
+    
+    return &arr->array[arr->offsets[arr->it++]];
 }
 
 int8_t has_previous(string_arrayADT arr) {
     return arr->it > 0;
 }
 
-char * previous(string_arrayADT arr) {
-     if (!has_previous(arr)){
+char * previous(string_arrayADT arr, uint16_t * len) {
+    if (!has_previous(arr)){
         return (void*) 0;
     }
+    if (len) {
+        *len = arr->offsets[arr->it + 1] - arr->offsets[arr->it] - 1;
+    }
+
     return &arr->array[arr->offsets[arr->it--]];
 }
 
@@ -94,18 +94,30 @@ int test() {
     string_arrayADT test = start_string_array(4096);
     uint8_t count = 10;
     char * h = "hola";
+    char * t = "t";
+    char * e = "";
     for (uint8_t i = 0; i < count; i++) {
-        add(test, h, 4);
+        if (i % 3 == 0) {
+            add(test, h, 4);
+        }else if (i % 3 == 1) {
+            add(test,t,1);
+        } else {
+            add(test, e, 0);
+        }
+        
     }
     to_begin(test);
     char * aux;
+    uint16_t len;
     while(has_previous(test)){
-        aux = previous(test);
+        aux = previous(test, &len);
         printf(aux);
+        printf("%d",len);
     }
     while (has_next(test)) {
-        aux = next(test);
+        aux = next(test, &len);
         printf(aux);
+        printf("%d",len);
     }
     
     free_string_array(test);

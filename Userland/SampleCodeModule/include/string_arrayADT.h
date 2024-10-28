@@ -13,11 +13,11 @@ int8_t to_begin(string_arrayADT arr);
 
 int8_t has_next(string_arrayADT arr);
 
-char * next(string_arrayADT arr);
+char * next(string_arrayADT arr, uint16_t * len);
 
 int8_t has_previous(string_arrayADT arr);
 
-char * previous(string_arrayADT arr);
+char * previous(string_arrayADT arr, uint16_t * len);
 
 void free_string_array(string_arrayADT arr);
 
