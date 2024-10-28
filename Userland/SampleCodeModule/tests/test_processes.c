@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "./include/test_util.h"
+#include "../include/tests.h"
 
 enum State { RUNNING,
              BLOCK,
@@ -47,7 +47,8 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           case 0:
             if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCK) {
               if (kill(p_rqs[rq].pid) == -1) {
-                //printf("test_processes: ERROR killing process\n");
+                s_draw_line("test_processes: ERROR killing process",0,1);
+                s_off_cursor();
                 return -1;
               }
               p_rqs[rq].state = KILL;
@@ -58,7 +59,8 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           case 1:
             if (p_rqs[rq].state == RUNNING) {
               if (block(p_rqs[rq].pid) == -1) {
-                //printf("test_processes: ERROR blocking process\n");
+                s_draw_line("ERROR blocking process",0,1);
+                s_off_cursor();
                 return -1;
               }
               p_rqs[rq].state = BLOCK;
@@ -71,7 +73,8 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
       for (rq = 0; rq < max_processes; rq++)
         if (p_rqs[rq].state == BLOCK && GetUniform(100) % 2) {
           if (unblock(p_rqs[rq].pid) == -1) {
-            //printf("test_processes: ERROR unblocking process\n");
+            s_draw_line("ERROR unblocking process",0,1);
+            s_off_cursor();
             return -1;
           }
           p_rqs[rq].state = RUNNING;
