@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include "../include/syscall.h"
+#include "../include/shell_graphics.h"
+#include "../include/libc.h"
 
 // Random
 static uint32_t m_z = 362436069;
@@ -99,50 +101,10 @@ void endless_loop_print(uint64_t wait) {
   int8_t buffer[20];
   numToStr(pid, buffer);
   while (1) {
+    /* int8_t pid_s[8];
+    itos(pid, pid_s);
+    s_draw_line(pid_s,0,1);
+    s_off_cursor(); */
     bussy_wait(wait);
   }
 }
-
-/* void print_process_info() {
-  printRectangle(0,20*16,getScreenWidth(),getScreenHeight(),BLACK);
-  process_info p_info[sizeof(process_info) * QUANT];
-  for(int i = 0; i < QUANT; i++) {
-    p_info[i].name = my_malloc(20);
-  }
-
-  uint32_t x = 0;
-  uint32_t y = 20;
-  drawString((int8_t *)"PID    NAME    PRIORITY    STATUS    STCK B    STCK PTR", x, y, WHITE, BLACK);
-  y += 1;
-
-  uint8_t s = ps(p_info);
-  int8_t id[20];
-  int8_t * prio[20];
-  int8_t stat[10];
-  int8_t stack_base[10];
-  int8_t stack_ptr[10];
-  
-  for(uint16_t i = 0; i < s; i++) {
-    //id
-    numToStr(p_info[i].pid, id);
-    drawString(id, x, y, WHITE, BLACK);
-    //name
-    drawString((int8_t *)p_info[i].name, x + 5, y, WHITE, BLACK);
-    //priority
-    numToStr(p_info[i].priority, prio);
-    drawString(prio, x + 20, y, WHITE, BLACK);
-    //status
-    numToStr(p_info[i].status, stat);
-    drawString(stat, x + 30, y, WHITE, BLACK);
-    //stack base
-    uint64ToHexStr((uint64_t)p_info[i].stack_base, stack_base);
-    drawString((int8_t *)stack_base, x + 40, y, WHITE, BLACK);
-    //stack ptr
-    uint64ToHexStr((uint64_t)p_info[i].stack_ptr, stack_ptr);
-    drawString((int8_t *)stack_ptr, x + 50, y, WHITE, BLACK);
-    y += 1;
-  }
-  for(int i = 0; i < QUANT; i++) {
-    my_free(p_info[i].name);
-  }
-} */

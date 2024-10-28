@@ -17,4 +17,6 @@ int strcmp(int8_t * s1, int8_t * s2);
 uint32_t strcpy(char * dest, const char * source);
 int64_t char_idx(char *s, char c);
 char * strtok(char * string, const char * delim);
+uint32_t strlen(const char * str);
+void uint64ToHexStr(uint64_t value, int8_t *buffer);
 #endif

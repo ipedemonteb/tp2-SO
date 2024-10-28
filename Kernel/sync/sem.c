@@ -1,7 +1,5 @@
 #include "../include/sem.h"
 
-#include "videoDriver.h" // @todo: borrar (es para debuggear)
-
 semaphore semaphores[SEM_MAX] = {0};
 
 extern int _xchg(int *lock, int value); // lock es el mutex y value el valor que le quiero poner

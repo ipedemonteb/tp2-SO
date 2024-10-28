@@ -14,9 +14,9 @@ typedef struct process_struct {
 	uint8_t ** argv;
 	int8_t * name;
 	uint8_t priority;
-  uint8_t count;
+  	uint8_t count;
 	enum Status status;
-  uint8_t blocked_in;
+  	uint8_t blocked_in;
 	struct process_struct * parent_pcb;
 	uint64_t children_processes[2];
 	uint64_t killed_children[2];
@@ -26,8 +26,8 @@ typedef struct process_info {
 	char * name;
 	uint16_t pid;
 	uint8_t priority;
-	char * stack_base;
-	char * stack_ptr;
+	void * stack_base;
+	void * stack_ptr;
 	uint8_t foreground;
 	enum Status status;
 } process_info;

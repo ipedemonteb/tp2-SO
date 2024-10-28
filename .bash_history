@@ -133,3 +133,7 @@ gdb
 gdb
 gdb
 exit
+cd 
+gdb
+q
+exit

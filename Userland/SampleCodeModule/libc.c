@@ -244,3 +244,35 @@ char * strtok(char * string, const char * delim) {
 
     return token_start;
 }
+
+uint32_t strlen(const char * str) {
+    uint32_t i = 0;
+    while (str[i]) {
+        i++;
+    }
+    return i;
+}
+
+void uint64ToHexStr(uint64_t value, int8_t *buffer) {
+    buffer[0] = '0';
+    buffer[1] = 'x';
+
+    int index = 2;
+    int start = 0;
+    
+
+    for (int i = 15; i >= 0; i--) {
+        uint8_t nibble = (value >> (i * 4)) & 0xF;
+        
+        if (nibble > 0 || start || i == 0) {
+            start = 1;
+            if (nibble < 10) {
+                buffer[index++] = nibble + '0';
+            } else {
+                buffer[index++] = nibble - 10 + 'A';
+            }
+        }
+    }
+
+    buffer[index] = '\0';
+}

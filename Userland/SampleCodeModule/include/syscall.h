@@ -40,6 +40,11 @@ uint8_t nice(uint16_t pid, uint8_t priority);
 void yield();
 uint8_t ps(process_info *info);
 void wait_children();
+void wait_pid(uint16_t pid);
 uint16_t get_current_pid();
+int8_t sem_open(int8_t id, int8_t value);
+int8_t sem_close(int8_t id);
+int8_t sem_post(int8_t id);
+int8_t sem_wait(int8_t id);
 
 #endif

@@ -19,7 +19,7 @@
 #define UP_ARROW 253
 #define DOWN_ARROW 254
 #define LETTERS 'z' - 'a' + 1
-#define WORDS 4
+#define WORDS 5
 #define MAX_COMMAND 128
 
 typedef struct command_t{
@@ -47,6 +47,8 @@ static void invalidOpCode(uint8_t argc, char * argv[]);
 static void prio(uint8_t argc, char * argv[]);
 static void processes(uint8_t argc, char * argv[]);
 static void mm(uint8_t argc, char * argv[]);
+static void printps(uint8_t argc, char * argv[]);
+static void sync(uint8_t argc, char * argv[]);
 
 static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //a
@@ -64,11 +66,11 @@ static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //m
     {{0,0}},  //n
     {{0,0}},  //o
-    {{0,0}},  //p
+    {{(int8_t *)"ps", printps}},  //p
     {{0,0}},  //q
     {{0,0}},  //r
     {{0,0}},  //s
-    {{"test_mm",mm},{"test_prio",prio},{"test_processes",processes},{0,0}}   //t
+    {{"test_mm",mm},{"test_prio",prio},{"test_processes",processes},{(int8_t *)"test_sync", sync}, {0,0}}   //t
 };
 
 static int8_t * commandNotFoundMsg = (int8_t *)"Command not found. Type help for a list of commands";
@@ -461,118 +463,6 @@ void launchShell() {
     }
 }
 
-void launchShell1() {
-    count = 0;
-    lineCount = 1;
-    firstLineOnScreen = 0;
-    leftSteps = 0;
-    currentLine = 1;
-    previousCount = 0;
-    fontSize = 1;
-    reset = 0;
-    width = getScreenWidth() / 8 / fontSize;
-    height = getScreenHeight() / 16 / fontSize;
-    clear();
-    currentX = 0;
-    currentY = 0;
-    exitFlag = 0;
-    startNewLine();
-    sPrintSelected(' ');
-    buffer[count] = ' ';
-
-    uint8_t key;
-    while (!exitFlag) {
-        key = getChar();
-        switch (key) {
-            case RIGHT_ARROW:
-                sMoveRight();
-                break;
-            case LEFT_ARROW:
-                sMoveLeft();
-                break;
-            case UP_ARROW:
-                sGetLastLine();
-                break;
-            case DOWN_ARROW:
-                shellErrSound();
-                break;
-            case DELETE:
-                sDeleteChar();
-                break;
-            case '\n':
-                sPrintChar(buffer[count - leftSteps]);
-                sCheckCommand();
-                leftSteps = 0;
-                previousCount = 0;
-                sPrintNewLine();
-                sPrintSelected(buffer[count]);
-                offsets[lineCount++] = count;
-                offsets[lineCount] = offsets[lineCount - 1]; // la linea esta vacia
-                currentLine = lineCount;
-                break;
-            case '\t':
-                if (offsets[lineCount] - offsets[lineCount - 1] == 1) {
-                    uint8_t c = getCommandIdx(buffer[count - 1]);
-                    if (c < 0) {
-                        break;
-                    }
-                    
-                    int8_t * aux = commands[c][0].name + 1;
-                    while (*aux) {
-                        sPrintChar(*aux);
-                        buffer[count++] = *aux;
-                        aux++;
-                        currentX++;
-                    }
-                    offsets[lineCount] = count;
-                    buffer[count] = ' ';
-                    sPrintSelected(' ');
-                }
-            case 0:
-                break;
-            default: {
-                uint16_t auxX = currentX, auxY = currentY;
-                if (currentX + leftSteps >= width) {
-                    currentY++;
-                }
-                currentX = (currentX + leftSteps) % width;
-                for (uint16_t i = 0; i < leftSteps; i++) {
-                    buffer[count - i] = buffer[count - i - 1];
-                    sPrintChar(buffer[count - i]);
-                    if (currentX == 0) {
-                        currentX = width - 1;
-                        currentY--;
-                    }
-                    else {
-                        currentX--;
-                    }
-                }
-                currentX = auxX;
-                currentY = auxY;
-                buffer[count - leftSteps] = key;
-                count++;
-                offsets[lineCount] = count;
-                buffer[count] = ' ';
-                sPrintChar(key);
-                currentX++;
-                if (currentX == width) {
-                    if (currentY < height - 1) {
-                        currentY++;
-                    }
-                    else {
-                        sMoveScreenUp(1);
-                    }
-                    currentX = 0;
-                }
-                sPrintSelected(buffer[count - leftSteps]);
-            }
-        }
-    }
-    while (fontSizeDown()) {
-        fontSize--;
-    }
-}
-
 // comandos de la terminal
 
 void fontBig(uint8_t argc, char * argv[]) {
@@ -640,6 +530,11 @@ void invalidOpCode(uint8_t argc, char * argv[]) {
     opcode();
 }
 
+void sync(uint8_t argc, char * argv[]) {
+    create_process(test_sync, argc, argv, "test_sync");
+    wait_children();
+}
+
 void prio(uint8_t argc, char * argv[]){
     create_process(test_prio,0,0,"test_prio");
     wait_children();
@@ -654,4 +549,76 @@ void processes(uint8_t argc, char * argv[]){
 void mm(uint8_t argc, char * argv[]){
     create_process(test_mm,1,0,"test_mm");
     wait_children();
+}
+
+void printps(uint8_t argc, char * argv[]) {
+    process_info * info = my_malloc(sizeof(process_info) * 128);
+    uint8_t process_count = ps(info);
+    int8_t header[] = "PID     NAME         PRIORITY     STACK_BASE      STACK_PTR       FOREGROUND    STATUS   ";
+    s_draw_line(header,0,1);
+    s_off_cursor();
+    for(int i = 0; i < process_count; i++) {
+        uint8_t jmp = 0;
+        uint8_t buffer[127];
+        uint8_t * buffer_ptr = buffer;
+        int8_t aux[30];
+
+        for(int i = 0; i < 127; i++) {
+            buffer[i] = ' ';
+        }
+
+        //copy pid
+        itos(info[i].pid, aux);
+        strcpy(buffer, aux);
+        buffer[strlen(aux)] = ' ';
+        jmp += 8;
+
+        //copy name
+        strcpy(buffer + jmp, info[i].name);
+        buffer[jmp + strlen(info[i].name)] = ' ';
+        jmp += 13;
+
+        //copy priority
+        itos(info[i].priority, aux);
+        strcpy(buffer + jmp, aux);
+        buffer_ptr[jmp + strlen(aux)] = ' ';
+        jmp += 13;
+
+        //copy stack base
+        uint64ToHexStr((uint64_t)info[i].stack_base, aux);
+        strcpy(buffer + jmp, aux);
+        buffer[jmp + strlen(aux)] = ' ';
+        jmp += 16;
+
+        //copy stack ptr
+        uint64ToHexStr((uint64_t)info[i].stack_ptr, aux);
+        strcpy(buffer + jmp, aux);
+        buffer[jmp + strlen(aux)] = ' ';
+        jmp += 16;
+        
+        //copy foreground
+        itos(info[i].foreground, aux);
+        strcpy(buffer + jmp, aux);
+        buffer[jmp + strlen(aux)] = ' ';
+        jmp += 14;
+
+        //copy status
+        int8_t * msg[] = {"READY", "BLOCKED", "KILLED"};
+        int index = 0;
+        switch (info[i].status) {
+            case BLOCKED:
+                index = 1;
+                break;
+            case KILLED:
+                index = 2;
+                break;
+        
+        }
+        strcpy(buffer + jmp, msg[index]);
+        buffer[jmp + strlen(msg[index])] = ' ';
+
+        buffer[127] = 0;
+        s_draw_line(buffer,0,1);
+        s_off_cursor();
+    }
 }
