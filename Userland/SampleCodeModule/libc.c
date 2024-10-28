@@ -3,6 +3,8 @@
 #include "./include/libc.h"
 #include "./include/syscaller.h"
 
+#define MIN(a,b) a > b ? b:a
+
 void readString(uint8_t * buffer, int maxLength);
 void printString(uint8_t * str);
 void printInt(int num);
@@ -193,4 +195,52 @@ uint32_t strcpy(char * dest, const char * source){
     }
     dest[i] = 0;
     return i;
+}
+
+int64_t char_idx(char *s, char c) {
+    int64_t i = 0;
+    
+    while (s[i]) {
+        if (s[i] == c) {
+            return i;
+        }
+        i++;
+    }
+    
+    return -1;
+}
+
+static char * last;
+
+char * strtok(char * string, const char * delim) {
+    if (string == NULL) {
+        string = last;
+    }
+
+    if (string == NULL) {
+        return NULL;
+    }
+
+    while (*string && char_idx(delim, *string) != -1) {
+        string++;
+    }
+    
+    if (!*string) {
+        last = NULL;
+        return NULL;
+    }
+
+    char *token_start = string;
+    while (*string && char_idx(delim, *string) == -1) {
+        string++;
+    }
+
+    if (*string) {
+        *string = 0;
+        last = string + 1; 
+    } else {
+        last = NULL;
+    }
+
+    return token_start;
 }

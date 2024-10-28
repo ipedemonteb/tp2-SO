@@ -23,10 +23,10 @@
 #define WORDS 4
 #define MAX_COMMAND 128
 
-typedef struct command {
+typedef struct command_t{
     int8_t * name;
-    void (*function)();
-} command;
+    void (*function)(uint8_t, char **);
+} command_t;
 
 string_arrayADT saved_commands;
 
@@ -36,20 +36,20 @@ uint8_t current_command_length = 0;
 
 uint8_t current_command_pos = 0;
 
-static void clearCmd();
-static void div0();
-static void exit();
-static void eliminator();
-static void fontSmall();
-static void fontBig();
-static void getTime();
-static void help();
-static void invalidOpCode();
-static void prio();
-static void processes();
-static void mm();
+static void clearCmd(uint8_t argc, char * argv[]);
+static void div0(uint8_t argc, char * argv[]);
+static void exit(uint8_t argc, char * argv[]);
+static void eliminator(uint8_t argc, char * argv[]);
+static void fontSmall(uint8_t argc, char * argv[]);
+static void fontBig(uint8_t argc, char * argv[]);
+static void getTime(uint8_t argc, char * argv[]);
+static void help(uint8_t argc, char * argv[]);
+static void invalidOpCode(uint8_t argc, char * argv[]);
+static void prio(uint8_t argc, char * argv[]);
+static void processes(uint8_t argc, char * argv[]);
+static void mm(uint8_t argc, char * argv[]);
 
-static command commands[LETTERS][WORDS] = {
+static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //a
     {{0,0}},  //b
     {{(int8_t *)"clear", clearCmd}, {0, 0}}, 
@@ -223,7 +223,7 @@ void sCheckCommand() {
     }
 
     buffer[offsets[lineCount]] = 0;
-    command * auxC = commands[c];
+    command_t * auxC = commands[c];
     for (int i = 0; i < WORDS; i++) {
         if (auxC[i].name != NULL) {
             int cmp = strcmp(buffer + offsets[lineCount - 1], auxC[i].name);
@@ -231,7 +231,7 @@ void sCheckCommand() {
                 break;
             }
             else if (cmp == 0) {
-                auxC[i].function();
+                auxC[i].function(0, 0);
                 buffer[offsets[lineCount]] = aux;
                 return;
             }
@@ -356,22 +356,32 @@ void check_command(){
     if (current_command_length == 0) {
         return;
     }
+
+
+    char * command_tokens[MAX_COMMAND/2] , * token, * command = current_command;
+    uint8_t i = 0;
+    do
+    {
+        token = strtok(command," ");
+        command_tokens[i++] = token;
+        command = NULL;
+    } while (token);
     
-    int8_t c = getCommandIdx(current_command[0]);
+    int8_t c = getCommandIdx(command_tokens[0][0]);
     if (c < 0) {
         s_draw_line(commandNotFoundMsg, 0, 1);
         s_off_cursor();
         return;
     }
-    command * auxC = commands[c];
-    for (int i = 0; i < WORDS; i++) {
-        if (auxC[i].name != NULL) {
-            int cmp = strcmp(current_command, auxC[i].name);
+    command_t * auxC = commands[c];
+    for (int j = 0; j < WORDS; j++) {
+        if (auxC[j].name != NULL) {
+            int cmp = strcmp(current_command, auxC[j].name);
             if (cmp < 0) {
                 break;
             }
             else if (cmp == 0) {
-                auxC[i].function();
+                auxC[j].function(i - 2,&command_tokens[1]);
                 return;
             }
         }
@@ -558,7 +568,7 @@ void launchShell1() {
 
 // comandos de la terminal
 
-void fontBig() {
+void fontBig(uint8_t argc, char * argv[]) {
     if (fontSize == 2) {
         shellErrSound();
         return;
@@ -571,19 +581,19 @@ void fontBig() {
     reset = 1;
 }
 
-void exit() {
+void exit(uint8_t argc, char * argv[]) {
     exitFlag = 1;
     firstLineOnScreen = lineCount - 1;
     currentX = 0;
     currentY = 0;
 }
 
-void div0() {
+void div0(uint8_t argc, char * argv[]) {
     fontSize = 1;
     divZero();
 }
 
-void fontSmall() {
+void fontSmall(uint8_t argc, char * argv[]) {
     if (fontSize == 1) {
         shellErrSound();
         return;
@@ -596,42 +606,42 @@ void fontSmall() {
     reset = 1;
 }
 
-void eliminator() {
+void eliminator(uint8_t argc, char * argv[]) {
     /* gameMain();
     cleanBuffer();
     sMoveScreenUp(0);
     reset = 1; */
 }
 
-void clearCmd() {
+void clearCmd(uint8_t argc, char * argv[]) {
     s_clear();
 }
 
-void getTime() {
+void getTime(uint8_t argc, char * argv[]) {
     int8_t clock[20];
     time(clock);
     printMsgAndWait(clock, 8);
 }
 
-void help() {
+void help(uint8_t argc, char * argv[]) {
     s_draw_line(helpMsg,0,1);
     s_off_cursor();
 }
 
-void invalidOpCode() {
+void invalidOpCode(uint8_t argc, char * argv[]) {
     fontSize = 1;
     opcode();
 }
 
-void prio(){
+void prio(uint8_t argc, char * argv[]){
     create_process(test_prio,0,0,"test_prio");
     wait_children();
 }
 
-void processes(){
+void processes(uint8_t argc, char * argv[]){
 
 }
 
-void mm(){
+void mm(uint8_t argc, char * argv[]){
 
 }
