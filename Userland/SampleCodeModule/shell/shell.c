@@ -3,10 +3,9 @@
 #include "../include/libc.h"
 #include "../include/userLib.h"
 #include "../include/sounds.h"
-#include "../include/eliminator.h"
-
+//#include "../include/eliminator.h"
 #include "../include/syscall.h"
-#include "../include/test_process.h"
+#include "../include/tests.h"
 #include "../include/string_arrayADT.h"
 #include "../include/shell_graphics.h"
 #include "../include/command_manager.h"
@@ -647,9 +646,12 @@ void prio(uint8_t argc, char * argv[]){
 }
 
 void processes(uint8_t argc, char * argv[]){
-
+    uint8_t * argv2[] = {(uint8_t *)"4", 0};
+    create_process(test_processes,1, argv2,"test_processes");
+    wait_children();
 }
 
 void mm(uint8_t argc, char * argv[]){
-
+    create_process(test_mm,1,0,"test_mm");
+    wait_children();
 }

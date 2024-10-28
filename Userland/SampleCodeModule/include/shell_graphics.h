@@ -13,7 +13,7 @@ void s_start_graphics(s_char * new_prompt, uint8_t len);
 
 void s_insert_char(char c);
 
-void s_draw_line(char * line, uint8_t with_prompt, uint8_t new);
+void s_draw_line(char * line, uint8_t with_prompt, uint8_t newL);
 
 void s_move_cursor(int8_t amount);
 

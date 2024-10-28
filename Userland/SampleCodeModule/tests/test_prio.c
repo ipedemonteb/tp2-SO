@@ -1,7 +1,5 @@
 #include <stdint.h>
-
-#include "./include/test_process.h"
-#include "./include/shell_graphics.h"
+#include "../include/tests.h"
 
 #define MINOR_WAIT 10000000 // TODO: Change this value to prevent a process from flooding the screen
 #define WAIT 100000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice

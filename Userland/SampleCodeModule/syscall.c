@@ -88,3 +88,4 @@ void wait_children() {
 uint16_t get_current_pid() {
     return syscaller(24, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
+
