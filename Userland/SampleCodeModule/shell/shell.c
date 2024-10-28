@@ -418,10 +418,10 @@ void launchShell() {
                 }
                 break;
             case '\n':
+                current_command[current_command_length] = 0;
                 s_off_cursor();
                 add(saved_commands, current_command, current_command_length);
                 check_command();
-                //sCheckCommand();
                 current_command[0] = 0;
                 current_command_length = 0;
                 current_command_pos = 0;
