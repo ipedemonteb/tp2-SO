@@ -1,7 +1,7 @@
 #include "../include/memory_manager.h"
 #include "../include/process_manager.h"
 #include "../include/lib.h"
-#include "../include/interrupts.h"
+#include "../include/videoDriver.h"
 #include <stdint.h>
 
 #define ALIGN 7 
@@ -9,7 +9,7 @@
 uint8_t proc_count = 0;
 process_struct processes[QUANT] = {0};
 
-void * stacks = 0x1000000;
+void * stacks = (void *)0x1000000;
 
 uint64_t occupied[2];
 
@@ -73,6 +73,7 @@ uint8_t kill(uint16_t pid) {
     if (get_current_pid() == pid) {
         yield();
     }
+    return 0;
 }
 
 uint8_t block(uint16_t pid) {
@@ -80,12 +81,14 @@ uint8_t block(uint16_t pid) {
     if (get_current_pid() == pid) {
         yield();
     }
+    return 0;
 }
 
 uint8_t unblock(uint16_t pid) {
   if (processes[pid].status != KILLED) {
     processes[pid].status = READY;
   }
+  return 0;
 }
 
 void nice(uint16_t pid, uint8_t priority) {
@@ -103,6 +106,7 @@ uint8_t ps(process_info * info) {
     for(int i = 0; i < QUANT; i++) {
         if(occupied[i / 64] & (1UL << (i % 64))) {
             process_struct * p = &processes[i];
+            info[process_count].name = my_malloc(my_strlen(p->name) + 1);
             memcpy(info[process_count].name, p->name, my_strlen(p->name));
             info[process_count].pid = p->pid;
             info[process_count].priority = p->priority;
