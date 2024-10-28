@@ -353,11 +353,6 @@ void printBufferFrom(uint16_t start, uint16_t end) {
 }
 
 void check_command(){
-    if (current_command_length == 0) {
-        return;
-    }
-
-
     char * command_tokens[MAX_COMMAND/2] , * token, * command = current_command;
     uint8_t i = 0;
     do
@@ -415,10 +410,20 @@ void launchShell() {
                 }
                 break;
             case UP_ARROW:
-                // logica taer comando anterior
+                if (has_previous(saved_commands)) {
+                    s_off_cursor();
+                    strcpy(current_command,previous(saved_commands, &current_command_length));
+                    current_command_pos = current_command_length;
+                    s_draw_line(current_command, 1, 0);
+                }
                 break;
             case DOWN_ARROW:
-                // logica taer comando siguiente
+                if (has_next(saved_commands)) {
+                    s_off_cursor();
+                    strcpy(current_command,next(saved_commands, &current_command_length));
+                    current_command_pos = current_command_length;
+                    s_draw_line(current_command, 1, 0);
+                }
                 break;
             case DELETE:
                 if (current_command_pos > 0){
@@ -430,11 +435,14 @@ void launchShell() {
             case '\n':
                 current_command[current_command_length] = 0;
                 s_off_cursor();
-                add(saved_commands, current_command, current_command_length);
-                check_command();
-                current_command[0] = 0;
-                current_command_length = 0;
-                current_command_pos = 0;
+                if (current_command_length != 0) {
+                    add(saved_commands, current_command, current_command_length);
+                    to_begin(saved_commands);
+                    check_command();
+                    current_command[0] = 0;
+                    current_command_length = 0;
+                    current_command_pos = 0;
+                }
                 s_draw_line(empty, 1, 1);
                 break;
             case '\t':

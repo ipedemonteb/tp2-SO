@@ -48,6 +48,7 @@ int8_t to_begin(string_arrayADT arr) {
 }
 
 int8_t has_next(string_arrayADT arr) {
+    if (arr->it < 0) arr->it = 1;
     return arr->it < arr->count;
 }
 
@@ -63,7 +64,8 @@ char * next(string_arrayADT arr, uint16_t * len) {
 }
 
 int8_t has_previous(string_arrayADT arr) {
-    return arr->it > 0;
+    if (arr->it >= arr->count) arr->it = arr->count - 2;
+    return arr->it >= 0;
 }
 
 char * previous(string_arrayADT arr, uint16_t * len) {
