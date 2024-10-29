@@ -38,7 +38,7 @@ uint8_t fontSizeDown(){
     return syscaller(11, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 }
-void time(int8_t bp[]){
+void time(char bp[]){
     return syscaller(12, bp, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
@@ -49,7 +49,7 @@ void my_free(void * p) {
     syscaller(14, p, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
-int8_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t **argv, int8_t *name) {
+int8_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t **argv, char *name) {
     return syscaller(15, fn, argc, argv, name, EMPTY);
 }
 

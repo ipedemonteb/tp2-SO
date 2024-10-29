@@ -23,7 +23,7 @@
 #define MAX_COMMAND 128
 
 typedef struct command_t{
-    int8_t * name;
+    char * name;
     void (*function)(uint8_t, char **);
 } command_t;
 
@@ -31,7 +31,7 @@ string_arrayADT saved_commands;
 
 char current_command[MAX_COMMAND] = {0};
 
-int8_t current_command_length = 0;
+uint16_t current_command_length = 0;
 
 int8_t current_command_pos = 0;
 
@@ -53,31 +53,32 @@ static void sync(uint8_t argc, char * argv[]);
 static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //a
     {{0,0}},  //b
-    {{(int8_t *)"clear", clearCmd}, {0, 0}}, 
-    {{(int8_t *)"div0", div0}, {0, 0}}, 
-    {{(int8_t *)"eliminator", eliminator}, {(int8_t *)"exit", exit}, {0, 0}}, 
-    {{(int8_t *)"fontBig", fontBig}, {(int8_t *)"fontSmall", fontSmall}, {0, 0}}, 
-    {{(int8_t *)"getTime", getTime}, {0, 0}},
-    {{(int8_t *)"help", help}, {0, 0}}, 
-    {{(int8_t *)"invalidOpCode", invalidOpCode}, {0, 0}},
+    {{"clear", clearCmd}, {0, 0}}, 
+    {{"div0", div0}, {0, 0}}, 
+    {{"eliminator", eliminator}, {"exit", exit}, {0, 0}}, 
+    {{"fontBig", fontBig}, {"fontSmall", fontSmall}, {0, 0}}, 
+    {{"getTime", getTime}, {0, 0}},
+    {{"help", help}, {0, 0}}, 
+    {{"invalidOpCode", invalidOpCode}, {0, 0}},
     {{0,0}},  //j
     {{0,0}},  //k
     {{0,0}},  //l
     {{0,0}},  //m
     {{0,0}},  //n
     {{0,0}},  //o
-    {{(int8_t *)"ps", printps}},  //p
+    {{"ps", printps}},  //p
     {{0,0}},  //q
     {{0,0}},  //r
     {{0,0}},  //s
-    {{"test_mm",mm},{"test_prio",prio},{"test_processes",processes},{(int8_t *)"test_sync", sync}, {0,0}}   //t
+    {{"test_mm",mm}, {"test_prio",prio}, {"test_processes",processes}, {"test_sync", sync}, {0,0}}   //t
 };
 
-static int8_t * commandNotFoundMsg = (int8_t *)"Command not found. Type help for a list of commands";
+
+static char * commandNotFoundMsg = "Command not found. Type help for a list of commands";
 static uint8_t cNotFoundSize = 51;
-static int8_t * helpMsg = (int8_t *)"List of commands: clear, div0, eliminator, exit, fontBig, fontSmall, getTime, help, invalidOpCode";
-static uint8_t hMsgSize = 97;
-static int8_t * waitMsg = (int8_t *)"Press any key to continue";
+static char * helpMsg = "List of commands: clear, div0, eliminator, exit, fontBig, fontSmall, getTime, help, invalidOpCode";
+//static uint8_t hMsgSize = 97;
+static char * waitMsg = "Press any key to continue";
 
 static uint16_t currentY;
 static uint16_t currentX;
@@ -167,7 +168,7 @@ void sPrintNewLine() {
     reset = 0;
 }
 
-void printMsgAndWait(const int8_t * msg, uint8_t size) {
+void printMsgAndWait(const char * msg, uint8_t size) {
     if (currentY < height - 2) {
         currentY++;
     }
@@ -216,7 +217,7 @@ void sCheckCommand() {
     if (offsets[lineCount] == offsets[lineCount - 1]) {
         return;
     }
-    uint8_t aux = buffer[offsets[lineCount]];
+    char aux = buffer[offsets[lineCount]];
     uint8_t c = getCommandIdx(buffer[offsets[lineCount - 1]]);
     if (c < 0) {
         printMsgAndWait(commandNotFoundMsg, cNotFoundSize);
@@ -227,7 +228,8 @@ void sCheckCommand() {
     command_t * auxC = commands[c];
     for (int i = 0; i < WORDS; i++) {
         if (auxC[i].name != NULL) {
-            int cmp = strcmp(buffer + offsets[lineCount - 1], auxC[i].name);
+            //TODO: ver casteo
+            int cmp = strcmp((char *)buffer + offsets[lineCount - 1], auxC[i].name);
             if (cmp < 0) {
                 break;
             }
@@ -515,7 +517,7 @@ void clearCmd(uint8_t argc, char * argv[]) {
 }
 
 void getTime(uint8_t argc, char * argv[]) {
-    int8_t clock[20];
+    char clock[20];
     time(clock);
     printMsgAndWait(clock, 8);
 }
@@ -554,14 +556,14 @@ void mm(uint8_t argc, char * argv[]){
 void printps(uint8_t argc, char * argv[]) {
     process_info * info = my_malloc(sizeof(process_info) * 128);
     uint8_t process_count = ps(info);
-    int8_t header[] = "PID     NAME         PRIORITY     STACK_BASE      STACK_PTR       FOREGROUND    STATUS   ";
+    char header[] = "PID     NAME         PRIORITY     STACK_BASE      STACK_PTR       FOREGROUND    STATUS   ";
     s_draw_line(header,0,1);
     s_off_cursor();
     for(int i = 0; i < process_count; i++) {
         uint8_t jmp = 0;
-        uint8_t buffer[127];
-        uint8_t * buffer_ptr = buffer;
-        int8_t aux[30];
+        char buffer[127];
+        char * buffer_ptr = buffer;
+        char aux[30];
 
         for(int i = 0; i < 127; i++) {
             buffer[i] = ' ';
@@ -604,9 +606,12 @@ void printps(uint8_t argc, char * argv[]) {
         jmp += 14;
 
         //copy status
-        int8_t * msg[] = {"READY", "BLOCKED", "KILLED"};
+        char * msg[] = {"READY", "BLOCKED", "KILLED"};
         int index = 0;
         switch (info[i].status) {
+            case READY:
+                index = 0;
+                break;
             case BLOCKED:
                 index = 1;
                 break;
@@ -618,7 +623,7 @@ void printps(uint8_t argc, char * argv[]) {
         strcpy(buffer + jmp, msg[index]);
         buffer[jmp + strlen(msg[index])] = ' ';
 
-        buffer[127] = 0;
+        buffer[126] = 0;
         s_draw_line(buffer,0,1);
         s_off_cursor();
     }

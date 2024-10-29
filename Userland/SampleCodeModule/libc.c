@@ -149,7 +149,7 @@ void reverse(uint8_t * str, int length) {
     }
 }
 
-void itos(int num, uint8_t * buffer) {
+void itos(int num, char * buffer) {
     int i = 0;
     uint8_t isNegative = 0;
     if (num == 0) {
@@ -175,7 +175,7 @@ void itos(int num, uint8_t * buffer) {
     return;
 }
 
-int strcmp(int8_t * s1, int8_t * s2) {
+int strcmp(char * s1, char * s2) {
     if (s1 == NULL && s2 == NULL) {
         return 0;
     }
@@ -253,7 +253,7 @@ uint32_t strlen(const char * str) {
     return i;
 }
 
-void uint64ToHexStr(uint64_t value, int8_t *buffer) {
+void uint64ToHexStr(uint64_t value, char *buffer) {
     buffer[0] = '0';
     buffer[1] = 'x';
 
