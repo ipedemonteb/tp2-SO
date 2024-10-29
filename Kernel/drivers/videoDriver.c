@@ -34,7 +34,7 @@ void printInPopUp(int8_t * msg, uint16_t x, uint16_t y) {
 }
 
 void clearPopUp() {
-	uint8_t * framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
+	uint8_t * framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
 	uint64_t offset = (TOP_LEFT_X * ((VBE_mode_info->bpp) / 8)) + (TOP_LEFT_Y * VBE_mode_info->pitch);
 	uint64_t width = getWidth() * BYTES_PER_PIXEL;
 	for (uint32_t i = 0; i < POP_UP_HEIGHT; i++) {
@@ -54,7 +54,7 @@ void clearPopUp() {
 }
 
 void resetPopUp() {
-	uint8_t * framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
+	uint8_t * framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
 	uint64_t offset = (TOP_LEFT_X * ((VBE_mode_info->bpp) / 8)) + (TOP_LEFT_Y * VBE_mode_info->pitch);
 	uint64_t width = getWidth() * BYTES_PER_PIXEL;
 
@@ -68,7 +68,7 @@ void resetPopUp() {
 }
 
 void savePopUpWindow() {
-	uint8_t * framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
+	uint8_t * framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
 	uint64_t offset = (TOP_LEFT_X * ((VBE_mode_info->bpp) / 8)) + (TOP_LEFT_Y * VBE_mode_info->pitch);
 	uint64_t width = getWidth() * BYTES_PER_PIXEL;
 	for (uint32_t i = 0; i < POP_UP_HEIGHT; i++) {
@@ -81,7 +81,7 @@ void savePopUpWindow() {
 }
 
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
-	uint8_t * framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
+	uint8_t * framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
 	uint64_t offset = (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
 	framebuffer[offset] = (hexColor) & 0xFF;
 	framebuffer[offset + 1] = (hexColor >> 8) & 0xFF;

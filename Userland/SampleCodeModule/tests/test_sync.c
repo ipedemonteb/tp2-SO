@@ -28,14 +28,14 @@ uint64_t my_process_inc(uint64_t argc, char * argv[]) {
     return -1;
   }
 
-  if((n = satoi(argv[0])) <= 0) {  // me fijo si n esta bien
+  if((n = satoi(argv[0])) <= 0) {
     return -1;
   }
 
-  if((inc = satoi(argv[1])) == 0) {  // me fijo si inc es un valor distinto de cero
+  if((inc = satoi(argv[1])) == 0) { 
     return -1;
   }
-  if((use_sem = satoi(argv[2])) < 0) { // me fijo si use_sem esta bien (que sea 0 o algo positivo)
+  if((use_sem = satoi(argv[2])) < 0) { 
     return -1;
   }
 
@@ -76,7 +76,12 @@ uint64_t test_sync(uint64_t argc, char * argv[]) { // { n, use_sem, 0 }
 
   global = 0;
 
-  sem_open(SEM_ID, 1);
+
+  int8_t sem_open_result = sem_open(SEM_ID, 1);
+  if(sem_open_result == -1) {
+    return -1;
+  }
+
 
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {

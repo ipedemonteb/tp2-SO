@@ -12,7 +12,7 @@ typedef struct process_struct {
 	void * stack_base;
 	void * stack_ptr;
 	uint8_t ** argv;
-	int8_t * name;
+	char * name;
 	uint8_t priority;
   	uint8_t count;
 	enum Status status;

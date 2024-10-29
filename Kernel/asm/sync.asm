@@ -16,11 +16,11 @@ _xchg:
 acquire:
   mov al, 0
 .retry:
-  xchg [rdi], al       ; en la clase en vez de rdi decia lock pero seguro es rdi
+  xchg [rdi], al
   test al, al
   jz .retry
   ret
 
 release:
-  mov byte [rdi], 1     ; idem
+  mov byte [rdi], 1
   ret

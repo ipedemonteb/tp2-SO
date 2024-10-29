@@ -197,7 +197,7 @@ uint32_t strcpy(char * dest, const char * source){
     return i;
 }
 
-int64_t char_idx(char *s, char c) {
+int64_t char_idx(const char *s, char c) {
     int64_t i = 0;
     
     while (s[i]) {

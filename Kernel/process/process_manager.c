@@ -1,7 +1,6 @@
 #include "../include/memory_manager.h"
 #include "../include/process_manager.h"
 #include "../include/lib.h"
-#include "../include/videoDriver.h"
 #include <stdint.h>
 
 #define ALIGN 7 
@@ -46,11 +45,11 @@ void load_proc_stack(process_struct * p_struct, void * stack) {
 void load_proc_args(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], void * stack) {
     process_stack * p_stack = stack - sizeof(process_stack);
     p_stack->rdi = fn;
-    p_stack->rsi = argc;
+    p_stack->rsi = (void *)(uintptr_t)argc;
     p_stack->rdx = argv;
 }
 
-int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], int8_t * name) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
+int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], const char * name) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
     if(proc_count >= QUANT){
         return -1;
     }
@@ -107,7 +106,7 @@ uint8_t ps(process_info * info) {
         if(occupied[i / 64] & (1UL << (i % 64))) {
             process_struct * p = &processes[i];
             info[process_count].name = my_malloc(my_strlen(p->name) + 1);
-            memcpy(info[process_count].name, p->name, my_strlen(p->name));
+            memcpy(info[process_count].name, p->name, my_strlen(p->name) + 1);
             info[process_count].pid = p->pid;
             info[process_count].priority = p->priority;
             info[process_count].stack_base = p->stack_base;
