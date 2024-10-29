@@ -1,4 +1,4 @@
-#include "../include/test_mm.h"
+#include "../include/tests.h"
 
 #define MAX_BLOCKS 128
 
@@ -8,7 +8,6 @@ typedef struct MM_rq {
 } mm_rq;
 
 uint64_t test_mm(uint64_t argc, uint64_t max_memory) {
-  start_mm();
   mm_rq mm_rqs[MAX_BLOCKS];
   uint8_t rq;
   uint32_t total;
@@ -35,7 +34,7 @@ uint64_t test_mm(uint64_t argc, uint64_t max_memory) {
     uint32_t i;
     for (i = 0; i < rq; i++) {
       if (mm_rqs[i].address) {
-        memset(mm_rqs[i].address, i, mm_rqs[i].size);
+        my_memset(mm_rqs[i].address, i, mm_rqs[i].size);
       }
     }
 
@@ -43,6 +42,8 @@ uint64_t test_mm(uint64_t argc, uint64_t max_memory) {
     for (i = 0; i < rq; i++) {
       if (mm_rqs[i].address) {
         if (!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) {
+          s_draw_line("test_mm: check failed",0,1);
+          s_off_cursor();
           return -1;
         }
       }
@@ -58,7 +59,6 @@ uint64_t test_mm(uint64_t argc, uint64_t max_memory) {
 }
 
 uint64_t test_mm1(uint64_t argc, uint8_t * argv[]) {
-  start_mm();
   mm_rq mm_rqs[MAX_BLOCKS];
   uint8_t rq;
   uint32_t total;
@@ -89,7 +89,7 @@ uint64_t test_mm1(uint64_t argc, uint8_t * argv[]) {
     uint32_t i;
     for (i = 0; i < rq; i++) {
       if (mm_rqs[i].address) {
-        memset(mm_rqs[i].address, i, mm_rqs[i].size);
+        my_memset(mm_rqs[i].address, i, mm_rqs[i].size);
       }
     }
 
@@ -97,6 +97,8 @@ uint64_t test_mm1(uint64_t argc, uint8_t * argv[]) {
     for (i = 0; i < rq; i++) {
       if (mm_rqs[i].address) {
         if (!memcheck(mm_rqs[i].address, i, mm_rqs[i].size )) {
+          s_draw_line("test_mm: check failed",0,1);
+          s_off_cursor();
           return -1;
         }
       }
@@ -109,4 +111,5 @@ uint64_t test_mm1(uint64_t argc, uint8_t * argv[]) {
       }
     }
   }
+
 }

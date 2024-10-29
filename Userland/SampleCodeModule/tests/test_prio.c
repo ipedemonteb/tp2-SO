@@ -1,7 +1,5 @@
 #include <stdint.h>
-#include "../include/test_util.h"
-#include "../include/videoDriver.h"
-#include "../include/process_manager.h"
+#include "../include/tests.h"
 
 #define MINOR_WAIT 10000000 // TODO: Change this value to prevent a process from flooding the screen
 #define WAIT 100000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
@@ -23,30 +21,37 @@ void test_prio() {
     pids[i] = create_process(endless_loop_print, 1, argv, (int8_t *)"funcion");
 
   bussy_wait(WAIT);
-  drawString((int8_t *)"\nCHANGING PRIORITIES...\n",0,y++,WHITE,BLACK);
+
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     nice(pids[i], prio[i]);
 
   bussy_wait(WAIT);
-  drawString((int8_t *)"\nBLOCKING...\n",0,y++,WHITE,BLACK);
+  //drawString((int8_t *)"\nBLOCKING...\n",0,y++,WHITE,BLACK);
+  s_draw_line("BLOCKING...",0,1);
+  s_off_cursor();
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     block(pids[i]);
 
-  drawString((int8_t *)"CHANGING PRIORITIES WHILE BLOCKED...\n",0,y++,WHITE,BLACK);
-
+  //drawString((int8_t *)"CHANGING PRIORITIES WHILE BLOCKED...\n",0,y++,WHITE,BLACK);
+  s_draw_line("CHANGING PRIORITIES WHILE BLOCKED...",0,1);
+  s_off_cursor();
   for (i = 0; i < TOTAL_PROCESSES; i++)
     nice(pids[i], MEDIUM);
 
-  drawString((int8_t *)"UNBLOCKING...\n",0,y++,WHITE,BLACK);
+  //drawString((int8_t *)"UNBLOCKING...\n",0,y++,WHITE,BLACK);
+  s_draw_line("UNBLOCKING...",0,1);
+  s_off_cursor();
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     unblock(pids[i]);
 
 
   bussy_wait(WAIT);
-  drawString((int8_t *)"\nKILLING...\n",0,y++,WHITE,BLACK);
+  //drawString((int8_t *)"\nKILLING...\n",0,y++,WHITE,BLACK);
+  s_draw_line("KILLING...",0,1);
+  s_off_cursor();
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     kill(pids[i]);

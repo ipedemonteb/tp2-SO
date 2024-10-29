@@ -3,6 +3,8 @@
 #include "./include/libc.h"
 #include "./include/syscaller.h"
 
+#define MIN(a,b) a > b ? b:a
+
 void readString(uint8_t * buffer, int maxLength);
 void printString(uint8_t * str);
 void printInt(int num);
@@ -147,7 +149,7 @@ void reverse(uint8_t * str, int length) {
     }
 }
 
-void itos(int num, uint8_t * buffer) {
+void itos(int num, char * buffer) {
     int i = 0;
     uint8_t isNegative = 0;
     if (num == 0) {
@@ -173,7 +175,7 @@ void itos(int num, uint8_t * buffer) {
     return;
 }
 
-int strcmp(int8_t * s1, int8_t * s2) {
+int strcmp(char * s1, char * s2) {
     if (s1 == NULL && s2 == NULL) {
         return 0;
     }
@@ -183,4 +185,94 @@ int strcmp(int8_t * s1, int8_t * s2) {
         ret = s1[i] - s2[i]; 
     } while (s1[i] && s2[i++] && !ret);
     return ret;
+}
+
+uint32_t strcpy(char * dest, const char * source){
+    uint32_t i = 0;
+    while (source[i]) {
+        dest[i] = source[i];
+        i++;
+    }
+    dest[i] = 0;
+    return i;
+}
+
+int64_t char_idx(const char *s, char c) {
+    int64_t i = 0;
+    
+    while (s[i]) {
+        if (s[i] == c) {
+            return i;
+        }
+        i++;
+    }
+    
+    return -1;
+}
+
+static char * last;
+
+char * strtok(char * string, const char * delim) {
+    if (string == NULL) {
+        string = last;
+    }
+
+    if (string == NULL) {
+        return NULL;
+    }
+
+    while (*string && char_idx(delim, *string) != -1) {
+        string++;
+    }
+    
+    if (!*string) {
+        last = NULL;
+        return NULL;
+    }
+
+    char *token_start = string;
+    while (*string && char_idx(delim, *string) == -1) {
+        string++;
+    }
+
+    if (*string) {
+        *string = 0;
+        last = string + 1; 
+    } else {
+        last = NULL;
+    }
+
+    return token_start;
+}
+
+uint32_t strlen(const char * str) {
+    uint32_t i = 0;
+    while (str[i]) {
+        i++;
+    }
+    return i;
+}
+
+void uint64ToHexStr(uint64_t value, char *buffer) {
+    buffer[0] = '0';
+    buffer[1] = 'x';
+
+    int index = 2;
+    int start = 0;
+    
+
+    for (int i = 15; i >= 0; i--) {
+        uint8_t nibble = (value >> (i * 4)) & 0xF;
+        
+        if (nibble > 0 || start || i == 0) {
+            start = 1;
+            if (nibble < 10) {
+                buffer[index++] = nibble + '0';
+            } else {
+                buffer[index++] = nibble - 10 + 'A';
+            }
+        }
+    }
+
+    buffer[index] = '\0';
 }

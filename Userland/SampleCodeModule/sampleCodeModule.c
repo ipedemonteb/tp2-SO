@@ -1,20 +1,15 @@
 /* sampleCodeModule.c */
 #include <stdint.h>
 #include "./include/shell.h"
-#include "./include/eliminator.h"
-#include "./include/syscaller.h"
-#include "./include/welcome.h"
 #include "./include/font.h"
 #include "./include/syscall.h"
 
-int main()
-{
+
+int main() {
 	uint8_t * argv[] = {0};
-	getScreenHeight();
-	create_process(launchShell,0,argv,"Shell");
+	create_process((void *)launchShell, 0, argv, (int8_t *)"Shell");
 	wait_children();
-	while (1)
-	{
+	while (1) {
 		/* code */
 	}
 	

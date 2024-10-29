@@ -1,7 +1,6 @@
 #include "../include/memory_manager.h"
 #include "../include/process_manager.h"
 #include "../include/lib.h"
-#include "../include/interrupts.h"
 #include <stdint.h>
 
 #define ALIGN 7 
@@ -9,7 +8,7 @@
 uint8_t proc_count = 0;
 process_struct processes[QUANT] = {0};
 
-void * stacks = 0x1000000;
+void * stacks = (void *)0x1000000;
 
 uint64_t occupied[2];
 
@@ -22,7 +21,6 @@ void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * arg
     my_exit();
 }
 
-//In development
 void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_base = stack;
     p_struct->priority = 1; 
@@ -47,18 +45,17 @@ void load_proc_stack(process_struct * p_struct, void * stack) {
 void load_proc_args(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], void * stack) {
     process_stack * p_stack = stack - sizeof(process_stack);
     p_stack->rdi = fn;
-    p_stack->rsi = argc;
+    p_stack->rsi = (void *)(uintptr_t)argc;
     p_stack->rdx = argv;
 }
 
-int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], int8_t * name) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
+int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], const char * name) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
     if(proc_count >= QUANT){
         return -1;
     }
     uint16_t pid = find_off_bit_128(occupied[0], occupied[1]);
     occupied[pid/64] = set_n_bit_64(occupied[pid/64], pid % 64);
     process_struct * p_struct = &processes[pid];
-    //p_struct->pid = proc_count++;
     p_struct->pid = pid;
     p_struct->argv = argv;
     p_struct->name = my_malloc(my_strlen(name) + 1);
@@ -75,6 +72,7 @@ uint8_t kill(uint16_t pid) {
     if (get_current_pid() == pid) {
         yield();
     }
+    return 0;
 }
 
 uint8_t block(uint16_t pid) {
@@ -82,10 +80,14 @@ uint8_t block(uint16_t pid) {
     if (get_current_pid() == pid) {
         yield();
     }
+    return 0;
 }
 
 uint8_t unblock(uint16_t pid) {
+  if (processes[pid].status != KILLED) {
     processes[pid].status = READY;
+  }
+  return 0;
 }
 
 void nice(uint16_t pid, uint8_t priority) {
@@ -103,7 +105,8 @@ uint8_t ps(process_info * info) {
     for(int i = 0; i < QUANT; i++) {
         if(occupied[i / 64] & (1UL << (i % 64))) {
             process_struct * p = &processes[i];
-            memcpy(info[process_count].name, p->name, my_strlen(p->name));
+            info[process_count].name = my_malloc(my_strlen(p->name) + 1);
+            memcpy(info[process_count].name, p->name, my_strlen(p->name) + 1);
             info[process_count].pid = p->pid;
             info[process_count].priority = p->priority;
             info[process_count].stack_base = p->stack_base;
@@ -122,8 +125,6 @@ void wait_children() {
     uint8_t child, idx;
     process_struct * pcb = &processes[pid];
     while(pcb->children_processes[0] || pcb->children_processes[1]){
-        uint16_t p = 0;
-        int8_t aux[30];
         while (pcb->killed_children[0] || pcb->killed_children[1]) {
             child = find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
             idx = child/64;
@@ -137,4 +138,22 @@ void wait_children() {
             yield();
         }    
     }
+}
+
+//TODO: Revisar
+void wait_pid(uint16_t pid) {
+    process_struct * parent_pcb = &processes[get_current_pid()];
+    if (!(parent_pcb->children_processes[pid / 64] & (1UL << (pid % 64)))) {
+        return;
+    }
+
+    while (!(parent_pcb->killed_children[pid / 64] & (1UL << (pid % 64)))) {
+        parent_pcb->status = BLOCKED;
+        yield();
+    }
+
+    parent_pcb->children_processes[pid / 64] = off_n_bit_64(parent_pcb->children_processes[pid / 64], pid % 64);
+    parent_pcb->killed_children[pid / 64] = off_n_bit_64(parent_pcb->killed_children[pid / 64], pid % 64);
+    occupied[pid / 64] = off_n_bit_64(occupied[pid / 64], pid % 64);
+    my_free(processes[pid].name);
 }

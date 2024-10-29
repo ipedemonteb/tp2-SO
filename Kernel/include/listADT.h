@@ -10,13 +10,12 @@ typedef int (*compare)(void * e1, void * e2);
 typedef struct listCDT * listADT;
 
 void add(listADT list, void * elem);
-listADT newList(compare cmp);
-void freeList(listADT list);
-void toBegin(listADT list);
-uint8_t hasNext(const listADT list);
+listADT new_list(compare cmp);
+void free_list(listADT list);
+void to_begin(listADT list);
+uint8_t has_next(const listADT list);
 void * next(listADT list);
-void * poll(listADT list);
 void * peek(listADT list);
+void * poll(listADT list);
 void queue(listADT list , void * elem);
-void queue_first(listADT list, void * elem);
 #endif

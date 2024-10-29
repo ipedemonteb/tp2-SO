@@ -33,7 +33,7 @@ typedef struct process_stack {
     void * ss;
 } process_stack;
 
-int32_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t * argv[], int8_t * name);
+int32_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t * argv[], const char * name);
 uint8_t kill(uint16_t pid);
 void my_exit();
 uint8_t block(uint16_t pid);
@@ -42,5 +42,6 @@ void nice(uint16_t pid, uint8_t priority);
 void yield(); // es la que libera al CPU voluntariamente
 uint8_t ps(process_info * info);
 void wait_children();
+void wait_pid(uint16_t pid);
 
 #endif

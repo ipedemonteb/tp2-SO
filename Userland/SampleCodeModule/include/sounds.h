@@ -1,6 +1,8 @@
 #ifndef NOTES_H
 #define NOTES_H
 
+#include <stdint.h>
+
 typedef enum FIGURES {
     BLANCA,
     NEGRA,

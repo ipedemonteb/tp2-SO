@@ -2,7 +2,7 @@ include Makefile.inc
 
 KERNEL=kernel.bin
 KERNEL_ELF=$(KERNEL:.bin=.elf)
-SOURCES=$(wildcard *.c) $(wildcard drivers/*.c) $(wildcard idt/*.c) $(wildcard libc/*.c) $(wildcard memory/*.c) $(wildcard process/*.c) $(wildcard tests/*.c)
+SOURCES=$(wildcard *.c) $(wildcard drivers/*.c) $(wildcard idt/*.c) $(wildcard libc/*.c) $(wildcard memory/*.c) $(wildcard process/*.c) $(wildcard tests/*.c) $(wildcard sync/*.c)
 SOURCES_ASM=$(wildcard asm/*.asm)
 OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
@@ -29,6 +29,6 @@ $(LOADEROBJECT):
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf asm/*.o tests/*.o *.o drivers/*.o idt/*.o libc/*.o memory/*.o process/*.o *.bin *.elf
+	rm -rf asm/*.o tests/*.o *.o drivers/*.o idt/*.o libc/*.o memory/*.o process/*.o sync/*.o *.bin *.elf
 
 .PHONY: all clean
