@@ -31,9 +31,9 @@ string_arrayADT saved_commands;
 
 char current_command[MAX_COMMAND] = {0};
 
-uint8_t current_command_length = 0;
+int8_t current_command_length = 0;
 
-uint8_t current_command_pos = 0;
+int8_t current_command_pos = 0;
 
 static void clearCmd(uint8_t argc, char * argv[]);
 static void div0(uint8_t argc, char * argv[]);
