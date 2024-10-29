@@ -42,7 +42,7 @@ void * my_memset(void * destination, int32_t c, uint64_t length) {
 }
 
 // Parameters
-int64_t satoi(uint8_t * str) {
+int64_t satoi(char * str) {
   uint64_t i = 0;
   int64_t res = 0;
   int8_t sign = 1;

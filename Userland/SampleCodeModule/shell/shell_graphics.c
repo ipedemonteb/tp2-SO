@@ -29,21 +29,36 @@ void re_draw_line(uint32_t from, uint32_t to){
     }
 }
 
-void re_draw_screen(){
-    re_draw_line(0,MAX_SCREEN);
+void re_draw_screen(void (*fn)(uint32_t)){
+    printRectangle(0, 0, getScreenWidth(), getScreenHeight(), BLACK);
+    for (uint16_t i = 0; i < width * height; i++) {
+        fn(i);
+        if (!screen[i].character){
+            i = (i / width + 1) * width - 1;
+        }
+        
+        printChar(screen[i].character, i % width , i / width, screen[i].fg_colour, screen[i].bg_colour);
+    }
+    
+}
+
+
+static void clear_s_char(uint32_t i){
+    screen[i] = blanck;
+}
+
+void s_clear(){
+    re_draw_screen(clear_s_char);
+    currentX = 0;
+    lastX = 0;
 }
 
 void s_start_graphics(s_char * new_prompt, uint8_t len) {
-    currentX = 0;
-    lastX = 0;
     char_height = 16;
     char_width = 8;
     width = getScreenWidth() / char_width;
     height = getScreenHeight() / char_height;
-    for(uint16_t i = 0; i < MAX_SCREEN; i++){
-        screen[i] = blanck;
-    }
-    re_draw_screen();
+    s_clear();
     uint8_t i;
     for (i = 0; i < PROMPT_MAX - 1 && i < len; i++) {
         prompt[i] = new_prompt[i];
@@ -69,7 +84,7 @@ void set_command_prompt(){
     }
 }
 
-void set_cursor(){
+void s_set_cursor(){
     s_move_cursor(0);
 }
 
@@ -93,23 +108,25 @@ void s_draw_line(char * line, uint8_t with_prompt, uint8_t new) {
     re_draw_line(start_position, currentX);
     currentX = i;
     lastX = currentX;
-    set_cursor();
+}
+
+static uint16_t displacement;
+
+static void move_s_char(uint32_t i) {
+    if (i + displacement < MAX_SCREEN)
+        screen[i] = screen[i + displacement];
+    else
+        screen[i] = blanck;
 }
 
 int8_t s_move_screen_up(uint8_t amount) {
     if(!amount) return 0;
-    if(amount >= height) return -1;
+    if((int)(currentX / width) - amount < 0) return -1;
 
-    uint16_t displacement = amount * width, i;
-    for(i = 0; i + displacement < MAX_SCREEN; i++){
-        screen[i] = screen[i + displacement];
-    }
+    displacement = amount * width;
+    re_draw_screen(move_s_char);
     currentX -=displacement;
     lastX -=displacement;
-    while (i < MAX_SCREEN) {
-        screen[i++] = blanck;
-    }
-    re_draw_screen();
     return 0;
 }
 
@@ -159,14 +176,33 @@ void s_remove_char(){
     }
     lastX--;
     currentX = aux;
-    set_cursor();
 }
 
-void s_clear(){
-    for (uint16_t i = 0; i < MAX_SCREEN; i++) {
-        screen[i] = blanck;
+int8_t s_increase_font_size() {
+    if (char_height >= 4 * 16) {
+        return -1;
     }
-    re_draw_screen();
-    currentX = 0;
-    lastX = 0;
+    
+    char_height += 16;
+    char_width += 8;
+    width = getScreenWidth() / char_width;
+    height = getScreenHeight() / char_height;
+    fontSizeUp();
+    s_clear();
+    return 0;
 }
+
+int8_t s_decrease_font_size() {
+    if (char_height <= 16) {
+        return -1;
+    }
+    
+    char_height -= 16;
+    char_width -= 8;
+    width = getScreenWidth() / char_width;
+    height = getScreenHeight() / char_height;
+    fontSizeDown();
+    s_clear();
+    return 0;
+}
+

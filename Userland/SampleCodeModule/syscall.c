@@ -49,7 +49,7 @@ void my_free(void * p) {
     syscaller(14, p, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
-int8_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t **argv, char *name) {
+int8_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, char **argv, char *name) {
     return syscaller(15, fn, argc, argv, name, EMPTY);
 }
 

@@ -30,10 +30,8 @@ typedef struct command_t{
 string_arrayADT saved_commands;
 
 char current_command[MAX_COMMAND] = {0};
-
 uint16_t current_command_length = 0;
-
-int8_t current_command_pos = 0;
+uint16_t current_command_pos = 0;
 
 static void clearCmd(uint8_t argc, char * argv[]);
 static void div0(uint8_t argc, char * argv[]);
@@ -49,6 +47,7 @@ static void processes(uint8_t argc, char * argv[]);
 static void mm(uint8_t argc, char * argv[]);
 static void printps(uint8_t argc, char * argv[]);
 static void sync(uint8_t argc, char * argv[]);
+static void move_up(uint8_t argc, char * argv[]);
 
 static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //a
@@ -63,144 +62,25 @@ static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //j
     {{0,0}},  //k
     {{0,0}},  //l
-    {{0,0}},  //m
+    {{"move_up", move_up},{0,0}},  //m
     {{0,0}},  //n
     {{0,0}},  //o
-    {{"ps", printps}},  //p
+    {{"ps", printps},{0,0}},  //p
     {{0,0}},  //q
     {{0,0}},  //r
     {{0,0}},  //s
-    {{"test_mm",mm}, {"test_prio",prio}, {"test_processes",processes}, {"test_sync", sync}, {0,0}}   //t
+    {{"test_mm",mm},{"test_prio",prio},{"test_processes",processes},{"test_sync", sync}, {0,0}},   //t
+    {{0,0}},  //u
+    {{0,0}},  //v
+    {{0,0}},  //x
+    {{0,0}},  //y
+    {{0,0}}  //z
 };
 
-
 static char * commandNotFoundMsg = "Command not found. Type help for a list of commands";
-static uint8_t cNotFoundSize = 51;
 static char * helpMsg = "List of commands: clear, div0, eliminator, exit, fontBig, fontSmall, getTime, help, invalidOpCode";
-//static uint8_t hMsgSize = 97;
-static char * waitMsg = "Press any key to continue";
 
-static uint16_t currentY;
-static uint16_t currentX;
-static uint16_t width;
-static uint16_t height;
-static int8_t buffer[4096];
-static uint16_t count;
-static uint16_t offsets[4096] = {0};
-static uint16_t lineCount;
-static uint16_t firstLineOnScreen;
-static uint16_t leftSteps;
-static uint16_t currentLine;
-static uint16_t previousCount;
 static uint8_t exitFlag;
-static uint8_t fontSize;
-static uint8_t reset;
-
-void sPrintChar(uint8_t c) {
-    printChar(c, currentX, currentY, WHITE, BLACK);
-}
-
-void sPrintSelected(uint8_t c) {
-    printChar(c, currentX, currentY, BLACK, WHITE);
-}
-
-void startNewLine() {
-    currentX = 0;
-    sPrintChar('$');
-    currentX++;
-    sPrintChar('>');
-    currentX++;
-}
-
-void clearLineFrom(uint16_t x, uint16_t to) {
-    uint16_t auxX = currentX;
-    currentX = x;
-    while (currentX < width) {
-        printRectangle(currentX * (8 * fontSize), currentY * (16 * fontSize), 8 * fontSize, 16 * fontSize, BLACK);
-        currentX++;
-    }
-    currentX = auxX;
-}
-
-void clear() {
-    uint16_t auxX = currentX, auxY = currentY;
-    currentX = 0;
-    currentY = 0;
-    while (currentY < height) {
-        clearLineFrom(0, width);
-        currentY++;
-    }
-    currentX = auxX;
-    currentY = auxY;
-}
-
-void sMoveScreenUp(uint8_t n) {
-    clear();
-    uint16_t y = currentY - n + 1, l = firstLineOnScreen + n;
-    currentY = 0;
-
-    while (y != currentY) {
-        startNewLine();
-        for (uint16_t i = 0; i < offsets[l + 1] - offsets[l]; i++) {
-            if (currentX == width) {
-                currentY++;
-                currentX = 0;
-            }
-            sPrintChar(buffer[offsets[l] + i]);
-            currentX++;
-        }
-        l++;
-        currentY++;
-    }
-    firstLineOnScreen += n;
-}
-
-void sPrintNewLine() {
-    if (!reset) {
-        if (currentY < height - 1) {
-            currentY++;
-        }
-        else {
-            sMoveScreenUp(1);
-        }
-    }
-    startNewLine();
-    reset = 0;
-}
-
-void printMsgAndWait(const char * msg, uint8_t size) {
-    if (currentY < height - 2) {
-        currentY++;
-    }
-    else {
-        sMoveScreenUp(2 + size / width);
-    }
-    currentX = 0;
-    for (uint16_t i = 0; i < size; i++) {
-        sPrintChar(msg[i]);
-        if (currentX == width - 1) {
-            currentX = 0;
-            currentY++;
-        }
-        else {
-            currentX++;
-        }
-    }
-    currentY++;
-    currentX = 0;
-    for (uint8_t j = 0; waitMsg[j]; j++) {
-        sPrintChar(waitMsg[j]);
-        currentX++;
-    }
-    uint8_t c = 0;
-    while (!(c = getChar())) {
-        ;
-    }
-    for (uint8_t i = 0; i < 2 + size / width; i++) {
-        clearLineFrom(0, i);
-        currentY--;
-    }
-}
 
 int8_t getCommandIdx(uint8_t c) {
     if (c <= 'Z') {
@@ -211,148 +91,6 @@ int8_t getCommandIdx(uint8_t c) {
         return c - 'a';
     }
     return -1;
-}
-
-void sCheckCommand() {
-    if (offsets[lineCount] == offsets[lineCount - 1]) {
-        return;
-    }
-    char aux = buffer[offsets[lineCount]];
-    uint8_t c = getCommandIdx(buffer[offsets[lineCount - 1]]);
-    if (c < 0) {
-        printMsgAndWait(commandNotFoundMsg, cNotFoundSize);
-        return;
-    }
-
-    buffer[offsets[lineCount]] = 0;
-    command_t * auxC = commands[c];
-    for (int i = 0; i < WORDS; i++) {
-        if (auxC[i].name != NULL) {
-            //TODO: ver casteo
-            int cmp = strcmp((char *)buffer + offsets[lineCount - 1], auxC[i].name);
-            if (cmp < 0) {
-                break;
-            }
-            else if (cmp == 0) {
-                auxC[i].function(0, 0);
-                buffer[offsets[lineCount]] = aux;
-                return;
-            }
-        }
-        else {
-            break;
-        }
-    }
-    printMsgAndWait(commandNotFoundMsg, cNotFoundSize);
-    buffer[offsets[lineCount]] = aux;
-}
-
-void sDeleteChar() {
-    if (offsets[lineCount - 1] == count - leftSteps) {
-        return;
-    }
-    if (currentX == 0) {
-        currentY--;
-        currentX = width - 1;
-    }
-    else {
-        currentX--;
-    }
-    uint16_t auxX = currentX, auxY = currentY;
-    for (uint16_t i = 0; i <= leftSteps; i++) {
-        buffer[count - leftSteps + i - 1] = buffer[count - leftSteps + i];
-        sPrintChar(buffer[count - leftSteps + i]);
-        if (currentX == width - 1) {
-            currentX = 0;
-            currentY++;
-        }
-        else {
-            currentX++;
-        }
-    }
-    sPrintChar(buffer[count]);
-    currentX = auxX;
-    currentY = auxY;
-    sPrintSelected(buffer[count - leftSteps - 1]);
-    count--;
-
-    offsets[lineCount]--;
-}
-
-void sMoveLeft() {
-    if (offsets[lineCount - 1] == count - leftSteps) {
-        shellErrSound();
-        return;
-    }
-    sPrintChar(buffer[count - leftSteps]);
-    if (currentX == 0) {
-        currentX = width - 1;
-        currentY--;
-    }
-    else {
-        currentX--;
-    }
-    leftSteps++;
-    sPrintSelected(buffer[count - leftSteps]);
-}
-
-void sMoveRight() {
-    if (leftSteps == 0) {
-        shellErrSound();
-        return;
-    }
-    sPrintChar(buffer[count - leftSteps]);
-    if (currentX == width) {
-        currentX = 0;
-        currentY++;
-    }
-    else {
-        currentX++;
-    }
-    leftSteps--;
-    sPrintSelected(buffer[count - leftSteps]);
-}
-
-void sGetLastLine() {
-    uint16_t currentOffset = offsets[lineCount] - offsets[lineCount - 1], l;
-    do {
-        if (currentLine) {
-            currentLine--;
-        }
-        else {
-            return;
-        }
-        l = offsets[currentLine + 1] - offsets[currentLine];
-    } while (!l);
-    previousCount += l;
-    clearLineFrom(2, width);
-    count -= currentOffset;
-    currentX = 2;
-    for (uint16_t i = 0; i < l; i++) {
-        if (currentX == width) {
-            if (currentY < height - 1) {
-                currentY++;
-            }
-            else {
-                sMoveScreenUp(1);
-            }
-            currentX = 0;
-        }
-        uint8_t aux = buffer[count - previousCount];
-        buffer[count++] = aux;
-        sPrintChar(aux);
-        currentX++;
-    }
-    buffer[count] = ' ';
-    offsets[lineCount] = count;
-    sPrintSelected(' ');
-}
-
-void printBufferFrom(uint16_t start, uint16_t end) {
-    for (int i = start; i < end; i++) {
-        sPrintChar(buffer[i]);
-        currentX++;
-    }
 }
 
 void check_command(){
@@ -368,7 +106,6 @@ void check_command(){
     int8_t c = getCommandIdx(command_tokens[0][0]);
     if (c < 0) {
         s_draw_line(commandNotFoundMsg, 0, 1);
-        s_off_cursor();
         return;
     }
     command_t * auxC = commands[c];
@@ -388,7 +125,6 @@ void check_command(){
         }
     }
     s_draw_line(commandNotFoundMsg, 0, 1);
-    s_off_cursor();
 }
 
 void launchShell() {
@@ -396,6 +132,7 @@ void launchShell() {
     s_start_graphics(prompt, 3);
     char * empty = "";
     s_draw_line(empty, 1, 0);
+    s_set_cursor();
     saved_commands = start_string_array(BUFF_MAX);
     uint8_t key;
     while (!exitFlag) {
@@ -418,6 +155,7 @@ void launchShell() {
                     strcpy(current_command,previous(saved_commands, &current_command_length));
                     current_command_pos = current_command_length;
                     s_draw_line(current_command, 1, 0);
+                    s_set_cursor();
                 }
                 break;
             case DOWN_ARROW:
@@ -426,12 +164,15 @@ void launchShell() {
                     strcpy(current_command,next(saved_commands, &current_command_length));
                     current_command_pos = current_command_length;
                     s_draw_line(current_command, 1, 0);
+                    s_set_cursor();
                 }
                 break;
             case DELETE:
                 if (current_command_pos > 0){
                     s_remove_char();
+                    s_set_cursor();
                     current_command_pos--;
+                    remove_letter(current_command, current_command_pos);
                     current_command_length--;
                 }
                 break;
@@ -447,9 +188,16 @@ void launchShell() {
                     current_command_pos = 0;
                 }
                 s_draw_line(empty, 1, 1);
+                s_set_cursor();
                 break;
             case '\t':
-                //logica tab
+                int8_t index;
+                if (current_command_length == 1 && (index  = getCommandIdx(current_command[0])) >= 0 && commands[index]->name) {
+                    current_command_length = strcpy(current_command, commands[index]->name);
+                    current_command_pos = current_command_length;
+                    s_draw_line(current_command, 1, 0);
+                    s_set_cursor();
+                }
             case 0:
                 break;
             default: 
@@ -460,49 +208,31 @@ void launchShell() {
                 break;
         }
     }
-    while (fontSizeDown()) {
-        fontSize--;
-    }
+    while (s_decrease_font_size() != -1);
 }
 
 // comandos de la terminal
 
 void fontBig(uint8_t argc, char * argv[]) {
-    if (fontSize == 2) {
-        shellErrSound();
-        return;
-    }
-    fontSizeUp();
-    fontSize = 2;
-    height /= 2;
-    width /= 2;
-    sMoveScreenUp((currentLine - firstLineOnScreen) / 2);
-    reset = 1;
+    s_increase_font_size();
+}
+
+void fontSmall(uint8_t argc, char * argv[]) {
+    s_decrease_font_size();
 }
 
 void exit(uint8_t argc, char * argv[]) {
     exitFlag = 1;
-    firstLineOnScreen = lineCount - 1;
-    currentX = 0;
-    currentY = 0;
 }
 
 void div0(uint8_t argc, char * argv[]) {
-    fontSize = 1;
+    while (s_decrease_font_size() != -1);
     divZero();
 }
 
-void fontSmall(uint8_t argc, char * argv[]) {
-    if (fontSize == 1) {
-        shellErrSound();
-        return;
-    }
-    fontSizeDown();
-    fontSize = 1;
-    height *= 2;
-    width *= 2;
-    sMoveScreenUp(0);
-    reset = 1;
+
+void move_up(uint8_t argc, char * argv[]) {
+    s_move_screen_up(satoi(argv[0]));
 }
 
 void eliminator(uint8_t argc, char * argv[]) {
@@ -519,16 +249,15 @@ void clearCmd(uint8_t argc, char * argv[]) {
 void getTime(uint8_t argc, char * argv[]) {
     char clock[20];
     time(clock);
-    printMsgAndWait(clock, 8);
+    s_draw_line(clock, 0, 1);
 }
 
 void help(uint8_t argc, char * argv[]) {
     s_draw_line(helpMsg,0,1);
-    s_off_cursor();
 }
 
 void invalidOpCode(uint8_t argc, char * argv[]) {
-    fontSize = 1;
+    while (s_decrease_font_size() != -1);
     opcode();
 }
 
@@ -543,10 +272,11 @@ void prio(uint8_t argc, char * argv[]){
 }
 
 void processes(uint8_t argc, char * argv[]){
-    uint8_t * argv2[] = {(uint8_t *)"4", 0};
+    char * argv2[] = {"4", 0};
     create_process(test_processes,1, argv2,"test_processes");
     wait_children();
 }
+
 
 void mm(uint8_t argc, char * argv[]){
     create_process(test_mm,1,0,"test_mm");
@@ -558,7 +288,6 @@ void printps(uint8_t argc, char * argv[]) {
     uint8_t process_count = ps(info);
     char header[] = "PID     NAME         PRIORITY     STACK_BASE      STACK_PTR       FOREGROUND    STATUS   ";
     s_draw_line(header,0,1);
-    s_off_cursor();
     for(int i = 0; i < process_count; i++) {
         uint8_t jmp = 0;
         char buffer[127];
@@ -609,22 +338,20 @@ void printps(uint8_t argc, char * argv[]) {
         char * msg[] = {"READY", "BLOCKED", "KILLED"};
         int index = 0;
         switch (info[i].status) {
-            case READY:
-                index = 0;
-                break;
             case BLOCKED:
                 index = 1;
                 break;
             case KILLED:
                 index = 2;
                 break;
-        
+            default:
+                break;
         }
         strcpy(buffer + jmp, msg[index]);
         buffer[jmp + strlen(msg[index])] = ' ';
 
-        buffer[126] = 0;
+        buffer[127] = 0;
         s_draw_line(buffer,0,1);
-        s_off_cursor();
     }
+
 }

@@ -43,40 +43,40 @@ int8_t to_begin(string_arrayADT arr) {
     if (arr->count == 0) {
         return -1;
     }
-    arr->it = arr->count - 1;
+    arr->it = arr->count;
     return 1;
 }
 
 int8_t has_next(string_arrayADT arr) {
-    if (arr->it < 0) arr->it = 1;
-    return arr->it < arr->count;
+    return arr->it + 1 < arr->count;
 }
 
 char * next(string_arrayADT arr, uint16_t * len) {
     if (!has_next(arr)){
         return (void*) 0;
     }
+    arr->it++;
     if (len) {
         *len = arr->offsets[arr->it + 1] - arr->offsets[arr->it] - 1;
     }
     
-    return &arr->array[arr->offsets[arr->it++]];
+    return &arr->array[arr->offsets[arr->it]];
 }
 
 int8_t has_previous(string_arrayADT arr) {
-    if (arr->it >= arr->count) arr->it = arr->count - 2;
-    return arr->it >= 0;
+    return arr->it - 1 >= 0;
 }
 
 char * previous(string_arrayADT arr, uint16_t * len) {
     if (!has_previous(arr)){
         return (void*) 0;
     }
+    arr->it--;
     if (len) {
         *len = arr->offsets[arr->it + 1] - arr->offsets[arr->it] - 1;
     }
 
-    return &arr->array[arr->offsets[arr->it--]];
+    return &arr->array[arr->offsets[arr->it]];
 }
 
 void free_string_array(string_arrayADT arr) {
