@@ -1,11 +1,10 @@
 #include "../include/scheduler.h"
 #include <stdint.h>
 #include "../include/videoDriver.h"
+#include "../include/pipes.h"
+
 #define AVAILABLE 1
-#define MAX_INPUT 4
-
-
-uint8_t avail_inputs[MAX_INPUT] = {0};
+#define MAX_INPUT 64
 
 int cmp(void * elem1, void * elem2) {
     return -1;
@@ -40,21 +39,17 @@ void * schedule(void * rsp) {
     process_struct * current_pcb;
     do {
         current_pcb = poll(scheduler->schedule);
-        /*    if(avail_inputs[current_pcb->blocked_in] == AVAILABLE) {
+        if(current_pcb->status == BLOCKED) {
+            if(get_available() & current_pcb->blocked_in) {
                 current_pcb->status = READY;
             } else {
+                add(scheduler->schedule, current_pcb);
             }
-        } else  */
-        if(current_pcb->status == BLOCKED) {
-            add(scheduler->schedule, current_pcb);
         }
         else if(current_pcb->status == KILLED) {
             current_pcb->count--;
             if (current_pcb->count == 0) {
                 uint8_t pid = current_pcb->pid, idx = pid/64;
-                /* int8_t aux[30];
-                numToStr(pid, aux);
-                drawString(aux, 0, t++, WHITE, BLACK);  */
                 current_pcb->parent_pcb->killed_children[idx] = set_n_bit_64(current_pcb->parent_pcb->killed_children[idx],pid % 64);
                 if (current_pcb->parent_pcb->status == BLOCKED) { // si esta esperando a que terminen sus hijos @todo: status mas creativo
                     current_pcb->parent_pcb->status = READY;

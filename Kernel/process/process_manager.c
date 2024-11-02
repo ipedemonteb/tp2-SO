@@ -99,7 +99,6 @@ void yield() {
     int20();
 }
 
-//In development
 uint8_t ps(process_info * info) {
     uint8_t process_count = 0;
     for(int i = 0; i < QUANT; i++) {
@@ -119,7 +118,6 @@ uint8_t ps(process_info * info) {
     return process_count;
 }
 
-//In development
 void wait_children() {
     uint16_t pid = get_current_pid();
     uint8_t child, idx;
@@ -140,7 +138,6 @@ void wait_children() {
     }
 }
 
-//TODO: Revisar
 void wait_pid(uint16_t pid) {
     process_struct * parent_pcb = &processes[get_current_pid()];
     if (!(parent_pcb->children_processes[pid / 64] & (1UL << (pid % 64)))) {
@@ -156,4 +153,8 @@ void wait_pid(uint16_t pid) {
     parent_pcb->killed_children[pid / 64] = off_n_bit_64(parent_pcb->killed_children[pid / 64], pid % 64);
     occupied[pid / 64] = off_n_bit_64(occupied[pid / 64], pid % 64);
     my_free(processes[pid].name);
+}
+
+process_struct * get_process_info(uint8_t pid) {
+    return &processes[pid];
 }
