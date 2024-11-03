@@ -40,7 +40,7 @@ void close(uint8_t bd) {
 }
 
 static uint8_t has_next_pipe(pipe_t * p) {
-    return p->last < p->current;
+    return p->last > p->current;
 }
 
 static uint8_t next_from_buffer(pipe_t * p) {
@@ -69,7 +69,10 @@ int64_t read(uint8_t bd, char * arr, int64_t size) {
         arr[count++] = next_from_buffer(pipe);
     }
     pcb->blocked_in = off_n_bit_64(pcb->blocked_in, id/2);
-    avail = off_n_bit_64(avail, id/2);
+    if (!has_next_pipe(pipe)) {
+        avail = off_n_bit_64(avail, id/2);
+    }
+    
     return count;
 }
 
