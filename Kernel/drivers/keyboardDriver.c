@@ -1,10 +1,9 @@
 #include "../include/keyboardDriver.h"
 #include "../include/regsDump.h"
+#include "../include/pipes.h"
 #include <stdint.h>
 
-static uint8_t charBuffer[BUFF_SIZE];
-static uint64_t last = 0;
-static uint64_t next = 0;
+static pipe_t * char_buffer;
 
 extern const uint64_t regs[19];
 
@@ -116,8 +115,10 @@ void keyboard_handler() {
 		default:
 			return;
 		}
-		charBuffer[last % BUFF_SIZE] = aux;
-		last++;
+		char_buffer->buff[char_buffer->last % BUFF_MAX] = aux;
+		char_buffer->last++;
+		char_buffer->buff[char_buffer->last % BUFF_MAX] = EOF;
+		keyboard_ready();
 	}
 	else if (keyVal > 58) {
 	}
@@ -127,12 +128,18 @@ void keyboard_handler() {
 			ctrlOn = 0;
 		}
 		else {
-			charBuffer[last % BUFF_SIZE] = asccode[keyVal][shiftOn + capsLock * 2];
-			last++;
+			char_buffer->buff[char_buffer->last % BUFF_SIZE] = asccode[keyVal][shiftOn + capsLock * 2];
+			char_buffer->last++;
+			keyboard_ready();
 		}
 	}
 }
 
 uint8_t nextFromBuffer() {
-	return last <= next ? 0 : charBuffer[(next++) % BUFF_SIZE];
+	return char_buffer->last <= char_buffer->current ? 0 : char_buffer->buff[(char_buffer->current++) % BUFF_SIZE];
+}
+
+void start_keyboard_driver(){
+	char_buffer = get_keyboard_buffer();
+	char_buffer->init = INIT;
 }

@@ -4,10 +4,17 @@
 #include "./include/font.h"
 #include "./include/syscall.h"
 
+void inactive() {
+	while (1) {//@todo: ver de cammbiar por un hlt
+		yield();
+	}
+	
+}
 
 int main() {
-	uint8_t * argv[] = {0};
-	create_process((void *)launchShell, 0, argv, (int8_t *)"Shell");
+	char * argv[] = {0};
+	create_process((void *)inactive, 0 , argv, "inactive");
+	create_process((void *)launchShell, 0, argv,"Shell");
 	wait_children();
 	while (1) {
 		/* code */

@@ -7,8 +7,8 @@ typedef enum FD {
     STDERR = 2
 } FD;
 
-uint32_t read(uint8_t * buffer, uint32_t size);
-long int write(FD fd, uint8_t * string, uint32_t size);
+/* uint32_t read(uint8_t * buffer, uint32_t size);
+long int write(FD fd, uint8_t * string, uint32_t size); */
 void printRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t colors);
 uint64_t getScreenWidth();
 uint64_t getScreenHeight();

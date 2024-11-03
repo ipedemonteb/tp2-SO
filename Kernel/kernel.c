@@ -7,6 +7,7 @@
 #include "./include/scheduler.h"
 #include "./include/process_manager.h"
 #include "./include/test_sync.h"
+#include "./include/keyboardDriver.h"
 #include "include/sem.h"
 
 
@@ -45,6 +46,7 @@ void * initializeKernelBinary() {
 }
 
 int main() {
+	start_keyboard_driver();
 	load_idt();
 	//_sti();
 	//((EntryPoint)sampleCodeModuleAddress)();
@@ -52,7 +54,7 @@ int main() {
 	init_scheduler(getStackBase());
 	init_semaphores();
 	uint8_t * argv[] = {0}; 
-	create_process((void *)sampleCodeModuleAddress,0, argv, "init");
+	create_first_process((void *)sampleCodeModuleAddress,0, argv, "init");
 	_sti();
 	while(1) {
 	}

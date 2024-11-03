@@ -33,5 +33,5 @@ uint8_t nextFromBuffer();
 uint8_t getKey();
 uint8_t getKeyboardStatus();
 uint8_t getKeyboardKey();
-
+void start_keyboard_driver();
 #endif

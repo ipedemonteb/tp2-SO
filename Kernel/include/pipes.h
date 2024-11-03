@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 #define BUFF_MAX 1024
+#define EOF -1
+#define INIT 1
 
 typedef struct pipe_t {
     int8_t init;
@@ -21,5 +23,9 @@ int64_t read(uint8_t bd, char * buffer, int64_t size);
 int64_t write(uint8_t bd, char * buffer, int64_t size);
 
 uint64_t get_available();
+
+pipe_t * get_keyboard_buffer();
+
+void keyboard_ready();
 
 #endif

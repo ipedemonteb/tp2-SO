@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "../include/keyboardDriver.h"
 #include "../include/syscalls.h"
+#include "../include/pipes.h"
 #include "../include/process_manager.h"
 #include "../include/memory_manager.h"
 #include "../include/scheduler.h"

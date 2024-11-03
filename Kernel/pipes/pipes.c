@@ -3,10 +3,8 @@
 #include "../include/scheduler.h"
 #include "../include/process_manager.h"
 
-#define INIT 1
 #define IN 0
 #define OUT 1
-#define EOF -1
 
 pipe_t pipes[MAX_BUFFERS] = {0};
 uint64_t avail = 0;
@@ -41,11 +39,11 @@ void close(uint8_t bd) {
     pcb->open_buffers[bd] = -1;
 }
 
-uint8_t has_next(pipe_t * p) {
+static uint8_t has_next_pipe(pipe_t * p) {
     return p->last < p->current;
 }
 
-uint8_t next_from_buffer(pipe_t * p) {
+static uint8_t next_from_buffer(pipe_t * p) {
 	return p->buff[(p->current++) % BUFF_MAX];
 }
 
@@ -55,15 +53,20 @@ int64_t read(uint8_t bd, char * arr, int64_t size) {
     if (id % 2 == OUT) {
         return -1;
     }
+
     pipe_t * pipe = &pipes[id/2];  
+    if (!pipe->init) {
+        return -1;
+    }
+    
     int64_t count = 0;
     while (count < size && pipe->buff[pipes[id].current % BUFF_MAX] != EOF) {
-        if (!has_next(pipe)) {
+        if (!has_next_pipe(pipe)) {
             pcb->status = BLOCKED;
             pcb->blocked_in = set_n_bit_64(pcb->blocked_in, id/2);
             yield();
         }
-        arr[count] = next_from_buffer(pipe);
+        arr[count++] = next_from_buffer(pipe);
     }
     pcb->blocked_in = off_n_bit_64(pcb->blocked_in, id/2);
     avail = off_n_bit_64(avail, id/2);
@@ -76,7 +79,12 @@ int64_t write(uint8_t bd, char * buffer, int64_t size) {
     if (id % 2 == IN) {
         return -1;
     }
+
     pipe_t * pipe = &pipes[id/2];
+    if (!pipe->init) {
+        return -1;
+    }
+
     int64_t count = 0;
     while (count < size) {
         pipe->buff[pipe->last++] = buffer[count];
@@ -89,4 +97,12 @@ int64_t write(uint8_t bd, char * buffer, int64_t size) {
 
 uint64_t get_available(){
     return avail;
+}
+
+pipe_t * get_keyboard_buffer(){
+    return &pipes[0];
+}
+
+void keyboard_ready(){
+    avail |= 1;
 }

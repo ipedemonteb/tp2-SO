@@ -16,8 +16,8 @@ typedef struct process_info {
 
 void * syscaller(uint8_t id, void * rsi, void * rdx, void * rcx, void * r8, void * r9);
 
-uint32_t read(uint8_t * buffer, uint32_t size);
-long int write(uint8_t fd, const uint8_t * string, uint32_t size);
+int64_t read(uint8_t bd, char * buffer, int64_t size);
+int64_t write(uint8_t bd, char * buffer, int64_t size);
 void printRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color);
 uint64_t getScreenWidth();
 uint64_t getScreenHeight();

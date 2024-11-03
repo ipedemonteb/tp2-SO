@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include "./include/libc.h"
 #include "./include/syscaller.h"
+#include "./include/syscall.h"
 
 #define MIN(a,b) a > b ? b:a
 
@@ -51,6 +52,12 @@ int getChar() {
     while (!c) {
         readCaller(UNUSED, &c, 1);
     }
+    return c;
+}
+
+char get_char(){
+    char c;
+    read(0, &c, 1);
     return c;
 }
 

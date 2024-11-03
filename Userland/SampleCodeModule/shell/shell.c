@@ -136,7 +136,7 @@ void launchShell() {
     saved_commands = start_string_array(BUFF_MAX);
     uint8_t key;
     while (!exitFlag) {
-        key = getChar();
+        key = get_char();
         switch (key) {
             case RIGHT_ARROW:
                 s_move_cursor(1);

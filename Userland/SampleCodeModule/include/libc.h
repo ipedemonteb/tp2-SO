@@ -9,6 +9,7 @@
 int printf(const uint8_t * fmt, ...);
 int putChar(uint8_t c);
 int getChar();
+char get_char();
 void cleanBuffer();
 void scanf(const uint8_t * fmt, ...);
 int atoi(const uint8_t * str);

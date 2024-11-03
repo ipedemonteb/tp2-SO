@@ -26,12 +26,18 @@ void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->priority = 1; 
     p_struct->status = READY;
     p_struct->parent_pcb = &processes[get_current_pid()];
+    
     p_struct->parent_pcb->children_processes[(p_struct->pid)/64] = set_n_bit_64(p_struct->parent_pcb->children_processes[(p_struct->pid)/64], (p_struct->pid) % 64);
-    p_struct->children_processes[0] = 0;
+    p_struct->children_processes[0] = 0; //@todo: ver si son necesarias estas inicializaciones
     p_struct->children_processes[1] = 0;
     p_struct->killed_children[0] = 0;
     p_struct->killed_children[1] = 0;
     p_struct->count = 1;
+
+    for (uint8_t i = 0; i < MAX_BUFFERS; i++) {
+        p_struct->open_buffers[i] = p_struct->parent_pcb->open_buffers[i];
+    }
+    
     process_stack * p_stack = stack - sizeof(process_stack);
     p_stack->rsp = stack;
     p_stack->rbp = stack;
@@ -65,6 +71,43 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
     load_proc_args(fn, argc, argv, stack);
     schedule_process(p_struct);
     return p_struct->pid;
+}
+
+void create_first_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], const char * name) {
+    process_struct * p_struct = &processes[0];
+    p_struct->pid = 0;
+    occupied[0] |= 1; 
+    p_struct->argv = argv;
+    p_struct->name = my_malloc(my_strlen(name) + 1);
+    memcpy(p_struct->name, name, my_strlen(name));
+    void * stack = stacks + STACKSIZE;
+
+    p_struct->stack_base = stack;
+    p_struct->priority = 1; 
+    p_struct->status = READY;
+    p_struct->parent_pcb = &processes[0];//@todo: ver si es preferible que el primero apunte a si mismo
+    p_struct->children_processes[0] = 0;
+    p_struct->children_processes[1] = 0;
+    p_struct->killed_children[0] = 0;
+    p_struct->killed_children[1] = 0;
+    p_struct->count = 1;
+
+    for (uint8_t i = 0; i < MAX_BUFFERS; i++) {
+        p_struct->open_buffers[i] = i < 4 ? i : -1;
+    }
+
+    process_stack * p_stack = stack - sizeof(process_stack);
+    p_stack->rsp = stack;
+    p_stack->rbp = stack;
+    p_stack->cs = (void *)0x8;
+    p_stack->rflags = (void *)0x202;
+    p_stack->ss = 0x0;
+    p_stack->rip = launch_process;
+    p_struct->stack_ptr = p_stack;
+    p_stack->rdi = fn;
+    p_stack->rsi = (void *)(uintptr_t)argc;
+    p_stack->rdx = argv;
+    schedule_process(p_struct);
 }
 
 uint8_t kill(uint16_t pid) {

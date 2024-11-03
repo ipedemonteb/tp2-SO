@@ -1,11 +1,11 @@
 #include "./include/syscall.h"
 #define EMPTY 0
 
-uint32_t read(uint8_t * buffer, uint32_t size){
-    return syscaller(0, buffer, size, EMPTY, EMPTY, EMPTY);
+int64_t read(uint8_t bd, char * buffer, int64_t size) {
+    return syscaller(0, bd, buffer, size, EMPTY, EMPTY);
 }
-long int write(uint8_t fd, const uint8_t * string, uint32_t size){
-    return syscaller(1, fd, string, size, EMPTY, EMPTY);
+int64_t write(uint8_t bd, char * buffer, int64_t size) {
+    return syscaller(1, bd, buffer, size, EMPTY, EMPTY);
 }
 void printRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t colour){
     syscaller(2, x, y, width, height, colour);

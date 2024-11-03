@@ -6,7 +6,7 @@
 
 static uint32_t uintToBase(uint64_t value, uint8_t * buffer, uint32_t base);
 
-uint32_t read(uint8_t * buffer, uint32_t size) {
+/* uint32_t read(uint8_t * buffer, uint32_t size) {
 	uint32_t i = 0;
 	uint8_t c;
 	while (i < size && (c = nextFromBuffer())) {
@@ -34,7 +34,7 @@ long int write(FD fd, uint8_t * string, uint32_t size) {
 		i++;
 	}
 	return i;
-}
+} */
 
 void printRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color) {
 	for (int j = 0; j < height; j++) {
