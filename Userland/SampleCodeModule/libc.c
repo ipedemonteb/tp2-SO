@@ -144,11 +144,11 @@ int atoi(const uint8_t * str) {
     return res * sign;
 }
 
-void reverse(uint8_t * str, int length) {
+void reverse(char * str, int length) {
     int start = 0;
     int end = length - 1;
     while (start < end) {
-        uint8_t temp = str[start];
+        char temp = str[start];
         str[start] = str[end];
         str[end] = temp;
         start++;

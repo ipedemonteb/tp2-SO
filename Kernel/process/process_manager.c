@@ -184,7 +184,7 @@ void wait_children() {
 uint8_t wait_pid_no_block(uint16_t pid) {
     process_struct * parent_pcb = &processes[get_current_pid()];
     if (!(parent_pcb->children_processes[pid / 64] & (1UL << (pid % 64)))) {
-        return;
+        return 0;
     }
     if((parent_pcb->killed_children[pid / 64] & (1UL << (pid % 64)))) {
         parent_pcb->children_processes[pid / 64] = off_n_bit_64(parent_pcb->children_processes[pid / 64], pid % 64);

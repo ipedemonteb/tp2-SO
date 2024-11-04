@@ -19,8 +19,8 @@ void * (* sys_call_arr[])(void * rsi, void * rdx, void * rcx, void * r8, void * 
 	(syscall)printChar /*5*/, (syscall)wait /*6*/, (syscall)keyboardStatus /*7*/, (syscall)keyboardKey /*8*/, (syscall)beepSyscall /*9*/, 
 	(syscall)fontSizeUp /*10*/, (syscall)fontSizeDown /*11*/, (syscall)getTime /*12*/, (syscall)my_malloc /*13*/, (syscall)my_free /*14*/, 
 	(syscall)create_process /*15*/, (syscall)kill /*16*/, (syscall)my_exit /*17*/, (syscall)block /*18*/, (syscall)unblock /*19*/, (syscall)nice /*20*/,
-	(syscall)yield /*21*/, (syscall)ps /*22*/, (syscall)wait_children /*23*/,(syscall)wait_pid, (syscall)get_current_pid /*24*/, (syscall)sem_open /*25*/, 
-	(syscall)sem_close /*26*/, (syscall)sem_post /*27*/, (syscall)sem_wait /*28*/
+	(syscall)yield /*21*/, (syscall)ps /*22*/, (syscall)wait_children /*23*/,(syscall)wait_pid /*24*/, (syscall)get_current_pid /*25*/, (syscall)sem_open /*26*/, 
+	(syscall)sem_close /*27*/, (syscall)sem_post /*28*/, (syscall)sem_wait /*29*/, (syscall)pipe /*30*/, (syscall)close /*31*/
 };
 
 void irqDispatcher(uint64_t irq) {
