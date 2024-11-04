@@ -32,6 +32,7 @@ string_arrayADT saved_commands;
 char current_command[MAX_COMMAND] = {0};
 uint16_t current_command_length = 0;
 uint16_t current_command_pos = 0;
+int16_t fg_process_pid = -1;
 
 static void clearCmd(uint8_t argc, char * argv[]);
 static void div0(uint8_t argc, char * argv[]);
@@ -103,20 +104,29 @@ void check_command(){
         command = NULL;
     } while (token);
     
+    if (!command_tokens[0]) {
+        s_draw_line("", 1, 1);
+        s_set_cursor();
+        return;
+    }
+    
     int8_t c = getCommandIdx(command_tokens[0][0]);
     if (c < 0) {
         s_draw_line(commandNotFoundMsg, 0, 1);
         return;
     }
-    command_t * auxC = commands[c];
+    add(saved_commands, current_command, current_command_length);
+    command_t * aux_command = commands[c];
     for (int j = 0; j < WORDS; j++) {
-        if (auxC[j].name != NULL) {
-            int cmp = strcmp(current_command, auxC[j].name);
+        if (aux_command[j].name != NULL) {
+            int cmp = strcmp(current_command, aux_command[j].name);
             if (cmp < 0) {
                 break;
             }
             else if (cmp == 0) {
-                auxC[j].function(i - 2,&command_tokens[1]);
+                fg_process_pid = create_process(aux_command[j].function, i - 2, &command_tokens[1], aux_command[j].name);
+                s_draw_line("",0,1);
+                //aux_command[j].function(i - 2,&command_tokens[1]);
                 return;
             }
         }
@@ -125,6 +135,8 @@ void check_command(){
         }
     }
     s_draw_line(commandNotFoundMsg, 0, 1);
+    s_draw_line("", 1, 1);
+    s_set_cursor();
 }
 
 void launchShell() {
@@ -137,75 +149,79 @@ void launchShell() {
     uint8_t key;
     while (!exitFlag) {
         key = get_char();
-        switch (key) {
-            case RIGHT_ARROW:
-                s_move_cursor(1);
-                if(current_command_pos < current_command_length)
-                    current_command_pos++;
-                break;
-            case LEFT_ARROW:
-                if (current_command_pos > 0){
-                    s_move_cursor(-1);
-                    current_command_pos--;
-                }
-                break;
-            case UP_ARROW:
-                if (has_previous(saved_commands)) {
+        if (fg_process_pid != -1) {
+            if (wait_pid(fg_process_pid, NO_BLOCK)) {
+                fg_process_pid = -1;
+                s_draw_line(empty, 1, 1);
+                s_set_cursor();
+            }
+            s_insert_char(key);
+        } else {
+            switch (key) {
+                case RIGHT_ARROW:
+                    s_move_cursor(1);
+                    if(current_command_pos < current_command_length)
+                        current_command_pos++;
+                    break;
+                case LEFT_ARROW:
+                    if (current_command_pos > 0){
+                        s_move_cursor(-1);
+                        current_command_pos--;
+                    }
+                    break;
+                case UP_ARROW:
+                    if (has_previous(saved_commands)) {
+                        s_off_cursor();
+                        strcpy(current_command,previous(saved_commands, &current_command_length));
+                        current_command_pos = current_command_length;
+                        s_draw_line(current_command, 1, 0);
+                        s_set_cursor();
+                    }
+                    break;
+                case DOWN_ARROW:
+                    if (has_next(saved_commands)) {
+                        s_off_cursor();
+                        strcpy(current_command,next(saved_commands, &current_command_length));
+                        current_command_pos = current_command_length;
+                        s_draw_line(current_command, 1, 0);
+                        s_set_cursor();
+                    }
+                    break;
+                case DELETE:
+                    if (current_command_pos > 0){
+                        s_remove_char();
+                        s_set_cursor();
+                        current_command_pos--;
+                        remove_letter(current_command, current_command_pos);
+                        current_command_length--;
+                    }
+                    break;
+                case '\n':
+                    current_command[current_command_length] = 0;
                     s_off_cursor();
-                    strcpy(current_command,previous(saved_commands, &current_command_length));
-                    current_command_pos = current_command_length;
-                    s_draw_line(current_command, 1, 0);
-                    s_set_cursor();
-                }
-                break;
-            case DOWN_ARROW:
-                if (has_next(saved_commands)) {
-                    s_off_cursor();
-                    strcpy(current_command,next(saved_commands, &current_command_length));
-                    current_command_pos = current_command_length;
-                    s_draw_line(current_command, 1, 0);
-                    s_set_cursor();
-                }
-                break;
-            case DELETE:
-                if (current_command_pos > 0){
-                    s_remove_char();
-                    s_set_cursor();
-                    current_command_pos--;
-                    remove_letter(current_command, current_command_pos);
-                    current_command_length--;
-                }
-                break;
-            case '\n':
-                current_command[current_command_length] = 0;
-                s_off_cursor();
-                if (current_command_length != 0) {
-                    add(saved_commands, current_command, current_command_length);
-                    to_begin(saved_commands);
                     check_command();
+                    to_begin(saved_commands);
                     current_command[0] = 0;
                     current_command_length = 0;
                     current_command_pos = 0;
-                }
-                s_draw_line(empty, 1, 1);
-                s_set_cursor();
-                break;
-            case '\t':
-                int8_t index;
-                if (current_command_length == 1 && (index  = getCommandIdx(current_command[0])) >= 0 && commands[index]->name) {
-                    current_command_length = strcpy(current_command, commands[index]->name);
-                    current_command_pos = current_command_length;
-                    s_draw_line(current_command, 1, 0);
-                    s_set_cursor();
-                }
-            case 0:
-                break;
-            default: 
-                s_insert_char(key);
-                insert_letter(current_command, current_command_length, key, current_command_pos);
-                current_command_length++;
-                current_command_pos++;
-                break;
+                    break;
+                case '\t':
+                    int8_t index;
+                    if (current_command_length == 1 && (index  = getCommandIdx(current_command[0])) >= 0 && commands[index]->name) {
+                        current_command_length = strcpy(current_command, commands[index]->name);
+                        current_command_pos = current_command_length;
+                        s_draw_line(current_command, 1, 0);
+                        s_set_cursor();
+                    }
+                case 0:
+                    break;
+                default: 
+                    s_insert_char(key);
+                    insert_letter(current_command, current_command_length, key, current_command_pos);
+                    current_command_length++;
+                    current_command_pos++;
+                    break;
+            }
         }
     }
     while (s_decrease_font_size() != -1);
@@ -253,7 +269,8 @@ void getTime(uint8_t argc, char * argv[]) {
 }
 
 void help(uint8_t argc, char * argv[]) {
-    s_draw_line(helpMsg,0,1);
+    write(1, helpMsg, 97);
+    //s_draw_line(helpMsg,0,1);
 }
 
 void invalidOpCode(uint8_t argc, char * argv[]) {

@@ -85,8 +85,8 @@ void wait_children() {
     syscaller(23, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
-void wait_pid(uint16_t pid) {
-    syscaller(24, pid, EMPTY, EMPTY, EMPTY, EMPTY);
+uint8_t wait_pid(uint16_t pid, uint8_t block) {
+    syscaller(24, pid, block, EMPTY, EMPTY, EMPTY);
 }
 
 uint16_t get_current_pid() {

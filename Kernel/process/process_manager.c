@@ -181,21 +181,37 @@ void wait_children() {
     }
 }
 
-void wait_pid(uint16_t pid) {
+uint8_t wait_pid_no_block(uint16_t pid) {
     process_struct * parent_pcb = &processes[get_current_pid()];
     if (!(parent_pcb->children_processes[pid / 64] & (1UL << (pid % 64)))) {
         return;
     }
+    if((parent_pcb->killed_children[pid / 64] & (1UL << (pid % 64)))) {
+        parent_pcb->children_processes[pid / 64] = off_n_bit_64(parent_pcb->children_processes[pid / 64], pid % 64);
+        parent_pcb->killed_children[pid / 64] = off_n_bit_64(parent_pcb->killed_children[pid / 64], pid % 64);
+        occupied[pid / 64] = off_n_bit_64(occupied[pid / 64], pid % 64);
+        my_free(processes[pid].name);
+        return 1;
+    }
 
-    while (!(parent_pcb->killed_children[pid / 64] & (1UL << (pid % 64)))) {
+    return 0;
+}
+
+uint8_t wait_pid_block(uint16_t pid) {
+    process_struct * parent_pcb = &processes[get_current_pid()];
+    while (!wait_pid_no_block(pid)) {
         parent_pcb->status = BLOCKED;
         yield();
     }
 
-    parent_pcb->children_processes[pid / 64] = off_n_bit_64(parent_pcb->children_processes[pid / 64], pid % 64);
-    parent_pcb->killed_children[pid / 64] = off_n_bit_64(parent_pcb->killed_children[pid / 64], pid % 64);
-    occupied[pid / 64] = off_n_bit_64(occupied[pid / 64], pid % 64);
-    my_free(processes[pid].name);
+    return 1;
+}
+
+uint8_t wait_pid(uint16_t pid, uint8_t block) {
+    if (block)
+        return wait_pid_block(pid);
+    else
+        return wait_pid_no_block(pid);
 }
 
 process_struct * get_process_info(uint8_t pid) {
