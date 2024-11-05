@@ -33,16 +33,9 @@ void re_draw_line(uint32_t from, uint32_t to){
 }
 
 void re_draw_screen(void (*fn)(uint32_t)){
-    printRectangle(0, 0, getScreenWidth(), getScreenHeight(), BLACK);
     for (uint16_t i = 0; i < width * height; i++) {
         fn(i);
-        if (!screen[i].character){
-            i = (i / width + 1) * width - 1;
-        }
-        
-        drawchar(screen[i].character, i % width , i / width, screen[i].fg_colour, screen[i].bg_colour);
     }
-    
 }
 
 static uint16_t displacement;
@@ -60,7 +53,8 @@ int8_t t_move_screen_up(uint8_t amount) {
     if((int)(currentX / width) - amount < 0) return -1;
 
     displacement = amount * width;
-    re_draw_screen(move_t_char);
+    //re_draw_screen(move_t_char);
+    move_screen_up(char_height * amount);
     currentX -=displacement;
     lastX -=displacement;
     return 0;

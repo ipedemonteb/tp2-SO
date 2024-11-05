@@ -61,5 +61,6 @@ void resetPopUp();
 void savePopUpWindow();
 uint8_t fontSizeBigger();
 uint8_t fontSizeSmaller();
+void move_screen_up(uint8_t amount);
 
 #endif

@@ -40,7 +40,7 @@ void * schedule(void * rsp) {
     do {
         current_pcb = poll(scheduler->schedule);
         if(current_pcb->status == BLOCKED) {
-            if(get_available() & current_pcb->blocked_in) {
+            if(get_available() & current_pcb->blocked_in) { // @todo: chequear esto
                 current_pcb->status = READY;
             } else {
                 add(scheduler->schedule, current_pcb);

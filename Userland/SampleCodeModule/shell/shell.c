@@ -104,6 +104,29 @@ int8_t getCommandIdx(uint8_t c) {
     return -1;
 }
 
+command_t * find_command(char * token) {
+    int8_t c = getCommandIdx(token[0]);
+    if (c < 0) {
+        return NULL;
+    }
+    command_t * command_array = commands[c];
+    for (int j = 0; j < WORDS; j++) {
+        if (command_array[j].name != NULL) {
+            int cmp = strcmp(current_command, command_array[j].name);
+            if (cmp < 0) {
+                break;
+            }
+            else if (cmp == 0) {
+                return command_array + j;
+            }
+        }
+        else {
+            break;
+        }
+    }
+    return NULL;
+}
+
 void check_command(){
     char * command_tokens[MAX_COMMAND/2] , * token, * command = current_command;
     uint8_t i = 0;
@@ -113,35 +136,19 @@ void check_command(){
         command_tokens[i++] = token;
         command = NULL;
     } while (token);
-
-    int8_t c = getCommandIdx(command_tokens[0][0]);
-    if (c < 0) {
-        write(TERMINAL, command_not_found_msg, 52); //@todo: cambiar los write por printf o algo asi
+    command_t * c = find_command(command_tokens[0]);
+    if (c == NULL) {
+        write(TERMINAL, command_not_found_msg, 52); //@todo: cambiar los write por printf o algo asiç
         return;
     }
-    command_t * auxC = commands[c];
-    for (int j = 0; j < WORDS; j++) {
-        if (auxC[j].name != NULL) {
-            int cmp = strcmp(current_command, auxC[j].name);
-            if (cmp < 0) {
-                break;
-            }
-            else if (cmp == 0) {
-                stdin = STDIN;
-                stdout = TERMINAL;
-                to_launch = auxC[j].function;
-                key_to_screen(1);
-                wait_pid(create_process(command_launcher,i - 2,&command_tokens[1], auxC[j].name), BLOCK);
-                key_to_screen(0);
-                write(TERMINAL, "\n", 1);
-                return;
-            }
-        }
-        else {
-            break;
-        }
-    }
-    write(TERMINAL, command_not_found_msg, 52); //@todo: cambiar los write por printf o algo asi
+    
+    stdin = STDIN;
+    stdout = TERMINAL;
+    to_launch = c->function;
+    key_to_screen(1);
+    wait_pid(create_process(command_launcher,i - 2,&command_tokens[1], c->name), BLOCK);
+    key_to_screen(0);
+    write(TERMINAL, "\n", 1);    
 }
 
 void handle_up_down(int8_t (*condition)(string_arrayADT), char * (*fn)(string_arrayADT,uint16_t *), uint8_t * key) {

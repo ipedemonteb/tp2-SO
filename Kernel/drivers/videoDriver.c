@@ -142,3 +142,22 @@ uint8_t fontSizeSmaller() {
 	font_size--;
 	return 1;
 }
+
+void move_screen_up(uint8_t pixels) {
+	uint8_t * framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
+	uint16_t width = getWidth();
+	uint16_t height = getHeight();
+	for (uint16_t i = 0; i < height; i++) {
+		for (uint16_t j = 0; j < width * BYTES_PER_PIXEL; j+= 3) {
+			if (i + pixels >= height) {
+				framebuffer[i * width * BYTES_PER_PIXEL + j] = BLACK;
+				framebuffer[i * width * BYTES_PER_PIXEL + j + 1] = BLACK;
+				framebuffer[i * width * BYTES_PER_PIXEL + j + 2] = BLACK;
+			} else {
+				framebuffer[i * width * BYTES_PER_PIXEL + j] = framebuffer[(i + pixels) * width * BYTES_PER_PIXEL + j];
+				framebuffer[i * width * BYTES_PER_PIXEL + j + 1] = framebuffer[(i + pixels) * width * BYTES_PER_PIXEL + j + 1];
+				framebuffer[i * width * BYTES_PER_PIXEL + j + 2] = framebuffer[(i + pixels) * width * BYTES_PER_PIXEL + j + 2];
+			}
+		}
+	}
+}

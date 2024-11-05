@@ -98,7 +98,7 @@ int64_t write(uint8_t bd, char * buffer, int64_t size) {
 
     int64_t count = 0;
     while (count < size) {
-        pipe->buff[pipe->last++] = buffer[count];
+        pipe->buff[(pipe->last++) % BUFF_MAX] = buffer[count];
         count++;
     }
     pipe->buff[pipe->last] = EOF;
