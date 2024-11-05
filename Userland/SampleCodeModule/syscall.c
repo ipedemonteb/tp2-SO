@@ -61,7 +61,7 @@ void my_free(void *p) {
     syscaller(14, p, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
-int8_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, char **argv, char *name) {
+int8_t create_process(void (*fn)(uint8_t, char **), uint8_t argc, char **argv, char *name) {
     return (int8_t)(uintptr_t)syscaller(15, (void *)fn, (void *)(uintptr_t)argc, (void *)argv, (void *)name, EMPTY);
 }
 
@@ -127,4 +127,12 @@ int8_t pipe(int8_t id, uint8_t pipe_bd[2]) {
 
 void close(uint8_t bd) {
     syscaller(31, (void *)(uintptr_t)bd, EMPTY, EMPTY, EMPTY, EMPTY);
+}
+
+void copy(uint8_t dest_bd, uint8_t source_bd) {
+    syscaller(32, (void *)(uintptr_t)dest_bd, (void *)(uintptr_t)source_bd, EMPTY, EMPTY, EMPTY);
+}
+
+void key_to_screen(uint8_t flag) {
+    syscaller(33, (void *)(uintptr_t)flag, EMPTY, EMPTY, EMPTY, EMPTY);
 }

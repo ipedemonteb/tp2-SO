@@ -21,6 +21,7 @@
 #define LETTERS 'z' - 'a' + 1
 #define WORDS 5
 #define MAX_COMMAND 128
+#define TERMINAL 3
 
 typedef struct command_t{
     char * name;
@@ -33,20 +34,18 @@ char current_command[MAX_COMMAND] = {0};
 uint16_t current_command_length = 0;
 uint16_t current_command_pos = 0;
 
+char * prompt = "$> ";
+uint8_t prompt_len = 3;
+
 static void clearCmd(uint8_t argc, char * argv[]);
 static void div0(uint8_t argc, char * argv[]);
 static void exit(uint8_t argc, char * argv[]);
 static void eliminator(uint8_t argc, char * argv[]);
-static void fontSmall(uint8_t argc, char * argv[]);
-static void fontBig(uint8_t argc, char * argv[]);
 static void getTime(uint8_t argc, char * argv[]);
 static void help(uint8_t argc, char * argv[]);
 static void invalidOpCode(uint8_t argc, char * argv[]);
-static void prio(uint8_t argc, char * argv[]);
-static void processes(uint8_t argc, char * argv[]);
-static void mm(uint8_t argc, char * argv[]);
 static void printps(uint8_t argc, char * argv[]);
-static void sync(uint8_t argc, char * argv[]);
+static void sleep(uint8_t argc, char * argv[]);
 static void move_up(uint8_t argc, char * argv[]);
 
 static command_t commands[LETTERS][WORDS] = {
@@ -55,7 +54,7 @@ static command_t commands[LETTERS][WORDS] = {
     {{"clear", clearCmd}, {0, 0}}, 
     {{"div0", div0}, {0, 0}}, 
     {{"eliminator", eliminator}, {"exit", exit}, {0, 0}}, 
-    {{"fontBig", fontBig}, {"fontSmall", fontSmall}, {0, 0}}, 
+    {{0, 0}}, 
     {{"getTime", getTime}, {0, 0}},
     {{"help", help}, {0, 0}}, 
     {{"invalidOpCode", invalidOpCode}, {0, 0}},
@@ -68,8 +67,8 @@ static command_t commands[LETTERS][WORDS] = {
     {{"ps", printps},{0,0}},  //p
     {{0,0}},  //q
     {{0,0}},  //r
-    {{0,0}},  //s
-    {{"test_mm",mm},{"test_prio",prio},{"test_processes",processes},{"test_sync", sync}, {0,0}},   //t
+    {{"sleep", sleep},{0,0}},  //s
+    {{"test_mm",test_mm},{"test_prio",test_prio},{"test_processes",test_processes},{"test_sync", test_sync}, {0,0}},   //t
     {{0,0}},  //u
     {{0,0}},  //v
     {{0,0}},  //x
@@ -77,10 +76,22 @@ static command_t commands[LETTERS][WORDS] = {
     {{0,0}}  //z
 };
 
-static char * commandNotFoundMsg = "Command not found. Type help for a list of commands";
-static char * helpMsg = "List of commands: clear, div0, eliminator, exit, fontBig, fontSmall, getTime, help, invalidOpCode";
+static char * command_not_found_msg = "Command not found. Type help for a list of commands\n";
+static char * helpMsg = "List of commands: clear, div0, eliminator, exit, getTime, help, invalidOpCode";
 
 static uint8_t exitFlag;
+
+void (*to_launch)(uint8_t, char **);
+uint8_t stdin;
+uint8_t stdout;
+
+void command_launcher(uint8_t argc, char * argv[]) {
+    copy(STDIN, stdin);
+    copy(STDOUT, stdout);
+    close(stdin);
+    close(stdout);
+    to_launch(argc, argv);
+}
 
 int8_t getCommandIdx(uint8_t c) {
     if (c <= 'Z') {
@@ -105,7 +116,7 @@ void check_command(){
 
     int8_t c = getCommandIdx(command_tokens[0][0]);
     if (c < 0) {
-        s_draw_line(commandNotFoundMsg, 0, 1);
+        write(TERMINAL, command_not_found_msg, 52); //@todo: cambiar los write por printf o algo asi
         return;
     }
     command_t * auxC = commands[c];
@@ -116,7 +127,13 @@ void check_command(){
                 break;
             }
             else if (cmp == 0) {
-                auxC[j].function(i - 2,&command_tokens[1]);
+                stdin = STDIN;
+                stdout = TERMINAL;
+                to_launch = auxC[j].function;
+                key_to_screen(1);
+                wait_pid(create_process(command_launcher,i - 2,&command_tokens[1], auxC[j].name), BLOCK);
+                key_to_screen(0);
+                write(TERMINAL, "\n", 1);
                 return;
             }
         }
@@ -124,61 +141,55 @@ void check_command(){
             break;
         }
     }
-    s_draw_line(commandNotFoundMsg, 0, 1);
+    write(TERMINAL, command_not_found_msg, 52); //@todo: cambiar los write por printf o algo asi
+}
+
+void handle_up_down(int8_t (*condition)(string_arrayADT), char * (*fn)(string_arrayADT,uint16_t *), uint8_t * key) {
+    if(condition(saved_commands)) {
+        write(TERMINAL, key, 1);
+        strcpy(current_command,fn(saved_commands, &current_command_length));
+        current_command_pos = current_command_length;
+        write(TERMINAL, prompt, prompt_len);
+        write(TERMINAL, current_command, current_command_length);
+    }
 }
 
 void launchShell() {
-    s_char prompt[] = {{'$', WHITE, BLACK},{'>', WHITE, BLACK}, {' ', WHITE, BLACK}};
-    s_start_graphics(prompt, 3);
-    char * empty = "";
-    s_draw_line(empty, 1, 0);
-    s_set_cursor();
+    write(TERMINAL, prompt, 3);
     saved_commands = start_string_array(BUFF_MAX);
     uint8_t key;
     while (!exitFlag) {
         key = get_char();
         switch (key) {
             case RIGHT_ARROW:
-                s_move_cursor(1);
-                if(current_command_pos < current_command_length)
+                if(current_command_pos < current_command_length) {
+                    write(TERMINAL, &key, 1);
                     current_command_pos++;
+                }
                 break;
             case LEFT_ARROW:
                 if (current_command_pos > 0){
-                    s_move_cursor(-1);
+                    write(TERMINAL, &key, 1);
                     current_command_pos--;
                 }
                 break;
             case UP_ARROW:
-                if (has_previous(saved_commands)) {
-                    s_off_cursor();
-                    strcpy(current_command,previous(saved_commands, &current_command_length));
-                    current_command_pos = current_command_length;
-                    s_draw_line(current_command, 1, 0);
-                    s_set_cursor();
-                }
+                handle_up_down(has_previous, previous, &key);
                 break;
             case DOWN_ARROW:
-                if (has_next(saved_commands)) {
-                    s_off_cursor();
-                    strcpy(current_command,next(saved_commands, &current_command_length));
-                    current_command_pos = current_command_length;
-                    s_draw_line(current_command, 1, 0);
-                    s_set_cursor();
-                }
+                handle_up_down(has_next, next, &key);
                 break;
             case DELETE:
                 if (current_command_pos > 0){
-                    s_remove_char();
-                    s_set_cursor();
+                    write(TERMINAL, &key, 1); //@todo: esta muchas veces repetido esto
                     current_command_pos--;
                     remove_letter(current_command, current_command_pos);
                     current_command_length--;
                 }
                 break;
             case '\n':
+                write(TERMINAL, &key, 1);
                 current_command[current_command_length] = 0;
-                s_off_cursor();
                 if (current_command_length != 0) {
                     add(saved_commands, current_command, current_command_length);
                     to_begin(saved_commands);
@@ -187,52 +198,41 @@ void launchShell() {
                     current_command_length = 0;
                     current_command_pos = 0;
                 }
-                s_draw_line(empty, 1, 1);
-                s_set_cursor();
+                write(TERMINAL, prompt, prompt_len);
                 break;
             case '\t':
                 int8_t index;
                 if (current_command_length == 1 && (index  = getCommandIdx(current_command[0])) >= 0 && commands[index]->name) {
                     current_command_length = strcpy(current_command, commands[index]->name);
                     current_command_pos = current_command_length;
-                    s_draw_line(current_command, 1, 0);
-                    s_set_cursor();
+                    write(TERMINAL, current_command + 1, current_command_length - 1);
                 }
             case 0:
                 break;
             default: 
-                s_insert_char(key);
+                write(TERMINAL, &key, 1);
                 insert_letter(current_command, current_command_length, key, current_command_pos);
                 current_command_length++;
                 current_command_pos++;
                 break;
         }
     }
-    while (s_decrease_font_size() != -1);
 }
 
 // comandos de la terminal
 
-void fontBig(uint8_t argc, char * argv[]) {
-    s_increase_font_size();
-}
-
-void fontSmall(uint8_t argc, char * argv[]) {
-    s_decrease_font_size();
-}
-
 void exit(uint8_t argc, char * argv[]) {
-    exitFlag = 1;
+
 }
 
 void div0(uint8_t argc, char * argv[]) {
-    while (s_decrease_font_size() != -1);
+
     divZero();
 }
 
 
 void move_up(uint8_t argc, char * argv[]) {
-    s_move_screen_up(satoi(argv[0]));
+
 }
 
 void eliminator(uint8_t argc, char * argv[]) {
@@ -243,51 +243,33 @@ void eliminator(uint8_t argc, char * argv[]) {
 }
 
 void clearCmd(uint8_t argc, char * argv[]) {
-    s_clear();
+
 }
 
 void getTime(uint8_t argc, char * argv[]) {
-    char clock[20];
-    time(clock);
-    s_draw_line(clock, 0, 1);
+    //char clock[20];
+    //time(clock);
+
 }
 
 void help(uint8_t argc, char * argv[]) {
-    s_draw_line(helpMsg,0,1);
+    printf(helpMsg);
+}
+
+void sleep(uint8_t argc, char * argv[]) {
+    bussy_wait(1000000000);
 }
 
 void invalidOpCode(uint8_t argc, char * argv[]) {
-    while (s_decrease_font_size() != -1);
+
     opcode();
-}
-
-void sync(uint8_t argc, char * argv[]) {
-    create_process(test_sync, argc, argv, "test_sync");
-    wait_children();
-}
-
-void prio(uint8_t argc, char * argv[]){
-    create_process(test_prio,0,0,"test_prio");
-    wait_children();
-}
-
-void processes(uint8_t argc, char * argv[]){
-    char * argv2[] = {"4", 0};
-    create_process(test_processes,1, argv2,"test_processes");
-    wait_children();
-}
-
-
-void mm(uint8_t argc, char * argv[]){
-    create_process(test_mm,1,0,"test_mm");
-    wait_children();
 }
 
 void printps(uint8_t argc, char * argv[]) {
     process_info * info = my_malloc(sizeof(process_info) * 128);
     uint8_t process_count = ps(info);
-    char header[] = "PID     NAME         PRIORITY     STACK_BASE      STACK_PTR       FOREGROUND    STATUS   ";
-    s_draw_line(header,0,1);
+    char header[] = "PID     NAME         PRIORITY     STACK_BASE      STACK_PTR       FOREGROUND    STATUS   \n";
+    write(STDOUT, header, 90);
     for(int i = 0; i < process_count; i++) {
         uint8_t jmp = 0;
         char buffer[127];
@@ -348,9 +330,7 @@ void printps(uint8_t argc, char * argv[]) {
                 break;
         }
         strcpy(buffer + jmp, msg[index]);
-        buffer[jmp + strlen(msg[index])] = ' ';
-
-        buffer[127] = 0;
-        s_draw_line(buffer,0,1);
+        buffer[jmp + strlen(msg[index])] = '\n';
+        write(STDOUT, buffer, jmp + strlen(msg[index]) + 1);
     }
 }

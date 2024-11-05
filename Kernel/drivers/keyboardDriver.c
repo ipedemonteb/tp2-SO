@@ -1,9 +1,12 @@
 #include "../include/keyboardDriver.h"
 #include "../include/regsDump.h"
 #include "../include/pipes.h"
+#include "../include/terminal_driver.h"
 #include <stdint.h>
 
-static pipe_t * char_buffer;
+static pipe_t * keyboard_buffer;
+static pipe_t * terminal_buffer;
+static uint8_t to_terminal = 0;
 
 extern const uint64_t regs[19];
 
@@ -115,9 +118,8 @@ void keyboard_handler() {
 		default:
 			return;
 		}
-		char_buffer->buff[char_buffer->last % BUFF_MAX] = aux;
-		char_buffer->last++;
-		char_buffer->buff[char_buffer->last % BUFF_MAX] = EOF;
+
+		direct_write(keyboard_buffer, aux);
 		keyboard_ready();
 	}
 	else if (keyVal > 58) {
@@ -128,18 +130,33 @@ void keyboard_handler() {
 			ctrlOn = 0;
 		}
 		else {
-			char_buffer->buff[char_buffer->last % BUFF_SIZE] = asccode[keyVal][shiftOn + capsLock * 2];
-			char_buffer->last++;
+			uint8_t c = asccode[keyVal][shiftOn ^ capsLock];
+			if (to_terminal) {
+				if (c == '\n') {
+					t_off_cursor();
+					t_draw_line("", 1);
+					t_set_cursor();
+				} else {
+					t_insert_char(c);
+				}
+			}
+			direct_write(keyboard_buffer, c);
 			keyboard_ready();
 		}
 	}
 }
 
 uint8_t nextFromBuffer() {
-	return char_buffer->last <= char_buffer->current ? 0 : char_buffer->buff[(char_buffer->current++) % BUFF_SIZE];
+	return keyboard_buffer->last <= keyboard_buffer->current ? 0 : keyboard_buffer->buff[(keyboard_buffer->current++) % BUFF_SIZE];
 }
 
 void start_keyboard_driver(){
-	char_buffer = get_keyboard_buffer();
-	char_buffer->init = INIT;
+	keyboard_buffer = get_keyboard_buffer();
+	terminal_buffer = get_terminal_buffer();
+	keyboard_buffer->init = INIT;
+	terminal_buffer->init = INIT;
+}
+
+void key_to_screen(uint8_t flag) {
+	to_terminal = flag;
 }

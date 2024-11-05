@@ -8,6 +8,7 @@
 #include "./include/process_manager.h"
 #include "./include/test_sync.h"
 #include "./include/keyboardDriver.h"
+#include "./include/terminal_driver.h"
 #include "include/sem.h"
 
 
@@ -47,6 +48,7 @@ void * initializeKernelBinary() {
 
 int main() {
 	start_keyboard_driver();
+	start_terminal();
 	load_idt();
 	//_sti();
 	//((EntryPoint)sampleCodeModuleAddress)();

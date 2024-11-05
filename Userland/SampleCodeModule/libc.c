@@ -10,7 +10,35 @@ void readString(uint8_t * buffer, int maxLength);
 void printString(uint8_t * str);
 void printInt(int num);
 
-int printf(const uint8_t * fmt, ...) {
+int64_t put_char(char c) {
+    return write(STDOUT, &c, 1);
+}
+
+void print_string(char * str) {
+    write(STDOUT, str, strlen(str));
+}
+
+void print_int(int num) {
+    if (num == 0) {
+        put_char('0');
+        return;
+    }
+    if (num < 0) {
+        put_char('-');
+        num = -num;
+    }
+    char buffer[10];
+    int i = 0;
+    while (num > 0) {
+        buffer[i++] = (num % 10) + '0';
+        num /= 10;
+    }
+    while (i > 0) {
+        put_char(buffer[--i]);
+    }
+}
+
+int printf(const char * fmt, ...) {
     va_list args;
     uint32_t ret = 0;
     va_start(args, fmt);
@@ -19,18 +47,18 @@ int printf(const uint8_t * fmt, ...) {
             fmt++;
             switch (*fmt) {
                 case 'd':
-                    printInt(va_arg(args, int));
+                    print_int(va_arg(args, int));
                     break;
                 case 'c':
-                    putChar(va_arg(args, int));
+                    put_char(va_arg(args, int));
                     break;
                 case 's':
-                    printString(va_arg(args, uint8_t *));
+                    print_string(va_arg(args, char *));
                     break;
             }
         }
         else {
-            uint8_t aux = putChar(*fmt);
+            uint8_t aux = put_char(*fmt);
             if (!aux) {
                 return -1;
             }
@@ -102,32 +130,6 @@ void readString(uint8_t * buffer, int maxLength) {
         putChar(c);
     }
     buffer[i] = '\0';
-}
-
-void printString(uint8_t * str) {
-    while (*str) {
-        putChar(*str++);
-    }
-}
-
-void printInt(int num) {
-    if (num == 0) {
-        putChar('0');
-        return;
-    }
-    if (num < 0) {
-        putChar('-');
-        num = -num;
-    }
-    uint8_t buffer[10];
-    int i = 0;
-    while (num > 0) {
-        buffer[i++] = (num % 10) + '0';
-        num /= 10;
-    }
-    while (i > 0) {
-        putChar(buffer[--i]);
-    }
 }
 
 int atoi(const uint8_t * str) {

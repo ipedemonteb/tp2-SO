@@ -6,8 +6,9 @@
 #define EOF -1
 #define NULL 0
 
-int printf(const uint8_t * fmt, ...);
+int printf(const char * fmt, ...);
 int putChar(uint8_t c);
+int64_t put_char(char c);
 int getChar();
 char get_char();
 void cleanBuffer();

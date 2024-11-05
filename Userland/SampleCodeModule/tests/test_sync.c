@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "../include/tests.h"
-
+#include "../include/libc.h"
 #define TOTAL_PAIR_PROCESSES    2
 #define SEM_ID                  1
 
@@ -64,11 +64,12 @@ uint64_t my_process_inc(uint64_t argc, char * argv[]) {
   return 0;
 }
 
-uint64_t test_sync(uint64_t argc, char * argv[]) { // { n, use_sem, 0 }
+void test_sync(uint8_t argc, char * argv[]) { // { n, use_sem, 0 }
   uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
 
   if(argc != 2) {
-    return -1;
+    printf("Incorrect argument count. Expected: 2");
+    return;
   }
 
   char * argvDec[] = {argv[0], "-1", argv[1], 0};
@@ -79,7 +80,8 @@ uint64_t test_sync(uint64_t argc, char * argv[]) { // { n, use_sem, 0 }
 
   int8_t sem_open_result = sem_open(SEM_ID, 1);
   if(sem_open_result == -1) {
-    return -1;
+    printf("Error while opening semaphore");
+    return;
   }
 
 
@@ -91,18 +93,13 @@ uint64_t test_sync(uint64_t argc, char * argv[]) { // { n, use_sem, 0 }
 
   //wait_children();
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    wait_pid(pids[i]);
-    wait_pid(pids[i + TOTAL_PAIR_PROCESSES]);
+    wait_pid(pids[i], BLOCK);
+    wait_pid(pids[i + TOTAL_PAIR_PROCESSES], BLOCK);
   }
 
   sem_close(SEM_ID);
 
-  s_draw_line("test_sync: final global value: ",0,1);
-  s_off_cursor();
-  int8_t final[3];
-  numToStr(global, final);
-  s_draw_line(final, 0, 1);
-  s_off_cursor();
+  printf("test_sync: final global value %d", global);
 
-  return 0;
+  return;
 }

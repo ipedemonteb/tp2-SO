@@ -1,4 +1,5 @@
 #include "../include/tests.h"
+#include "../include/libc.h"
 
 #define MAX_BLOCKS 128
 
@@ -7,7 +8,7 @@ typedef struct MM_rq {
   uint32_t size;
 } mm_rq;
 
-uint64_t test_mm(uint64_t argc, uint64_t max_memory) {
+uint64_t test_mm1(uint64_t argc, uint64_t max_memory) {
   mm_rq mm_rqs[MAX_BLOCKS];
   uint8_t rq;
   uint32_t total;
@@ -58,18 +59,20 @@ uint64_t test_mm(uint64_t argc, uint64_t max_memory) {
   }
 }
 
-uint64_t test_mm1(uint64_t argc, uint8_t * argv[]) {
+void test_mm(uint8_t argc, char * argv[]) {
   mm_rq mm_rqs[MAX_BLOCKS];
   uint8_t rq;
   uint32_t total;
   uint64_t max_memory;
 
   if (argc != 1) {
-    return -1;
+    printf("Incorrect argument count. Expected: 1");
+    return;
   }
 
-  if ((max_memory = satoi(argv[0])) <= 0) {
-    return -1;
+  if ((max_memory = satoi(argv[0])) <= 0) { //@todo: esta raro el tema de los negativos
+    printf("Max memory must be greater than 0");
+    return;
   }
 
   while (1) {
@@ -97,9 +100,8 @@ uint64_t test_mm1(uint64_t argc, uint8_t * argv[]) {
     for (i = 0; i < rq; i++) {
       if (mm_rqs[i].address) {
         if (!memcheck(mm_rqs[i].address, i, mm_rqs[i].size )) {
-          s_draw_line("test_mm: check failed",0,1);
-          s_off_cursor();
-          return -1;
+          printf("Memory Error.");
+          return;
         }
       }
     }

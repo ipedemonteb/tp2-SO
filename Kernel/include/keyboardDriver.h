@@ -34,4 +34,6 @@ uint8_t getKey();
 uint8_t getKeyboardStatus();
 uint8_t getKeyboardKey();
 void start_keyboard_driver();
+void key_to_screen(uint8_t flag);
+
 #endif

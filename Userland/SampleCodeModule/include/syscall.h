@@ -37,7 +37,7 @@ uint8_t fontSizeDown();
 void time(char bp[]);
 void * my_malloc(uint64_t size);
 void my_free(void * p); 
-int8_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, char **argv, char *name);
+int8_t create_process(void (*fn)(uint8_t, char **), uint8_t argc, char **argv, char *name);
 uint8_t kill(uint16_t pid);
 void my_exit(); 
 uint8_t block(uint16_t pid);
@@ -52,5 +52,9 @@ int8_t sem_open(int8_t id, int8_t value);
 int8_t sem_close(int8_t id);
 int8_t sem_post(int8_t id);
 int8_t sem_wait(int8_t id);
+int8_t pipe(int8_t id, uint8_t pipe_bd[2]);
+void close(uint8_t bd);
+void copy(uint8_t dest_bd, uint8_t source_bd);
+void key_to_screen(uint8_t flag);
 
 #endif

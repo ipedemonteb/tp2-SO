@@ -2,9 +2,12 @@
 #include "../include/process.h"
 #include "../include/scheduler.h"
 #include "../include/process_manager.h"
+#include "../include/terminal_driver.h"
 
 #define IN 0
 #define OUT 1
+#define TERMINAL 1
+#define KEYBOARD 0
 
 pipe_t pipes[MAX_BUFFERS] = {0};
 uint64_t avail = 0;
@@ -39,6 +42,11 @@ void close(uint8_t bd) {
     pcb->open_buffers[bd] = -1;
 }
 
+void copy(uint8_t dest_bd, uint8_t source_bd) {
+    process_struct * pcb = get_process_info(get_current_pid());
+    pcb->open_buffers[dest_bd] = pcb->open_buffers[source_bd];
+}
+
 static uint8_t has_next_pipe(pipe_t * p) {
     return p->last > p->current;
 }
@@ -60,7 +68,7 @@ int64_t read(uint8_t bd, char * arr, int64_t size) {
     }
     
     int64_t count = 0;
-    while (count < size && pipe->buff[pipes[id].current % BUFF_MAX] != EOF) {
+    while (count < size && pipe->buff[pipe->current % BUFF_MAX] != EOF /*@todo: chequear esta condicion*/) {
         if (!has_next_pipe(pipe)) {
             pcb->status = BLOCKED;
             pcb->blocked_in = set_n_bit_64(pcb->blocked_in, id/2);
@@ -94,7 +102,12 @@ int64_t write(uint8_t bd, char * buffer, int64_t size) {
         count++;
     }
     pipe->buff[pipe->last] = EOF;
-    avail = set_n_bit_64(avail,id/2);
+    if (id/2 == TERMINAL) {
+        terminal();
+    }
+    else {
+        avail = set_n_bit_64(avail,id/2);
+    }
     return count;
 }
 
@@ -103,9 +116,27 @@ uint64_t get_available(){
 }
 
 pipe_t * get_keyboard_buffer(){
-    return &pipes[0];
+    return &pipes[KEYBOARD];
+}
+
+pipe_t * get_terminal_buffer() {
+    return &pipes[TERMINAL];
 }
 
 void keyboard_ready(){
     avail |= 1;
+}
+
+void direct_write(pipe_t * p, char c) {
+    p->buff[p->last % BUFF_MAX] = c;
+    p->last++;
+}
+
+uint8_t direct_read(pipe_t * p, char * c) {
+    if (p->current >= p->last ) {
+        return 0;
+    }
+    *c = p->buff[p->current % BUFF_MAX];
+    p->current++;
+    return 1;
 }
