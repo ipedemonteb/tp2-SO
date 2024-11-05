@@ -8,6 +8,9 @@
 #define STDIN 0
 #define STDOUT 1
 
+#define READ_END 0
+#define WRITE_END 1
+
 enum Status {READY, BLOCKED, KILLED};
 
 typedef struct process_info {
@@ -52,5 +55,7 @@ int8_t sem_open(int8_t id, int8_t value);
 int8_t sem_close(int8_t id);
 int8_t sem_post(int8_t id);
 int8_t sem_wait(int8_t id);
+int8_t pipe(int8_t id, uint8_t pipe_bd[2]);
+void close(uint8_t bd);
 
 #endif
