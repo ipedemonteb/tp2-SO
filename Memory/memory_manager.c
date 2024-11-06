@@ -1,5 +1,5 @@
-#include "mmADT.h"
-#include "memory_manager.h"
+#include "./include/mmADT.h"
+#include "./include/memory_manager.h"
 
 #define START 0x10000
 #define END 0x9FFFF
