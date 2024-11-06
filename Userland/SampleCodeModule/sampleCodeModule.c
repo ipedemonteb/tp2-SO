@@ -6,7 +6,7 @@
 
 void inactive() {
 	while (1) {//@todo: ver de cammbiar por un hlt
-		yield();
+		//yield();
 	}
 	
 }

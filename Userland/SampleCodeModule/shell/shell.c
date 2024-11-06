@@ -22,6 +22,7 @@
 #define WORDS 5
 #define MAX_COMMAND 128
 #define TERMINAL 3
+#define MAX_PID 127
 
 typedef struct command_t{
     char * name;
@@ -76,21 +77,14 @@ static command_t commands[LETTERS][WORDS] = {
     {{0,0}}  //z
 };
 
-static char * command_not_found_msg = "Command not found. Type help for a list of commands\n";
-static char * helpMsg = "List of commands: clear, div0, eliminator, exit, getTime, help, invalidOpCode";
 
 static uint8_t exitFlag;
 
-void (*to_launch)(uint8_t, char **);
-uint8_t stdin;
-uint8_t stdout;
+uint8_t running_processes_pids[MAX_PID + 1] = {0};
 
-void command_launcher(uint8_t argc, char * argv[]) {
-    copy(STDIN, stdin);
-    copy(STDOUT, stdout);
-    close(stdin);
-    close(stdout);
-    to_launch(argc, argv);
+
+void not_found_process(uint8_t argc, char * argv[]) {
+    printf("%s: Command not found. Type help for a list of commands", argv[0]);
 }
 
 int8_t getCommandIdx(uint8_t c) {
@@ -112,7 +106,7 @@ command_t * find_command(char * token) {
     command_t * command_array = commands[c];
     for (int j = 0; j < WORDS; j++) {
         if (command_array[j].name != NULL) {
-            int cmp = strcmp(current_command, command_array[j].name);
+            int cmp = strcmp(token, command_array[j].name);
             if (cmp < 0) {
                 break;
             }
@@ -127,26 +121,68 @@ command_t * find_command(char * token) {
     return NULL;
 }
 
-void check_command(){
-    char * command_tokens[MAX_COMMAND/2] , * token, * command = current_command;
+uint8_t get_tokens(char ** tokens, char * source, const char * delim) {
+    char * token;
     uint8_t i = 0;
     do
     {
-        token = strtok(command," ");
-        command_tokens[i++] = token;
-        command = NULL;
+        token = strtok(source,delim);
+        tokens[i++] = token;
+        source = NULL;
     } while (token);
-    command_t * c = find_command(command_tokens[0]);
-    if (c == NULL) {
-        write(TERMINAL, command_not_found_msg, 52); //@todo: cambiar los write por printf o algo asiç
+    tokens[i] = NULL;
+    return i;
+}
+
+void wait_for_processes(uint8_t fg) {
+     for (uint8_t i = 0; i < MAX_PID + 1; i++) {
+        if (running_processes_pids[i]) {
+            wait_pid(i, fg);
+            running_processes_pids[i] = 0;
+        }
+    }
+}
+
+void check_command(){
+    key_to_screen(1);
+    char * commands[MAX_COMMAND/2], * command_tokens[MAX_COMMAND/2];
+    uint8_t command_count = get_tokens(commands, current_command, "|") - 1;
+
+    if (command_count > 2) {
+        write(TERMINAL, "Only one pipe supported.\n",25);
+        key_to_screen(0);
         return;
     }
     
-    stdin = STDIN;
-    stdout = TERMINAL;
-    to_launch = c->function;
-    key_to_screen(1);
-    wait_pid(create_process(command_launcher,i - 2,&command_tokens[1], c->name), BLOCK);
+    uint8_t command_argc;
+    command_t * c;
+
+    uint8_t p[2];
+    pipe(ANON,p);
+    if (command_count == 2) {
+        swap(STDIN,p[READ_END]);
+
+        command_argc = get_tokens(command_tokens, commands[1], " ") - 2;
+        c = find_command(command_tokens[0]);
+
+        running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1;
+
+        swap(STDIN, p[READ_END]);
+    } else {
+        copy(p[WRITE_END],STDOUT);
+    }
+    swap(STDOUT, p[WRITE_END]);
+    
+    command_argc = get_tokens(command_tokens, commands[0], " ") - 2;
+    c = find_command(command_tokens[0]);
+
+    running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1;
+    
+    swap(STDOUT, p[WRITE_END]);
+    close(p[WRITE_END]);
+    close(p[READ_END]);
+
+    wait_for_processes(1);
     key_to_screen(0);
     write(TERMINAL, "\n", 1);    
 }
@@ -162,6 +198,9 @@ void handle_up_down(int8_t (*condition)(string_arrayADT), char * (*fn)(string_ar
 }
 
 void launchShell() {
+    uint8_t p[2];
+    copy(STDOUT,TERMINAL);
+
     write(TERMINAL, prompt, 3);
     saved_commands = start_string_array(BUFF_MAX);
     uint8_t key;
@@ -260,7 +299,7 @@ void getTime(uint8_t argc, char * argv[]) {
 }
 
 void help(uint8_t argc, char * argv[]) {
-    printf(helpMsg);
+    printf("List of commands: clear, div0, eliminator, exit, getTime, help, invalidOpCode");
 }
 
 void sleep(uint8_t argc, char * argv[]) {

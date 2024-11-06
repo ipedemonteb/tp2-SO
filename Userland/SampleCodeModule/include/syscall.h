@@ -8,6 +8,13 @@
 #define STDIN 0
 #define STDOUT 1
 
+#define MAX_PID 127
+
+#define ANON -1
+
+#define READ_END 0
+#define WRITE_END 1
+
 enum Status {READY, BLOCKED, KILLED};
 
 typedef struct process_info {
@@ -56,5 +63,5 @@ int8_t pipe(int8_t id, uint8_t pipe_bd[2]);
 void close(uint8_t bd);
 void copy(uint8_t dest_bd, uint8_t source_bd);
 void key_to_screen(uint8_t flag);
-
+void swap(uint8_t bd1, uint8_t bd2);
 #endif
