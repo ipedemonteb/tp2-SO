@@ -1,13 +1,9 @@
 #include <stdint.h>
 #include "../include/shell.h"
 #include "../include/libc.h"
-#include "../include/userLib.h"
-#include "../include/sounds.h"
-//#include "../include/eliminator.h"
 #include "../include/syscall.h"
 #include "../include/tests.h"
 #include "../include/string_arrayADT.h"
-#include "../include/shell_graphics.h"
 #include "../include/command_manager.h"
 
 #define BUFF_MAX 4096
@@ -38,20 +34,9 @@ uint16_t current_command_pos = 0;
 char * prompt = "$> ";
 uint8_t prompt_len = 3;
 
-static void clearCmd(uint8_t argc, char * argv[]);
-static void div0(uint8_t argc, char * argv[]);
-static void exit(uint8_t argc, char * argv[]);
-static void eliminator(uint8_t argc, char * argv[]);
-static void getTime(uint8_t argc, char * argv[]);
-static void help(uint8_t argc, char * argv[]);
-static void invalidOpCode(uint8_t argc, char * argv[]);
-static void printps(uint8_t argc, char * argv[]);
-static void sleep(uint8_t argc, char * argv[]);
-static void move_up(uint8_t argc, char * argv[]);
-
 static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //a
-    {{0,0}},  //b
+    {{"block", block_process}, {0,0}},  //b
     {{"clear", clearCmd}, {0, 0}}, 
     {{"div0", div0}, {0, 0}}, 
     {{"eliminator", eliminator}, {"exit", exit}, {0, 0}}, 
@@ -60,10 +45,10 @@ static command_t commands[LETTERS][WORDS] = {
     {{"help", help}, {0, 0}}, 
     {{"invalidOpCode", invalidOpCode}, {0, 0}},
     {{0,0}},  //j
-    {{0,0}},  //k
-    {{0,0}},  //l
+    {{"kill", kill_process}, {0,0}},  //k
+    {{"loop",loop}, {0,0}},  //l
     {{"move_up", move_up},{0,0}},  //m
-    {{0,0}},  //n
+    {{"nice", nice_process}, {0,0}},  //n
     {{0,0}},  //o
     {{"ps", printps},{0,0}},  //p
     {{0,0}},  //q
@@ -77,6 +62,7 @@ static command_t commands[LETTERS][WORDS] = {
     {{0,0}}  //z
 };
 
+static char * command_not_found_msg = "Command not found. Type help for a list of commands";
 
 static uint8_t exitFlag;
 
@@ -262,121 +248,5 @@ void launchShell() {
                 current_command_pos++;
                 break;
         }
-    }
-}
-
-// comandos de la terminal
-
-void exit(uint8_t argc, char * argv[]) {
-
-}
-
-void div0(uint8_t argc, char * argv[]) {
-
-    divZero();
-}
-
-
-void move_up(uint8_t argc, char * argv[]) {
-
-}
-
-void eliminator(uint8_t argc, char * argv[]) {
-    /* gameMain();
-    cleanBuffer();
-    sMoveScreenUp(0);
-    reset = 1; */
-}
-
-void clearCmd(uint8_t argc, char * argv[]) {
-
-}
-
-void getTime(uint8_t argc, char * argv[]) {
-    //char clock[20];
-    //time(clock);
-
-}
-
-void help(uint8_t argc, char * argv[]) {
-    printf("List of commands: clear, div0, eliminator, exit, getTime, help, invalidOpCode");
-}
-
-void sleep(uint8_t argc, char * argv[]) {
-    bussy_wait(1000000000);
-}
-
-void invalidOpCode(uint8_t argc, char * argv[]) {
-
-    opcode();
-}
-
-void printps(uint8_t argc, char * argv[]) {
-    process_info * info = my_malloc(sizeof(process_info) * 128);
-    uint8_t process_count = ps(info);
-    char header[] = "PID     NAME         PRIORITY     STACK_BASE      STACK_PTR       FOREGROUND    STATUS   \n";
-    write(STDOUT, header, 90);
-    for(int i = 0; i < process_count; i++) {
-        uint8_t jmp = 0;
-        char buffer[127];
-        char * buffer_ptr = buffer;
-        char aux[30];
-
-        for(int i = 0; i < 127; i++) {
-            buffer[i] = ' ';
-        }
-
-        //copy pid
-        itos(info[i].pid, aux);
-        strcpy(buffer, aux);
-        buffer[strlen(aux)] = ' ';
-        jmp += 8;
-
-        //copy name
-        strcpy(buffer + jmp, info[i].name);
-        buffer[jmp + strlen(info[i].name)] = ' ';
-        jmp += 13;
-        my_free(info[i].name);
-
-        //copy priority
-        itos(info[i].priority, aux);
-        strcpy(buffer + jmp, aux);
-        buffer_ptr[jmp + strlen(aux)] = ' ';
-        jmp += 13;
-
-        //copy stack base
-        uint64ToHexStr((uint64_t)info[i].stack_base, aux);
-        strcpy(buffer + jmp, aux);
-        buffer[jmp + strlen(aux)] = ' ';
-        jmp += 16;
-
-        //copy stack ptr
-        uint64ToHexStr((uint64_t)info[i].stack_ptr, aux);
-        strcpy(buffer + jmp, aux);
-        buffer[jmp + strlen(aux)] = ' ';
-        jmp += 16;
-
-        //copy foreground
-        itos(info[i].foreground, aux);
-        strcpy(buffer + jmp, aux);
-        buffer[jmp + strlen(aux)] = ' ';
-        jmp += 14;
-
-        //copy status
-        char * msg[] = {"READY", "BLOCKED", "KILLED"};
-        int index = 0;
-        switch (info[i].status) {
-            case BLOCKED:
-                index = 1;
-                break;
-            case KILLED:
-                index = 2;
-                break;
-            default:
-                break;
-        }
-        strcpy(buffer + jmp, msg[index]);
-        buffer[jmp + strlen(msg[index])] = '\n';
-        write(STDOUT, buffer, jmp + strlen(msg[index]) + 1);
     }
 }
