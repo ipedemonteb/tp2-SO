@@ -1,6 +1,8 @@
 #include "../include/memory_manager.h"
 #include "../include/process_manager.h"
 #include "../include/lib.h"
+#include "../include/pipes.h"
+
 #include <stdint.h>
 
 #define ALIGN 7 
@@ -34,8 +36,21 @@ void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->killed_children[1] = 0;
     p_struct->count = 1;
 
-    for (uint8_t i = 0; i < MAX_BUFFERS; i++) {
+    for (uint8_t i = 0; i < 4; i++) {
         p_struct->open_buffers[i] = p_struct->parent_pcb->open_buffers[i];
+        if (p_struct->open_buffers[i] != -1) {
+            uint8_t id = p_struct->open_buffers[i]/2;
+            pipe_t * p = get_pipe_by_id(id);
+            if (p_struct->open_buffers[i] % 2 == OUT) {
+                p->opened_write++;
+            } else {
+                p->opened_read++;
+            }
+        }
+    }
+    
+    for (uint8_t i = 4; i < MAX_BUFFERS; i++) {
+        p_struct->open_buffers[i] = -1;
     }
     
     process_stack * p_stack = stack - sizeof(process_stack);
@@ -95,6 +110,12 @@ void create_first_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t 
     for (uint8_t i = 0; i < MAX_BUFFERS; i++) {
         p_struct->open_buffers[i] = i < 4 ? i : -1;
     }
+    pipe_t * pipe = get_keyboard_buffer();
+    pipe->opened_read++;
+    pipe->opened_write++;
+    pipe = get_terminal_buffer();
+    pipe->opened_read++;
+    pipe->opened_write++;
 
     process_stack * p_stack = stack - sizeof(process_stack);
     p_stack->rsp = stack;

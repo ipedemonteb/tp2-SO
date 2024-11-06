@@ -136,3 +136,7 @@ void copy(uint8_t dest_bd, uint8_t source_bd) {
 void key_to_screen(uint8_t flag) {
     syscaller(33, (void *)(uintptr_t)flag, EMPTY, EMPTY, EMPTY, EMPTY);
 }
+
+void swap(uint8_t bd1, uint8_t bd2) {
+    syscaller(34, (void *)(uintptr_t)bd1, (void *)(uintptr_t)bd2, EMPTY, EMPTY, EMPTY);
+}

@@ -4,8 +4,6 @@
 #include "../include/process_manager.h"
 #include "../include/terminal_driver.h"
 
-#define IN 0
-#define OUT 1
 #define TERMINAL 1
 #define KEYBOARD 0
 
@@ -14,9 +12,18 @@ uint64_t avail = 0;
 
 
 int8_t pipe(int8_t id, uint8_t pipe_bd[2]){
-    if (id < 2 || id >= MAX_BUFFERS) {
+    if (id == 0 || id == 1 || id >= MAX_BUFFERS) {
         return -1;
     }
+
+    if (id == ANON) {
+        id = 0;
+        while (pipes[id].init) {
+            id++;
+        }
+        
+    }
+    
     pipes[id].init = INIT;
     process_struct * pcb = get_process_info(get_current_pid());
     uint8_t count = 0;
@@ -33,18 +40,53 @@ int8_t pipe(int8_t id, uint8_t pipe_bd[2]){
         }
         return -1;
     } 
-    
+    pipes[id].opened_read++;
+    pipes[id].opened_write++;
+
     return id;
 }
 
-void close(uint8_t bd) {
-    process_struct * pcb = get_process_info(get_current_pid());
+void internal_close(process_struct * pcb, uint8_t bd) {
+    if(pcb->open_buffers[bd] == -1) return;
+    uint8_t id = pcb->open_buffers[bd]/2;
+    if (pcb->open_buffers[bd] % 2 == OUT) {
+        pipes[id].opened_write--;
+    } else {
+        pipes[id].opened_read--;
+    }
+    if(!pipes[id].opened_read && !pipes[id].opened_write) {
+        pipes[id].current = pipes[id].last;
+        pipes[id].init = NOT_INIT;
+    }
     pcb->open_buffers[bd] = -1;
 }
 
-void copy(uint8_t dest_bd, uint8_t source_bd) {
-    process_struct * pcb = get_process_info(get_current_pid());
+void close(uint8_t bd) {
+    internal_close(get_process_info(get_current_pid()), bd);
+}
+
+void internal_copy(process_struct * pcb, uint8_t dest_bd, uint8_t source_bd) {
+    internal_close(pcb, dest_bd);
     pcb->open_buffers[dest_bd] = pcb->open_buffers[source_bd];
+    if (pcb->open_buffers[dest_bd] == -1) return;
+    
+    uint8_t id = pcb->open_buffers[dest_bd]/2;
+    if (pcb->open_buffers[dest_bd] % 2 == OUT) {
+        pipes[id].opened_write++;
+    } else {
+        pipes[id].opened_read++;
+    }
+}
+
+void copy(uint8_t dest_bd, uint8_t source_bd) {
+    internal_copy(get_process_info(get_current_pid()), dest_bd, source_bd);
+}
+
+void swap(uint8_t bd1, uint8_t bd2) {
+    process_struct * pcb = get_process_info(get_current_pid());
+    int8_t aux = pcb->open_buffers[bd1];
+    pcb->open_buffers[bd1] = pcb->open_buffers[bd2];
+    pcb->open_buffers[bd2] = aux;
 }
 
 static uint8_t has_next_pipe(pipe_t * p) {
@@ -113,6 +155,10 @@ int64_t write(uint8_t bd, char * buffer, int64_t size) {
 
 uint64_t get_available(){
     return avail;
+}
+
+pipe_t * get_pipe_by_id(uint8_t id) {
+    return &pipes[id];
 }
 
 pipe_t * get_keyboard_buffer(){
