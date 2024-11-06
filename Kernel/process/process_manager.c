@@ -131,7 +131,7 @@ void create_first_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t 
     schedule_process(p_struct);
 }
 
-uint8_t kill(uint16_t pid) {
+uint8_t kill(uint16_t pid) { //@todo: chequeos
     processes[pid].status = KILLED;
     if (get_current_pid() == pid) {
         yield();

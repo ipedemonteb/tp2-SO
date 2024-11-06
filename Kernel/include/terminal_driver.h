@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define CTRL_C 200
+
 typedef struct t_char{
     char character;
     uint32_t fg_colour;

@@ -150,9 +150,11 @@ void check_command(){
 
         command_argc = get_tokens(command_tokens, commands[1], " ") - 2;
         c = find_command(command_tokens[0]);
-
-        running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1;
-
+        if (c == NULL) {
+            printf("%s: Command not found. Type help for a list of commands\n", command_tokens[0]);
+        } else {
+            running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1;
+        }
         swap(STDIN, p[READ_END]);
     } else {
         copy(p[WRITE_END],STDOUT);
@@ -161,16 +163,17 @@ void check_command(){
     
     command_argc = get_tokens(command_tokens, commands[0], " ") - 2;
     c = find_command(command_tokens[0]);
-
-    running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1;
-    
+    if (c == NULL) {
+        printf("%s: Command not found. Type help for a list of commands\n", command_tokens[0]);
+    } else {
+        running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1;
+    }
     swap(STDOUT, p[WRITE_END]);
     close(p[WRITE_END]);
     close(p[READ_END]);
 
     wait_for_processes(1);
-    key_to_screen(0);
-    write(TERMINAL, "\n", 1);    
+    key_to_screen(0);    
 }
 
 void handle_up_down(int8_t (*condition)(string_arrayADT), char * (*fn)(string_arrayADT,uint16_t *), uint8_t * key) {
@@ -184,7 +187,6 @@ void handle_up_down(int8_t (*condition)(string_arrayADT), char * (*fn)(string_ar
 }
 
 void launchShell() {
-    uint8_t p[2];
     copy(STDOUT,TERMINAL);
 
     write(TERMINAL, prompt, 3);
