@@ -6,8 +6,8 @@
 
 #define BUFF_MAX 1024
 #define EOF -1
-#define INIT 1
-#define NOT_INIT 0
+#define P_INIT 1
+#define P_NOT_INIT 0
 #define IN 0
 #define OUT 1
 

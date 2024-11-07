@@ -53,7 +53,7 @@ int8_t t_move_screen_up(uint8_t amount) {
     if((int)(currentX / width) - amount < 0) return -1;
 
     displacement = amount * width;
-    //re_draw_screen(move_t_char);
+    re_draw_screen(move_t_char);
     move_screen_up(char_height * amount);
     currentX -=displacement;
     lastX -=displacement;
@@ -220,7 +220,11 @@ void terminal() {
             case 0:
                 break;
             default: 
-                t_insert_char(c);
+                if (c <= 9) {
+                    t_move_screen_up(c);
+                } else {
+                    t_insert_char(c);
+                }
                 break;
         }
     }

@@ -24,7 +24,7 @@ int8_t pipe(int8_t id, uint8_t pipe_bd[2]){
         
     }
     
-    pipes[id].init = INIT;
+    pipes[id].init = P_INIT;
     process_struct * pcb = get_process_info(get_current_pid());
     uint8_t count = 0;
     for (uint8_t i = 0; count < 2 && i < MAX_BUFFERS; i++) {
@@ -56,7 +56,7 @@ void internal_close(process_struct * pcb, uint8_t bd) {
     }
     if(!pipes[id].opened_read && !pipes[id].opened_write) {
         pipes[id].current = pipes[id].last;
-        pipes[id].init = NOT_INIT;
+        pipes[id].init = P_NOT_INIT;
     }
     pcb->open_buffers[bd] = -1;
 }
@@ -115,8 +115,9 @@ int64_t read(uint8_t bd, char * arr, int64_t size) {
             pcb->status = BLOCKED;
             pcb->blocked_in = set_n_bit_64(pcb->blocked_in, id/2);
             yield();
+        } else {
+            arr[count++] = next_from_buffer(pipe);
         }
-        arr[count++] = next_from_buffer(pipe);
     }
     pcb->blocked_in = off_n_bit_64(pcb->blocked_in, id/2);
     if (!has_next_pipe(pipe)) {

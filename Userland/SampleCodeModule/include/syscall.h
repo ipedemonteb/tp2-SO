@@ -7,6 +7,7 @@
 
 #define STDIN 0
 #define STDOUT 1
+#define TERMINAL 3
 
 #define MAX_PID 127
 

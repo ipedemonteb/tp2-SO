@@ -17,8 +17,9 @@
 #define LETTERS 'z' - 'a' + 1
 #define WORDS 5
 #define MAX_COMMAND 128
-#define TERMINAL 3
 #define MAX_PID 127
+#define FG 1
+#define BG 2
 
 typedef struct command_t{
     char * name;
@@ -77,8 +78,7 @@ int8_t getCommandIdx(uint8_t c) {
     if (c <= 'Z') {
         return c - 'A';
     }
-    if (c <= 'z')
-    {
+    if (c <= 'z') {
         return c - 'a';
     }
     return -1;
@@ -120,16 +120,36 @@ uint8_t get_tokens(char ** tokens, char * source, const char * delim) {
     return i;
 }
 
-void wait_for_processes(uint8_t fg) {
+void wait_for_processes(uint8_t block) {
      for (uint8_t i = 0; i < MAX_PID + 1; i++) {
-        if (running_processes_pids[i]) {
-            wait_pid(i, fg);
-            running_processes_pids[i] = 0;
+        uint8_t state = running_processes_pids[i];
+        if (state) {
+            if(wait_pid(i, block & state)) {
+                running_processes_pids[i] = 0;
+                if (!block) {
+                    printf("[%d]Done\n",i);
+                }
+                
+            }
         }
     }
 }
 
+uint8_t check_bg() {
+    while (current_command[current_command_length - 1] == ' ') {
+        current_command[current_command_length - 1] = 0;
+        current_command_length--;
+    }
+    if(current_command[current_command_length - 1] == '&'){
+        current_command[current_command_length - 1] = 0;
+        current_command_length--;
+        return 1;
+    }
+    return 0;
+}
+
 void check_command(){
+    uint8_t bg = check_bg();
     key_to_screen(1);
     char * commands[MAX_COMMAND/2], * command_tokens[MAX_COMMAND/2];
     uint8_t command_count = get_tokens(commands, current_command, "|") - 1;
@@ -153,7 +173,7 @@ void check_command(){
         if (c == NULL) {
             printf("%s: Command not found. Type help for a list of commands\n", command_tokens[0]);
         } else {
-            running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1;
+            running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1 + bg;
         }
         swap(STDIN, p[READ_END]);
     } else {
@@ -166,13 +186,13 @@ void check_command(){
     if (c == NULL) {
         printf("%s: Command not found. Type help for a list of commands\n", command_tokens[0]);
     } else {
-        running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1;
+        running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1 + bg;
     }
     swap(STDOUT, p[WRITE_END]);
     close(p[WRITE_END]);
     close(p[READ_END]);
 
-    wait_for_processes(1);
+    wait_for_processes(!bg);
     key_to_screen(0);    
 }
 
@@ -223,6 +243,7 @@ void launchShell() {
                 break;
             case '\n':
                 write(TERMINAL, &key, 1);
+                wait_for_processes(NO_BLOCK);
                 current_command[current_command_length] = 0;
                 if (current_command_length != 0) {
                     add(saved_commands, current_command, current_command_length);

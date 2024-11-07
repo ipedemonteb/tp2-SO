@@ -66,12 +66,12 @@ void test_mm(uint8_t argc, char * argv[]) {
   uint64_t max_memory;
 
   if (argc != 1) {
-    printf("Incorrect argument count. Expected: 1");
+    printf("Incorrect argument count. Expected: 1\n");
     return;
   }
 
   if ((max_memory = satoi(argv[0])) <= 0) { //@todo: esta raro el tema de los negativos
-    printf("Max memory must be greater than 0");
+    printf("Max memory must be greater than 0\n");
     return;
   }
 

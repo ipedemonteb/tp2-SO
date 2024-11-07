@@ -153,8 +153,8 @@ uint8_t nextFromBuffer() {
 void start_keyboard_driver(){
 	keyboard_buffer = get_keyboard_buffer();
 	terminal_buffer = get_terminal_buffer();
-	keyboard_buffer->init = INIT;
-	terminal_buffer->init = INIT;
+	keyboard_buffer->init = P_INIT;
+	terminal_buffer->init = P_INIT;
 }
 
 void key_to_screen(uint8_t flag) {

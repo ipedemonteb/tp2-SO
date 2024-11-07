@@ -121,12 +121,21 @@ void mem(uint8_t argc, char * argv[]) {
 
 //implement
 void move_up(uint8_t argc, char * argv[]) {
-
+    if (argc != 1) {
+        printf("Usage: move_up <amount[1-9]>\n");
+        return;
+    }
+    int8_t amount = satoi(argv[0]);
+    if (amount <= 0 || amount > 9) {
+        printf("amount must be between 0 and 9\n");
+        return;
+    }
+    put_char(amount);
 }
 
 //check and check max priority
-void nice_process(uint8_t arc, char * argv[]) {
-    if (arc != 2) {
+void nice_process(uint8_t argc, char * argv[]) {
+    if (argc != 2) {
         printf("Usage: nice <pid> <priority>\n");
         return;
     }

@@ -19,12 +19,12 @@ void test_processes(uint8_t argc, char *argv[]) {
   char *argvAux[] = {0};
 
   if (argc != 1){
-    printf("Incorrect argument count. Expected: 1");
+    printf("Incorrect argument count. Expected: 1\n");
     return;
   }
 
   if ((max_processes = satoi(argv[0])) <= 0){
-    printf("Max processes must be greater than 0");
+    printf("Max processes must be greater than 0\n");
     return;
   }
 
