@@ -173,8 +173,8 @@ void printps(uint8_t argc, char * argv[]) {
         //copy name
         strcpy(buffer + jmp, info[i].name);
         buffer[jmp + strlen(info[i].name)] = ' ';
-        jmp += 13;
         my_free(info[i].name);
+        jmp += 13;
 
         //copy priority
         itos(info[i].priority, aux);

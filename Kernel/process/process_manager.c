@@ -80,7 +80,7 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
     p_struct->pid = pid;
     p_struct->argv = argv;
     p_struct->name = my_malloc(my_strlen(name) + 1);
-    memcpy(p_struct->name, name, my_strlen(name));
+    memcpy(p_struct->name, name, my_strlen(name) + 1);
     void * stack = stacks + STACKSIZE * (pid+1);
     load_proc_stack(p_struct, stack);
     load_proc_args(fn, argc, argv, stack);

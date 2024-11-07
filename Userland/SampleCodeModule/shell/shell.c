@@ -69,11 +69,6 @@ static uint8_t exitFlag;
 
 uint8_t running_processes_pids[MAX_PID + 1] = {0};
 
-
-void not_found_process(uint8_t argc, char * argv[]) {
-    printf("%s: Command not found. Type help for a list of commands", argv[0]);
-}
-
 int8_t getCommandIdx(uint8_t c) {
     if (c <= 'Z') {
         return c - 'A';
