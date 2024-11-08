@@ -5,7 +5,6 @@
 #define END 0x0000000000400000
 
 mmADT mm;
-char mem[END-START];
 
 void start_mm() {
     mm = init_mm((void *)START, END - START);
