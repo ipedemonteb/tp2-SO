@@ -58,8 +58,8 @@ int main() {
   init_buddy(); // PARA USAR EL OTRO MM COMENTAR ESTO Y DESCOMENTAR LA LINEA DE ARRIBA
   // TAMBIEN DESCOMENTAR TODOS LOS ARCHIVOS DEL OTRO MM Y COMENTAR TODOS LOS ARCHIVOS DEL BUDDY (LOS .H TAMBIEN)
   // despues cuando hagamos el makefile quedará bien
-	init_scheduler(getStackBase());
-	init_semaphores();
+	//init_scheduler(getStackBase());
+	//init_semaphores();
 	uint8_t * argv[] = {0}; 
 	create_first_process((void *)sampleCodeModuleAddress,0, argv, "init");
   create_process((void *) test_buddy, 0, argv, "test_buddy");

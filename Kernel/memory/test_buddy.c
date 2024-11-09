@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "../include/videoDriver.h"
 #include "../include/buddy.h"
+#include "../include/time.h"
 
 uint8_t test_buddy() {
   void * p = my_malloc(64);

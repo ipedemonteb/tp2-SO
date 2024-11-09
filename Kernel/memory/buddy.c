@@ -1,18 +1,19 @@
 #include "buddy.h"
 
+#define MIN_LEVEL 5 // nivel minimo de la memoria (2^5 = 32 bytes)
 #define MAX_ORDER 25 // maximo nivel hardcodeado (por el tamaño de la memoria es el maximo nivel que deberia tener, lo pongo como proteccion x las)
 
 // @ todo: ver si deberia hacer validaciones de los parametros en cada funcion o no
 
 typedef struct block_t {
-    int8_t order;
-    int8_t status;
-    struct block_t * next;
+  int8_t order;
+  int8_t status;
+  struct block_t * next;
 } block_t;
 
 typedef struct buddy_manager {
-    int8_t max_order;
-    block_t * free_blocks[MAX_ORDER];   // arreglo de listas de bloques libres x nivel. en el arreglo hay un solo bloque representativo que arranca la lista
+  int8_t max_order;
+  block_t * free_blocks[MAX_ORDER];   // arreglo de listas de bloques libres x nivel. en el arreglo hay un solo bloque representativo que arranca la lista
 } buddy_manager;
 
 buddy_manager buddy_man;
@@ -27,20 +28,52 @@ block_t * create_block(void * address, int8_t order) {
 }
 
 void remove_block(block_t * block) {
-  block_t ** head = &buddy_man.free_blocks[block->order];
-  if (*head == block) { // el bloque es el primero en la lista
-    buddy_man.free_blocks[block->order] = block->next;
-  } else {
-    block_t * prev = *head;
-    while (prev && prev->next != block) {   // itero por la lista hasta encontrar el bloque anterior al que quiero sacar
-      prev = prev->next;
-    }
-    if (prev) {
-      prev->next = block->next;
-    }
+  uint8_t order = block->order;
+  if (block == NULL) {
+    // printf("Error: trying to remove a NULL block.\n");
+    return;
   }
-  block->next = NULL;
+
+  block_t * curr_block = buddy_man.free_blocks[order];
+  if (curr_block == NULL) {
+    // printf("Error in rem_block: level: %ld does not have free blocks\n",
+    // level);
+    return;
+  }
+
+  if (curr_block == block) {
+    buddy_man.free_blocks[order]->status = OCCUPIED;
+    buddy_man.free_blocks[order] = buddy_man.free_blocks[order]->next;
+    return;
+  }
+  // Si llegue hasta aca: hay primero y no es el bloque
+
+  while (curr_block->next != NULL && curr_block->next != block) {
+    curr_block = curr_block->next;
+  }
+  if (curr_block->next == NULL) {
+    // printf("Error: culd not find the block in the specified level\n");
+    return;
+  }
+
+  curr_block->next = curr_block->next->next;
+
+  curr_block->status = OCCUPIED;
   return;
+  // block_t ** head = &buddy_man.free_blocks[block->order];
+  // if (*head == block) { // el bloque es el primero en la lista
+  //   buddy_man.free_blocks[block->order] = block->next;
+  // } else {
+  //   block_t * prev = *head;
+  //   while (prev && prev->next != block) {   // itero por la lista hasta encontrar el bloque anterior al que quiero sacar
+  //     prev = prev->next;
+  //   }
+  //   if (prev) {
+  //     prev->next = block->next;
+  //   }
+  // }
+  // block->next = NULL;
+  // return;
 }
 
 void split_block(int8_t order) {
@@ -78,6 +111,7 @@ void init_buddy() {
     buddy_man.free_blocks[i] = NULL;
   }
   create_block((void *) MEM_START, level);
+  return;
 }
 
 void * my_malloc(uint64_t size) {
@@ -88,15 +122,17 @@ void * my_malloc(uint64_t size) {
   // encuentro el orden ideal
   int8_t order = 1;
   int64_t block_size = 2;
-  while (block_size < size + sizeof(block_t) && order < buddy_man.max_order) {
+  while (block_size < size + sizeof(block_t)) {
     order++;
     block_size *= 2;
   }
 
+  order = (MIN_LEVEL > order) ? MIN_LEVEL : order; // si el tamaño pedido es menor al tamaño minimo, devuelvo el tamaño minimo
+
   if (buddy_man.free_blocks[order] == NULL) { // no hay definidos bloques libres de ese tamaño (o estan ocupados por ende no estan en la lista o nunca se crearon)
     uint8_t order_approx = 0;
     // busco el nivel superior más cercano disponible para luego splittearlo
-    for (uint8_t i = order + 1; i <= buddy_man.max_order && !order_approx; i++) {
+    for (uint8_t i = order + 1; i <= buddy_man.max_order && order_approx == 0; i++) {
       if (buddy_man.free_blocks[i] != NULL) {
         order_approx = i;
       }
@@ -116,11 +152,11 @@ void * my_malloc(uint64_t size) {
 
   block_t * block = buddy_man.free_blocks[order]; // el bloque que voy a devolver es el que cree en el level encontrado inicialmente
   remove_block(block); // saco al bloque del nivel en el que estaba (pues estará ocupado ya que lo devuelvo en el malloc)
-  block->status = OCCUPIED;
+  block->status = OCCUPIED; // todo: ver si esto va o no
 
-  print_memory(); // @todo: borrar
+  mem_status(); // @todo: borrar
 
-  return (void *) block + sizeof(block_t);
+  return (void *)((uint8_t *) block + sizeof(block_t));
 
 }
 
@@ -132,84 +168,75 @@ void my_free (void * address) {
   block->status = FREE;
   
   uint64_t block_pos = (uint64_t) ((void *) block - MEM_START);
-  block_t * buddy_block = (block_t *) (MEM_START + (block_pos ^ (1L << block->order)));
+  block_t * buddy_block = (block_t *) ((uint64_t) MEM_START + (((uint64_t) block_pos) ^ ((1L << block->order))));
 
-  while (buddy_block->status == FREE && buddy_block->order == block->order && block->order < buddy_man.max_order) {
+  while (block->order < buddy_man.max_order && buddy_block->status == FREE && buddy_block->order == block->order) {
     block = merge(block, buddy_block);
-    block_pos = (uint64_t) ((void *) block - MEM_START);
-    buddy_block = (block_t *) (MEM_START + (block_pos ^ (1L << block->order)));
+    block->status = FREE;
+    block_pos = (uint64_t)((void *) block - ((uint64_t) MEM_START));
+    buddy_block = (block_t *) (block_t *) ((uint64_t) MEM_START + (((uint64_t) block_pos) ^ ((1L << block->order))));
   }
 
   create_block((void *) block, block->order);
 
-  print_memory(); // @todo: borrar
+  mem_status(); // @todo: borrar
 
   return;
 }
 
-void print_memory() {
-    char buffer[32];
-    int x_pos = 0; // Start each level at the left side of the screen
-    int y_pos = 4; // Starting y position
+uint32_t itoa(uint32_t num, uint8_t *str) {
+  uint32_t digits = 1;
+  for (uint32_t n = num / 10; n != 0; digits++, n /= 10)
+    ;
 
-    for (int level = 0; level < 6; level++) {
-        // Print the level header
-        drawString("Level: ", x_pos, y_pos, WHITE, BLACK);
-        int len = int_to_str(level, buffer);
-        drawString((uint8_t *) buffer, x_pos + 20, y_pos, WHITE, BLACK);
+  if (digits == 1) {
+    str[0] = num + '0';
+    str[1] = '\0';
+    return digits;
+  }
 
-        block_t * current_block = buddy_man.free_blocks[level];
-        int block_x_pos = 200; // Start blocks info a bit further right
+  str[digits] = '\0';
+  for (int32_t i = digits - 1; i >= 0; i--) {
+    str[i] = (num % 10) + '0';
+    num /= 10;
+  }
 
-        // Loop through each block in the level
-        while (current_block != NULL) {
-            // Print each block's starting address
-            drawString("Addr: ", block_x_pos, ++y_pos, GREEN, BLACK);
-            len = addr_to_str((uint64_t) current_block, buffer);
-            drawString((uint8_t *) buffer, block_x_pos + 60, y_pos, GREEN, BLACK);
-
-            current_block = current_block->next;
-            block_x_pos += 200; // Space each block's info further to the right
-        }
-        drawString("End of level", block_x_pos, ++y_pos, WHITE, BLACK);
-
-        y_pos++; // Move to the next line for the next level
-    }
+  return digits;
 }
 
-// Helper function to convert integer to string
-int int_to_str(int num, char *buffer) {
-    int len = 0;
-    if (num == 0) {
-        buffer[len++] = '0';
+void mem_status() {
+  int debug = 3;
+  drawString("MEMORY STATE:", 0, debug++, WHITE, BLACK);
+  void * null = NULL;
+  for (uint32_t level = MIN_LEVEL; level <= buddy_man.max_order; level++) {
+    block_t * current = buddy_man.free_blocks[level];
+    uint8_t aux[10];
+    if (current != null) {
+      itoa(level, aux); // @todo: incluir itoa
+      drawString("Level ", 3, debug, BLUE, BLACK);
+      drawString(aux, 10, debug++, BLUE, BLACK);
+      // Imprimir cada bloque de la lista
+      while (current != null) {
+        itoa((void *)current - (void *)MEM_START, aux);
+        drawString("Block at address: ", 5, debug, GREEN, BLACK);
+        drawString(aux, 20, debug, WHITE, BLACK);
+        itoa((1UL << current->order), aux);
+        drawString("size: ", 35, debug, WHITE, BLACK);
+        drawString(aux, 40, debug++, WHITE, BLACK);
+        itoa((void *)current->next - MEM_START, aux);
+        drawString("next: ", 0, debug, WHITE, BLACK);
+        drawString(aux, 5, debug, WHITE, BLACK);
+        itoa(current->status, aux);
+        drawString("is_free: ", 20, debug, WHITE, BLACK);
+        drawString(aux, 30, debug++, WHITE, BLACK);
+        current = current->next; // Mover al siguiente bloque
+      }
     } else {
-        int temp = num;
-        while (temp > 0) {
-            buffer[len++] = '0' + (temp % 10);
-            temp /= 10;
-        }
-        // Reverse the string
-        for (int i = 0; i < len / 2; i++) {
-            char swap = buffer[i];
-            buffer[i] = buffer[len - i - 1];
-            buffer[len - i - 1] = swap;
-        }
+      itoa(level, aux);
+      drawString("Level ", 3, debug, BLUE, BLACK);
+      drawString(aux, 10, debug++, BLUE, BLACK);
+      drawString("No blocks available", 5, debug++, GREEN, BLACK);
     }
-    buffer[len] = '\0';
-    return len;
+  }
 }
-
-// Helper function to convert address to hex string
-int addr_to_str(uint64_t addr, char *buffer) {
-    int len = 0;
-    buffer[len++] = '0';
-    buffer[len++] = 'x';
-    for (int i = (sizeof(addr) * 8) - 4; i >= 0; i -= 4) {
-        int hex_digit = (addr >> i) & 0xF;
-        buffer[len++] = (hex_digit < 10) ? '0' + hex_digit : 'A' + (hex_digit - 10);
-    }
-    buffer[len] = '\0';
-    return len;
-}
-
 
