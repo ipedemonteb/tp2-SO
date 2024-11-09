@@ -7,7 +7,6 @@ List of commands: \n\
 - cat: displays the content of the standard input\n\
 - clear: clears the terminal \n\
 - div0: tests div0 exception \n\
-- exit: exits the terminal\n\
 - filter: filters the input's vocals\n\
 - help: displays all available commands\n\
 - invalidOpCode: tests invalid opcode exception\n\
@@ -18,7 +17,6 @@ List of commands: \n\
 - nice: changes the priority of the process with the given ID\n\
 - phylo: starts the phylosophers problem\n\
 - ps: lists all processes and their information\n\
-- sleep: \n\
 - test_mm: tests memory management\n\
 - test_prio: tests priority management\n\
 - test_processes: tests process management\n\
@@ -74,11 +72,6 @@ void eliminator(uint8_t argc, char * argv[]) {
 }
 
 //implement
-void exit(uint8_t argc, char * argv[]) {
-
-}
-
-//implement
 void filter(uint8_t argc, char * argv[]) {
 
 }
@@ -105,13 +98,13 @@ void loop_func(uint8_t argc, char * argv[]) {
     while(1) {
         printf("Hello from process %d\n", get_current_pid());
         char * time[] = {"1000000000"};
-        sleep(1, time);
+        wait(100);
     }
 }
 
 //implement
 void loop(uint8_t argc, char * argv[]) {
-    create_process(loop_func, 0, 0, "loop");
+    create_process(loop_func, 0, 0, "loop", 1);
 }
 
 //implement
@@ -119,7 +112,6 @@ void mem(uint8_t argc, char * argv[]) {
     
 }
 
-//implement
 void move_up(uint8_t argc, char * argv[]) {
     if (argc != 1) {
         printf("Usage: move_up <amount[1-9]>\n");
@@ -144,12 +136,10 @@ void nice_process(uint8_t argc, char * argv[]) {
     nice(pid, priority);
 }
 
-//implement
 void phylo(uint8_t argc, char * argv[]) {
-    
+    run_phylo();
 }
 
-//check overwriting names
 void printps(uint8_t argc, char * argv[]) {
     process_info * info = my_malloc(sizeof(process_info) * 128);
     uint8_t process_count = ps(info);
@@ -217,22 +207,6 @@ void printps(uint8_t argc, char * argv[]) {
         buffer[jmp + strlen(msg[index])] = 0;
         printf("%s\n", buffer);
     }
-}
-
-//check bussy wait
-void sleep(uint8_t argc, char * argv[]) {
-    if (argc != 1) {
-        printf("Usage: sleep <time>\n");
-        return;
-    }
-    uint64_t time = atoi(argv[0]);
-    bussy_wait(time);
-}
-
-//check
-void getTime(uint8_t argc, char * argv[]) {
-    //char clock[20];
-    //time(clock);
 }
 
 //check

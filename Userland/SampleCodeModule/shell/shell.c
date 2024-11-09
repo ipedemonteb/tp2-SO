@@ -40,9 +40,9 @@ static command_t commands[LETTERS][WORDS] = {
     {{"block", block_process}, {0,0}},  //b
     {{"clear", clearCmd}, {0, 0}}, 
     {{"div0", div0}, {0, 0}}, 
-    {{"eliminator", eliminator}, {"exit", exit}, {0, 0}}, 
+    {{"eliminator", eliminator}, {0, 0}}, 
     {{0, 0}}, 
-    {{"getTime", getTime}, {0, 0}},
+    { {0, 0}},
     {{"help", help}, {0, 0}}, 
     {{"invalidOpCode", invalidOpCode}, {0, 0}},
     {{0,0}},  //j
@@ -51,10 +51,10 @@ static command_t commands[LETTERS][WORDS] = {
     {{"move_up", move_up},{0,0}},  //m
     {{"nice", nice_process}, {0,0}},  //n
     {{0,0}},  //o
-    {{"ps", printps},{0,0}},  //p
+    {{"phylo", phylo}, {"ps", printps},{0,0}},  //p
     {{0,0}},  //q
     {{0,0}},  //r
-    {{"sleep", sleep},{0,0}},  //s
+    {{0,0}},  //s
     {{"test_mm",test_mm},{"test_prio",test_prio},{"test_processes",test_processes},{"test_sync", test_sync}, {0,0}},   //t
     {{0,0}},  //u
     {{0,0}},  //v
