@@ -48,7 +48,7 @@ static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //j
     {{"kill", kill_process}, {0,0}},  //k
     {{"loop",loop}, {0,0}},  //l
-    {{"move_up", move_up},{0,0}},  //m
+    {{"mem", mem}, {"move_up", move_up},{0,0}},  //m
     {{"nice", nice_process}, {0,0}},  //n
     {{0,0}},  //o
     {{"phylo", phylo}, {"ps", printps},{0,0}},  //p

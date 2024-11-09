@@ -28,6 +28,12 @@ typedef struct process_info {
 	enum Status status;
 } process_info;
 
+typedef struct mem_info {
+	uint64_t total;
+	uint64_t used;
+	uint64_t free;
+} mem_info;
+
 void * syscaller(uint8_t id, void * rsi, void * rdx, void * rcx, void * r8, void * r9);
 
 int64_t read(uint8_t bd, char * buffer, int64_t size);
@@ -65,4 +71,5 @@ void close(uint8_t bd);
 void copy(uint8_t dest_bd, uint8_t source_bd);
 void key_to_screen(uint8_t flag);
 void swap(uint8_t bd1, uint8_t bd2);
+void mem_data(mem_info * info);
 #endif

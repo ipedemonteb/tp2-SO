@@ -140,3 +140,7 @@ void key_to_screen(uint8_t flag) {
 void swap(uint8_t bd1, uint8_t bd2) {
     syscaller(34, (void *)(uintptr_t)bd1, (void *)(uintptr_t)bd2, EMPTY, EMPTY, EMPTY);
 }
+
+void mem_data(mem_info * info) {
+    syscaller(35, (void *) info, EMPTY, EMPTY, EMPTY, EMPTY);
+}

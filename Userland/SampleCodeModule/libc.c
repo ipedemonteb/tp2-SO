@@ -132,7 +132,7 @@ void readString(uint8_t * buffer, int maxLength) {
     buffer[i] = '\0';
 }
 
-int atoi(const uint8_t * str) {
+int atoi(const char * str) {
     int res = 0;
     int sign = 1;
     if (*str == '-') {

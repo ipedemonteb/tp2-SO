@@ -190,7 +190,7 @@ uint8_t ps(process_info * info) {
             info[process_count].priority = p->priority;
             info[process_count].stack_base = p->stack_base;
             info[process_count].stack_ptr = p->stack_ptr;
-            info[process_count].foreground = 0;
+            info[process_count].foreground = p->fg;
             info[process_count].status = p->status;
             process_count++;
         }

@@ -146,3 +146,11 @@ void mm_free(mmADT mm, void * mem) {
     //@TODO: chequear si fusionamos bloques
     return;
 }
+
+uint64_t mm_avail(mmADT mm) {
+    return mm->avail;
+}
+
+uint64_t mm_size(mmADT mm) {
+    return mm->size;
+}

@@ -1,5 +1,4 @@
 #include "../include/command_manager.h"
-#include <stdint.h>
 
 static char * helpMsg = "\
 List of commands: \n\
@@ -13,7 +12,7 @@ List of commands: \n\
 - kill: kills the process with the given ID\n\
 - loop: prints the proccess ID with a greeting\n\
 - mem: displays memory information\n\
-- move_up: \n\
+- move_up: moves the screen the amout of lines received as a parameter\n\
 - nice: changes the priority of the process with the given ID\n\
 - phylo: starts the phylosophers problem\n\
 - ps: lists all processes and their information\n\
@@ -23,7 +22,6 @@ List of commands: \n\
 - test_sync: tests semaphores\n\
 - wc: counts the number of lines of the input\n\
 ";
-
 
 void remove_letter(char * string, uint8_t idx) {
     while(string[idx]) {
@@ -84,7 +82,6 @@ void invalidOpCode(uint8_t argc, char * argv[]) {
     opcode();
 }
 
-//check
 void kill_process(uint8_t argc, char * argv[]) {
     if (argc != 1) {
         printf("Usage: kill <pid>\n");
@@ -94,22 +91,20 @@ void kill_process(uint8_t argc, char * argv[]) {
     kill(pid);
 }
 
-void loop_func(uint8_t argc, char * argv[]) {
+void loop(uint8_t argc, char * argv[]) {
     while(1) {
         printf("Hello from process %d\n", get_current_pid());
-        char * time[] = {"1000000000"};
         wait(100);
     }
 }
 
-//implement
-void loop(uint8_t argc, char * argv[]) {
-    create_process(loop_func, 0, 0, "loop", 1);
-}
-
-//implement
 void mem(uint8_t argc, char * argv[]) {
-    
+    mem_info * info = my_malloc(sizeof(mem_info));
+    mem_data(info);
+    printf("Total memory: %d B\n", info->total);
+    printf("Used memory: %d B\n",  info->used);
+    printf("Free memory: %d B\n",  info->free);
+    my_free(info);
 }
 
 void move_up(uint8_t argc, char * argv[]) {
