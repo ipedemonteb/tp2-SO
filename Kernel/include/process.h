@@ -16,6 +16,7 @@ typedef struct process_struct {
 	char * name;
 	uint8_t priority;
   	uint8_t count;
+	uint8_t fg;
 	enum Status status;
 	struct process_struct * parent_pcb;
 	uint64_t children_processes[2];

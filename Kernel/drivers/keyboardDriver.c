@@ -58,7 +58,7 @@ char asccode[58][4] =
 		{'\\', '|', '\\', '|'},
 		{'z', 'Z', 'Z', 'z'},
 		{'x', 'X', 'X', 'x'},
-		{'c', 'C', 'C', 'c'},
+		{'c', 'C', CTRL_C, CTRL_C},
 		{'v', 'V', 'V', 'v'},
 		{'b', 'B', 'B', 'b'},
 		{'n', 'N', 'N', 'n'},
@@ -91,7 +91,7 @@ void keyboard_handler() {
 		shiftOn = 0;
 	}
 	else if (keyVal == LEFT_CTRL) {
-		ctrlOn = 1;
+		ctrlOn = 2;
 	}
 	else if (keyVal == LEFT_CTRL_B) {
 		ctrlOn = 0;
@@ -130,7 +130,15 @@ void keyboard_handler() {
 			ctrlOn = 0;
 		}
 		else {
-			uint8_t c = asccode[keyVal][shiftOn ^ capsLock];
+			uint8_t c = asccode[keyVal][(shiftOn ^ capsLock) + ctrlOn];
+			if (c == CTRL_C) {
+					t_insert_char('^');
+					t_insert_char('C');
+					t_off_cursor();
+					t_draw_line("",1);
+					t_kill_fg();
+					return;
+			}
 			if (to_terminal) {
 				if (c == '\n') {
 					t_off_cursor();

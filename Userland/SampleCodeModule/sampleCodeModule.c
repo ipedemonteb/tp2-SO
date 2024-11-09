@@ -13,8 +13,8 @@ void inactive() {
 
 int main() {
 	char * argv[] = {0};
-	create_process((void *)inactive, 0 , argv, "inactive");
-	create_process((void *)launchShell, 0, argv,"Shell");
+	create_process((void *)inactive, 0 , argv, "inactive", 0);
+	create_process((void *)launchShell, 0, argv,"Shell", 0);
 	wait_children();
 	while (1) {
 		/* code */

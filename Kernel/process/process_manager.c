@@ -2,6 +2,7 @@
 #include "../include/process_manager.h"
 #include "../include/lib.h"
 #include "../include/pipes.h"
+#include "../include/terminal_driver.h"
 
 #include <stdint.h>
 
@@ -70,15 +71,30 @@ void load_proc_args(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv
     p_stack->rdx = argv;
 }
 
-int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], const char * name) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
+int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], const char * name, uint8_t fg) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
     if(proc_count >= QUANT){
         return -1;
     }
     uint16_t pid = find_off_bit_128(occupied[0], occupied[1]);
     occupied[pid/64] = set_n_bit_64(occupied[pid/64], pid % 64);
     process_struct * p_struct = &processes[pid];
+
+    char ** args = my_malloc((argc + 1) * sizeof(char *));
+    for (uint8_t i = 0; i < argc; i++) {
+        uint64_t len = my_strlen(argv[i]) + 1;
+        args[i] = my_malloc(len);
+        memcpy(args[i], argv[i], len);
+    }
+    args[argc] = NULL;
+
     p_struct->pid = pid;
-    p_struct->argv = argv;
+    p_struct->argv = args;
+
+    p_struct->fg = fg;
+    if (fg) {
+        add_to_fg(pid);
+    }
+    
     p_struct->name = my_malloc(my_strlen(name) + 1);
     memcpy(p_struct->name, name, my_strlen(name) + 1);
     void * stack = stacks + STACKSIZE * (pid+1);
@@ -182,6 +198,13 @@ uint8_t ps(process_info * info) {
     return process_count;
 }
 
+void clear_child(process_struct * parent_pcb, uint16_t pid) {
+    parent_pcb->children_processes[pid / 64] = off_n_bit_64(parent_pcb->children_processes[pid / 64], pid % 64);
+    parent_pcb->killed_children[pid / 64] = off_n_bit_64(parent_pcb->killed_children[pid / 64], pid % 64);
+    occupied[pid / 64] = off_n_bit_64(occupied[pid / 64], pid % 64);
+    my_free(processes[pid].name);
+}
+
 void wait_children() {
     uint16_t pid = get_current_pid();
     uint8_t child, idx;
@@ -190,10 +213,7 @@ void wait_children() {
         while (pcb->killed_children[0] || pcb->killed_children[1]) {
             child = find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
             idx = child/64;
-            pcb->children_processes[idx] = off_n_bit_64(pcb->children_processes[idx],child%64);
-            pcb->killed_children[idx] = off_n_bit_64(pcb->killed_children[idx],child%64);
-            occupied[idx] = off_n_bit_64(occupied[idx],child%64);
-            my_free(processes[child].name);
+            clear_child(pcb, idx);
         }
         if (pcb->children_processes[0] || pcb->children_processes[1]) {
             pcb->status = BLOCKED; 
@@ -208,10 +228,7 @@ uint8_t wait_pid_no_block(uint16_t pid) {
         return 0;
     }
     if((parent_pcb->killed_children[pid / 64] & (1UL << (pid % 64)))) {
-        parent_pcb->children_processes[pid / 64] = off_n_bit_64(parent_pcb->children_processes[pid / 64], pid % 64);
-        parent_pcb->killed_children[pid / 64] = off_n_bit_64(parent_pcb->killed_children[pid / 64], pid % 64);
-        occupied[pid / 64] = off_n_bit_64(occupied[pid / 64], pid % 64);
-        my_free(processes[pid].name);
+        clear_child(parent_pcb, pid);
         return 1;
     }
 

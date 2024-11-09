@@ -168,7 +168,7 @@ void check_command(){
         if (c == NULL) {
             printf("%s: Command not found. Type help for a list of commands\n", command_tokens[0]);
         } else {
-            running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1 + bg;
+            running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name, !bg)] = 1 + bg;
         }
         swap(STDIN, p[READ_END]);
     } else {
@@ -180,8 +180,8 @@ void check_command(){
     c = find_command(command_tokens[0]);
     if (c == NULL) {
         printf("%s: Command not found. Type help for a list of commands\n", command_tokens[0]);
-    } else {
-        running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name)] = 1 + bg;
+    } else { 
+        running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name, !bg)] = 1 + bg;
     }
     swap(STDOUT, p[WRITE_END]);
     close(p[WRITE_END]);

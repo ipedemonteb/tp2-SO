@@ -1,7 +1,7 @@
 #include "../include/terminal_driver.h"
 #include "../include/videoDriver.h"
-#include "../include/syscalls.h"
 #include "../include/pipes.h"
+#include "../include/process_manager.h"
 
 #define MAX_SCREEN 6500
 
@@ -10,6 +10,7 @@
 #define RIGHT_ARROW 252
 #define UP_ARROW 253
 #define DOWN_ARROW 254
+#define MAX_FG 5
 
 static uint16_t lastX;
 
@@ -25,6 +26,23 @@ static uint8_t char_width;
 static pipe_t * terminal_buffer;
 
 static t_char blanck = {0, BLACK, BLACK};
+
+static int32_t fg[MAX_FG];
+static uint8_t fg_count = 0;
+
+void add_to_fg(uint16_t pid) {
+    fg[fg_count % MAX_FG] = pid;
+    fg_count++;
+}
+
+void t_kill_fg() {
+    for (uint8_t i = 0; i < MAX_FG; i++){
+        if (fg[i] != -1) {
+            kill(fg[i]);
+            fg[i] = -1;
+        }   
+    }
+}
 
 void re_draw_line(uint32_t from, uint32_t to){
     for(uint16_t i = from; i < to ; i++) {
@@ -158,9 +176,9 @@ int8_t t_increase_font_size() {
     
     char_height += 16;
     char_width += 8;
-    width = getScreenWidth() / char_width;
-    height = getScreenHeight() / char_height;
-    fontSizeUp();
+    width = getWidth() / char_width;
+    height = getHeight() / char_height;
+    fontSizeBigger();
     t_clear();
     return 0;
 }
@@ -172,19 +190,23 @@ int8_t t_decrease_font_size() {
     
     char_height -= 16;
     char_width -= 8;
-    width = getScreenWidth() / char_width;
-    height = getScreenHeight() / char_height;
-    fontSizeDown();
+    width = getWidth() / char_width;
+    height = getHeight() / char_height;
+    fontSizeSmaller();
     t_clear();
     return 0;
 }
 
 void start_terminal() {
+    for (uint8_t i = 0; i < MAX_FG; i++) {
+        fg[i] = -1;
+    }
+    
     terminal_buffer = get_terminal_buffer();
     char_height = 16;
     char_width = 8;
-    width = getScreenWidth() / char_width;
-    height = getScreenHeight() / char_height;
+    width = getWidth() / char_width;
+    height = getHeight() / char_height;
     t_clear();
 }
 
