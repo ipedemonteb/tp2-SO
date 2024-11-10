@@ -154,7 +154,7 @@ void * my_malloc(uint64_t size) {
   remove_block(block); // saco al bloque del nivel en el que estaba (pues estará ocupado ya que lo devuelvo en el malloc)
   block->status = OCCUPIED; // todo: ver si esto va o no
 
-  mem_status(); // @todo: borrar
+  //mem_status(); // @todo: borrar
 
   return (void *)((uint8_t *) block + sizeof(block_t));
 
@@ -179,7 +179,7 @@ void my_free (void * address) {
 
   create_block((void *) block, block->order);
 
-  mem_status(); // @todo: borrar
+  //mem_status(); // @todo: borrar
 
   return;
 }
@@ -219,16 +219,16 @@ void mem_status() {
       while (current != null) {
         itoa((void *)current - (void *)MEM_START, aux);
         drawString("Block at address: ", 5, debug, GREEN, BLACK);
-        drawString(aux, 20, debug, WHITE, BLACK);
+        drawString(aux, 30, debug, WHITE, BLACK);
         itoa((1UL << current->order), aux);
-        drawString("size: ", 35, debug, WHITE, BLACK);
-        drawString(aux, 40, debug++, WHITE, BLACK);
+        drawString("size: ",50, debug, WHITE, BLACK);
+        drawString(aux, 55, debug++, WHITE, BLACK);
         itoa((void *)current->next - MEM_START, aux);
         drawString("next: ", 0, debug, WHITE, BLACK);
-        drawString(aux, 5, debug, WHITE, BLACK);
+        drawString(aux, 7, debug, WHITE, BLACK);
         itoa(current->status, aux);
-        drawString("is_free: ", 20, debug, WHITE, BLACK);
-        drawString(aux, 30, debug++, WHITE, BLACK);
+        drawString("is_free: ", 25, debug, WHITE, BLACK);
+        drawString(aux, 35, debug++, WHITE, BLACK);
         current = current->next; // Mover al siguiente bloque
       }
     } else {
@@ -239,4 +239,3 @@ void mem_status() {
     }
   }
 }
-
