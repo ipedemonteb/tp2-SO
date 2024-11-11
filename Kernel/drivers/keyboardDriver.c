@@ -26,7 +26,7 @@ char asccode[58][4] =
 		{'0', ')', '0', ')'},
 		{'-', '_', '-', '_'},
 		{'=', '+', '=', '+'},
-		{127, 127, 127, 127},
+		{DELETE, DELETE, DELETE, DELETE},
 		{'\t', '\t', '\t', '\t'},
 		{'q', 'Q', 'Q', 'q'},
 		{'w', 'W', 'W', 'w'},
@@ -44,7 +44,7 @@ char asccode[58][4] =
 		{0, 0, 0, 0},
 		{'a', 'A', 'A', 'a'},
 		{'s', 'S', 'S', 's'},
-		{'d', 'D', 'D', 'd'},
+		{'d', 'D', CTRL_D, CTRL_D},
 		{'f', 'F', 'F', 'f'},
 		{'g', 'G', 'G', 'g'},
 		{'h', 'H', 'H', 'h'},
@@ -100,8 +100,8 @@ void keyboard_handler() {
 		capsLock = !capsLock;
 	}
 	else if (extendedKey) {
-		extendedKey = 0; // Reset the extended key flag
-		uint8_t aux;
+		extendedKey = 0;
+		char aux;
 		switch (keyVal) {
 		case DOWNKEY:
 			aux = DOWN_ARROW;
@@ -130,19 +130,24 @@ void keyboard_handler() {
 			ctrlOn = 0;
 		}
 		else {
-			uint8_t c = asccode[keyVal][(shiftOn ^ capsLock) + ctrlOn];
+			char c = asccode[keyVal][(shiftOn ^ capsLock) + ctrlOn];
 			if (c == CTRL_C) {
 					t_insert_char('^');
 					t_insert_char('C');
-					t_off_cursor();
-					t_draw_line("",1);
 					t_kill_fg();
+					ctrlOn = 0;
 					return;
 			}
-			if (to_terminal) {
+			if (c == CTRL_D) {
+				t_insert_char('^');
+				t_insert_char('D');
+			} else if (to_terminal) {
 				if (c == '\n') {
 					t_off_cursor();
 					t_draw_line("", 1);
+					t_set_cursor();
+				} else if (c == DELETE) {
+					t_remove_char();
 					t_set_cursor();
 				} else {
 					t_insert_char(c);
@@ -152,10 +157,6 @@ void keyboard_handler() {
 			keyboard_ready();
 		}
 	}
-}
-
-uint8_t nextFromBuffer() {
-	return keyboard_buffer->last <= keyboard_buffer->current ? 0 : keyboard_buffer->buff[(keyboard_buffer->current++) % BUFF_SIZE];
 }
 
 void start_keyboard_driver(){

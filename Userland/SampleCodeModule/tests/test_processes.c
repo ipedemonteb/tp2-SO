@@ -34,7 +34,7 @@ void test_processes(uint8_t argc, char *argv[]) {
     char str[30];
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
-      p_rqs[rq].pid = create_process(endless_loop, 0, argvAux, "endless_loop");
+      p_rqs[rq].pid = create_process(endless_loop, 0, argvAux, "endless_loop",0);
       if (p_rqs[rq].pid == -1) {
         return -1;
       } else {

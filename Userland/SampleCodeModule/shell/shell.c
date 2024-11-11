@@ -10,10 +10,10 @@
 #define WHITE 0x00FFFFFF
 #define BLACK 0
 #define DELETE 127
-#define LEFT_ARROW 251
-#define RIGHT_ARROW 252
-#define UP_ARROW 253
-#define DOWN_ARROW 254
+#define LEFT_ARROW -5
+#define RIGHT_ARROW -4
+#define UP_ARROW -3
+#define DOWN_ARROW -2
 #define LETTERS 'z' - 'a' + 1
 #define WORDS 5
 #define MAX_COMMAND 128
@@ -38,7 +38,7 @@ uint8_t prompt_len = 3;
 static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //a
     {{"block", block_process}, {0,0}},  //b
-    {{"clear", clearCmd}, {0, 0}}, 
+    {{"cat", cat},{"clear", clearCmd}, {0, 0}}, 
     {{"div0", div0}, {0, 0}}, 
     {{"eliminator", eliminator}, {0, 0}}, 
     {{0, 0}}, 
@@ -191,7 +191,7 @@ void check_command(){
     key_to_screen(0);    
 }
 
-void handle_up_down(int8_t (*condition)(string_arrayADT), char * (*fn)(string_arrayADT,uint16_t *), uint8_t * key) {
+void handle_up_down(int8_t (*condition)(string_arrayADT), char * (*fn)(string_arrayADT,uint16_t *), char * key) {
     if(condition(saved_commands)) {
         write(TERMINAL, key, 1);
         strcpy(current_command,fn(saved_commands, &current_command_length));
@@ -206,7 +206,7 @@ void launchShell() {
 
     write(TERMINAL, prompt, 3);
     saved_commands = start_string_array(BUFF_MAX);
-    uint8_t key;
+    char key;
     while (!exitFlag) {
         key = get_char();
         switch (key) {

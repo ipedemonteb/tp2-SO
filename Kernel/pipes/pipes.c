@@ -51,6 +51,9 @@ void internal_close(process_struct * pcb, uint8_t bd) {
     uint8_t id = pcb->open_buffers[bd]/2;
     if (pcb->open_buffers[bd] % 2 == OUT) {
         pipes[id].opened_write--;
+        if (!pipes[id].opened_write) {
+            pipes[id].buff[(pipes[id].last++) % BUFF_MAX] = EOF;
+        }
     } else {
         pipes[id].opened_read--;
     }
@@ -110,15 +113,20 @@ int64_t read(uint8_t bd, char * arr, int64_t size) {
     }
     
     int64_t count = 0;
-    while (count < size && pipe->buff[pipe->current % BUFF_MAX] != EOF /*@todo: chequear esta condicion*/) {
+    while (count < size) {
         if (!has_next_pipe(pipe)) {
             pcb->status = BLOCKED;
             pcb->blocked_in = set_n_bit_64(pcb->blocked_in, id/2);
             yield();
         } else {
+            if (pipe->buff[pipe->current % BUFF_MAX] == EOF) { //@todo: ver si solo hacerlo con el teclado esto
+                pipe->current++;
+                break;
+            }
             arr[count++] = next_from_buffer(pipe);
         }
     }
+    
     pcb->blocked_in = off_n_bit_64(pcb->blocked_in, id/2);
     if (!has_next_pipe(pipe)) {
         avail = off_n_bit_64(avail, id/2);
@@ -143,14 +151,11 @@ int64_t write(uint8_t bd, char * buffer, int64_t size) {
     while (count < size) {
         pipe->buff[(pipe->last++) % BUFF_MAX] = buffer[count];
         count++;
+        if (id/2 == TERMINAL) terminal();
     }
-    pipe->buff[pipe->last] = EOF;
-    if (id/2 == TERMINAL) {
-        terminal();
-    }
-    else {
-        avail = set_n_bit_64(avail,id/2);
-    }
+    
+    if(id/2 != TERMINAL) avail = set_n_bit_64(avail,id/2);
+
     return count;
 }
 

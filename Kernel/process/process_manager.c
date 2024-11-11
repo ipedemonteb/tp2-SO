@@ -19,7 +19,7 @@ void my_exit() {
     kill(get_current_pid());
 }
 
-void launch_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc , uint8_t * argv[]) {
+void launch_process(void (*fn)(uint8_t,char **), uint8_t argc , char * argv[]) {
     fn(argc, argv);
     my_exit();
 }
@@ -64,14 +64,14 @@ void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_ptr = p_stack;
 }
 
-void load_proc_args(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], void * stack) {
+void load_proc_args(void (*fn)(uint8_t,char **), uint8_t argc, char * argv[], void * stack) {
     process_stack * p_stack = stack - sizeof(process_stack);
     p_stack->rdi = fn;
     p_stack->rsi = (void *)(uintptr_t)argc;
     p_stack->rdx = argv;
 }
 
-int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], const char * name, uint8_t fg) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
+int32_t create_process(void (*fn)(uint8_t,char **), uint8_t argc, char * argv[], const char * name, uint8_t fg) { //@todo: ver si se devuelve un exit code por ejemplo (fn)
     if(proc_count >= QUANT){
         return -1;
     }
@@ -104,7 +104,7 @@ int32_t create_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * a
     return p_struct->pid;
 }
 
-void create_first_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t * argv[], const char * name) {
+void create_first_process(void (*fn)(uint8_t,char **), uint8_t argc, char * argv[], const char * name) {
     process_struct * p_struct = &processes[0];
     p_struct->pid = 0;
     occupied[0] |= 1; 
@@ -149,6 +149,9 @@ void create_first_process(void (*fn)(uint8_t,uint8_t **), uint8_t argc, uint8_t 
 
 uint8_t kill(uint16_t pid) { //@todo: chequeos
     processes[pid].status = KILLED;
+    for (uint8_t i = 0; i < MAX_BUFFERS * 2; i++) {
+        internal_close(&processes[pid], i);
+    }
     if (get_current_pid() == pid) {
         yield();
     }
@@ -207,13 +210,12 @@ void clear_child(process_struct * parent_pcb, uint16_t pid) {
 
 void wait_children() {
     uint16_t pid = get_current_pid();
-    uint8_t child, idx;
+    uint8_t child;
     process_struct * pcb = &processes[pid];
     while(pcb->children_processes[0] || pcb->children_processes[1]){
         while (pcb->killed_children[0] || pcb->killed_children[1]) {
             child = find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
-            idx = child/64;
-            clear_child(pcb, idx);
+            clear_child(pcb, child);
         }
         if (pcb->children_processes[0] || pcb->children_processes[1]) {
             pcb->status = BLOCKED; 

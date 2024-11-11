@@ -85,8 +85,7 @@ int getChar() {
 
 char get_char(){
     char c;
-    read(0, &c, 1);
-    return c;
+    return read(0, &c, 1) ? c : -1;
 }
 
 void cleanBuffer() {

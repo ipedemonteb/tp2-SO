@@ -3,8 +3,13 @@
 
 #include <stdint.h>
 
-#define CTRL_C 200
-#define CTRL_D 201
+#define CTRL_C -56
+#define CTRL_D -1
+#define DELETE 127
+#define LEFT_ARROW -5
+#define RIGHT_ARROW -4
+#define UP_ARROW -3
+#define DOWN_ARROW -2
 
 typedef struct t_char{
     char character;
@@ -17,6 +22,8 @@ void t_off_cursor();
 void t_set_cursor();
 
 void t_insert_char(char c);
+
+void t_remove_char();
 
 void t_draw_line(char * line, uint8_t new);
 

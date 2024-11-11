@@ -33,8 +33,8 @@ typedef struct process_stack {
     void * ss;
 } process_stack;
 
-void create_first_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t * argv[], const char * name);
-int32_t create_process(void (*fn)(uint8_t, uint8_t **), uint8_t argc, uint8_t * argv[], const char * name, uint8_t fg);
+void create_first_process(void (*fn)(uint8_t, char **), uint8_t argc, char * argv[], const char * name);
+int32_t create_process(void (*fn)(uint8_t, char **), uint8_t argc, char * argv[], const char * name, uint8_t fg);
 uint8_t kill(uint16_t pid);
 void my_exit();
 uint8_t block(uint16_t pid);

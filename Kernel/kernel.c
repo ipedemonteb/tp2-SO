@@ -55,7 +55,7 @@ int main() {
 	start_mm();
 	init_scheduler(getStackBase());
 	init_semaphores();
-	uint8_t * argv[] = {0}; 
+	char * argv[] = {0}; 
 	create_first_process((void *)sampleCodeModuleAddress,0, argv, "init");
 	_sti();
 	while(1) {

@@ -5,11 +5,6 @@
 
 #define MAX_SCREEN 6500
 
-#define DELETE 127
-#define LEFT_ARROW 251
-#define RIGHT_ARROW 252
-#define UP_ARROW 253
-#define DOWN_ARROW 254
 #define MAX_FG 5
 
 static uint16_t lastX;
@@ -159,6 +154,10 @@ void t_insert_char(char c){
 }
 
 void t_remove_char(){ 
+    if (!screen[currentX - 1].character) {
+        return;
+    }
+    
     uint16_t aux = --currentX;
     while (currentX <= lastX) {
         screen[currentX] = screen[currentX + 1];
@@ -211,7 +210,7 @@ void start_terminal() {
 }
 
 void terminal() {
-    uint8_t c;
+    char c;
     while (direct_read(terminal_buffer, &c)) {
         switch (c) {
             case RIGHT_ARROW:

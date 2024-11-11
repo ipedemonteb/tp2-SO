@@ -47,9 +47,19 @@ void block_process(uint8_t argc, char * argv[]) {
     block(pid);
 }
 
-//implement
-void cat(uint8_t argc, char * argv[]) {
+#define MAX_LINE 256
 
+void cat(uint8_t argc, char * argv[]) {
+    char c, buff[MAX_LINE];
+    uint16_t count = 0;
+    while ((c = get_char()) != -1) {
+        buff[count++] = c;
+        if (c == '\n' || count - 1 >= MAX_LINE ) {
+            buff[count] = 0;
+            printf(buff);
+            count = 0;
+        }
+    }
 }
 
 //implement
