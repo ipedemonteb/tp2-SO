@@ -31,15 +31,8 @@ block_t * create_block(void * address, int8_t order) {
 
 void remove_block(block_t * block) {
   uint8_t order = block->order;
-  if (block == NULL) {
-    // printf("Error: trying to remove a NULL block.\n");
-    return;
-  }
-
   block_t * curr_block = buddy_man.free_blocks[order];
-  if (curr_block == NULL) {
-    // printf("Error in rem_block: level: %ld does not have free blocks\n",
-    // level);
+  if (block == NULL || curr_block == NULL) {
     return;
   }
 
@@ -48,34 +41,19 @@ void remove_block(block_t * block) {
     buddy_man.free_blocks[order] = buddy_man.free_blocks[order]->next;
     return;
   }
-  // Si llegue hasta aca: hay primero y no es el bloque
 
   while (curr_block->next != NULL && curr_block->next != block) {
     curr_block = curr_block->next;
   }
+
   if (curr_block->next == NULL) {
-    // printf("Error: culd not find the block in the specified level\n");
     return;
   }
 
   curr_block->next = curr_block->next->next;
-
   curr_block->status = OCCUPIED;
+  
   return;
-  // block_t ** head = &buddy_man.free_blocks[block->order];
-  // if (*head == block) { // el bloque es el primero en la lista
-  //   buddy_man.free_blocks[block->order] = block->next;
-  // } else {
-  //   block_t * prev = *head;
-  //   while (prev && prev->next != block) {   // itero por la lista hasta encontrar el bloque anterior al que quiero sacar
-  //     prev = prev->next;
-  //   }
-  //   if (prev) {
-  //     prev->next = block->next;
-  //   }
-  // }
-  // block->next = NULL;
-  // return;
 }
 
 void split_block(int8_t order) {
