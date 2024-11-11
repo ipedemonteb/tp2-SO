@@ -1,4 +1,5 @@
 #include "../include/sem.h"
+#include <stdint.h>
 
 semaphore semaphores[SEM_MAX] = {0};
 
@@ -18,6 +19,15 @@ void enable_list(listADT list) {
     uint16_t pid = (uint16_t)(uintptr_t) poll(list);
     unblock(pid);
   }
+}
+
+int8_t enable_first(listADT list) {
+  if (peek(list) == NULL) {
+    return -1;
+  }
+  uint16_t pid = (uint16_t)(uintptr_t) poll(list);
+  unblock(pid);
+  return 0;
 }
 
 void acquire_sem_lock(semaphore * sem) {
@@ -62,11 +72,13 @@ int8_t sem_post(int8_t id) {
   if (id >= SEM_MAX || id <= 0 || semaphores[id].value == NOT_INIT) {
     return -1;
   }
+  
   acquire_sem_lock(&semaphores[id]);
-  semaphores[id].value++;
-  if (semaphores[id].value == 1) {
-    enable_list(semaphores[id].waiting_sem);
-  }
+
+  if(enable_first(semaphores[id].waiting_sem) == -1) {
+    semaphores[id].value++;
+  }  
+
   release_sem_lock(&semaphores[id]);
   return 0;
 }
@@ -77,19 +89,17 @@ int8_t sem_wait(int8_t id) {
   }
 
   acquire_sem_lock(&semaphores[id]);
-
   int16_t my_pid = get_current_pid();
-  while(semaphores[id].value == 0) {
+
+  if(semaphores[id].value == 0) {
     add(semaphores[id].waiting_sem, (void *)(uintptr_t) my_pid);
     release_sem_lock(&semaphores[id]);
     block(my_pid);
-    
-    acquire_sem_lock(&semaphores[id]);
+    return 0;
   }
 
   semaphores[id].value--;
   release_sem_lock(&semaphores[id]);
-
   return 0;
 }
 

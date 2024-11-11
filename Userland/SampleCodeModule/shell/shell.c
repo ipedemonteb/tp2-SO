@@ -38,13 +38,13 @@ uint8_t prompt_len = 3;
 static command_t commands[LETTERS][WORDS] = {
     {{0,0}},  //a
     {{"block", block_process}, {0,0}},  //b
-    {{"cat", cat},{"clear", clearCmd}, {0, 0}}, 
-    {{"div0", div0}, {0, 0}}, 
-    {{"eliminator", eliminator}, {0, 0}}, 
-    {{0, 0}}, 
-    { {0, 0}},
-    {{"help", help}, {0, 0}}, 
-    {{"invalidOpCode", invalidOpCode}, {0, 0}},
+    {{"cat", cat},{"clear", clearCmd}, {0, 0}}, //c
+    {{"div0", div0}, {0, 0}}, //d
+    {{0, 0}}, //e
+    {{"filter", filter}, {0, 0}}, //f
+    { {0, 0}}, //g
+    {{"help", help}, {0, 0}}, //h
+    {{"invalidOpCode", invalidOpCode}, {0, 0}}, //i
     {{0,0}},  //j
     {{"kill", kill_process}, {0,0}},  //k
     {{"loop",loop}, {0,0}},  //l
@@ -58,6 +58,7 @@ static command_t commands[LETTERS][WORDS] = {
     {{"test_mm",test_mm},{"test_prio",test_prio},{"test_processes",test_processes},{"test_sync", test_sync}, {0,0}},   //t
     {{0,0}},  //u
     {{0,0}},  //v
+    {{"wc",wc}, {0,0}}, //w
     {{0,0}},  //x
     {{0,0}},  //y
     {{0,0}}  //z

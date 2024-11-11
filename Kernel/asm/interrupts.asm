@@ -18,7 +18,7 @@ GLOBAL regs
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN sysCallDispatcher
-EXTERN getStackBase
+EXTERN get_stack_base
 EXTERN schedule
 
 section .text
@@ -106,7 +106,7 @@ section .text
 	mov rsi, regs
 	call exceptionDispatcher
 	popState
-	call getStackBase
+	call get_stack_base
 	mov [rsp+24], rax
 	mov rax, userland
 	mov [rsp], rax

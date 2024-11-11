@@ -61,7 +61,7 @@ void my_free(void *p) {
     syscaller(14, p, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
-int8_t create_process(void (*fn)(uint8_t, char **), uint8_t argc, char **argv, char *name, uint8_t fg) {
+int8_t create_process(void (*fn)(uint64_t, char **), uint8_t argc, char **argv, char *name, uint8_t fg) {
     return (int8_t)(uintptr_t)syscaller(15, (void *)fn, (void *)(uintptr_t)argc, (void *)argv, (void *)name, (void *)(uintptr_t)fg);
 }
 

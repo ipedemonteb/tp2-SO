@@ -157,3 +157,14 @@ void move_screen_up(uint8_t pixels) {
 		}
 	}
 }
+
+void clear() {
+	uint64_t * framebuffer = (uint64_t *)(uintptr_t)VBE_mode_info->framebuffer;
+	uint16_t width = getWidth() / sizeof(uint64_t) * BYTES_PER_PIXEL;
+	uint16_t height = getHeight();
+	for (uint16_t i = 0; i < height; i++) {
+		for (uint16_t j = 0; j < width; j++) {
+			framebuffer[i * width + j] = BLACK;
+		}
+	}
+}

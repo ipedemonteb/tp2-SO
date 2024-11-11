@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include "memory_manager.h"
 
+#ifndef NULL
 #define NULL (void *) 0
+#endif
 
 typedef int (*compare)(void * e1, void * e2);
 typedef struct listCDT * listADT;
