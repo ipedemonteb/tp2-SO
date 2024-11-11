@@ -4,4 +4,3 @@ if [[ "$1" = "gdb" ]]; then
 else
     qemu-system-x86_64 -hda Image/x64BareBonesImage.qcow2 -m 512
 fi
-# -d int 2>&1 | grep "v="

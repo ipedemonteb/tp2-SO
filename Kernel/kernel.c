@@ -52,14 +52,11 @@ int main() {
 	start_keyboard_driver();
 	start_terminal();
 	load_idt();
-	//_sti();
-	//((EntryPoint)sampleCodeModuleAddress)();
 	start_mm();
 	init_scheduler(getStackBase());
 	init_semaphores();
 	char * argv[] = {0}; 
 	create_first_process((void *)sampleCodeModuleAddress,0, argv, "init");
-  //create_first_process((void *) test_buddy, 0, argv, "test_buddy");
 	_sti();
 	while(1) {
 	}

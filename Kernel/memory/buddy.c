@@ -1,4 +1,4 @@
-#include "memory_manager.h"
+#include "../include/memory_manager.h"
 
 #define MIN_LEVEL 5 // nivel minimo de la memoria (2^5 = 32 bytes)
 #define MAX_ORDER 25 // maximo nivel hardcodeado (por el tamaño de la memoria es el maximo nivel que deberia tener, lo pongo como proteccion x las)
