@@ -46,7 +46,7 @@ void * mm_alloc(mmADT mm, uint64_t size) {
     blockDataPtr iter = mm->first;
 
     while(iter != NULL) {
-        if(iter->size >= size /* + sizeof(struct blockData) */) {
+        if(iter->size >= size) {
             break;
         }
         iter = iter->next;
@@ -56,7 +56,7 @@ void * mm_alloc(mmADT mm, uint64_t size) {
         return NULL;
     }
     
-    uint64_t remaining = iter->size - size /*- sizeof(struct blockData)*/;
+    uint64_t remaining = iter->size - size;
 
     if(remaining > sizeof(struct blockData)) {
         blockDataPtr newFreeBlock = (blockDataPtr)((uint8_t *)iter->block + size);
@@ -121,7 +121,7 @@ void mm_free(mmADT mm, void * mem) {
         return;
     }
     blockDataPtr blockFreed = (blockDataPtr)((uint8_t *)mem - sizeof(struct blockData));
-    mm->avail += blockFreed->size /* + sizeof(struct blockData) */;
+    mm->avail += blockFreed->size;
     blockDataPtr iter = mm->first;
     blockDataPtr prev = NULL;
 

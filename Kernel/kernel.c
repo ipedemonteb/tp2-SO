@@ -9,7 +9,9 @@
 #include "./include/test_sync.h"
 #include "./include/keyboardDriver.h"
 #include "./include/terminal_driver.h"
-#include "include/sem.h"
+#include "./include/sem.h"
+#include "./include/memory_manager.h"
+#include "./include/mmADT.h"
 
 
 extern uint8_t text;
@@ -57,6 +59,7 @@ int main() {
 	init_semaphores();
 	char * argv[] = {0}; 
 	create_first_process((void *)sampleCodeModuleAddress,0, argv, "init");
+  //create_first_process((void *) test_buddy, 0, argv, "test_buddy");
 	_sti();
 	while(1) {
 	}

@@ -21,6 +21,6 @@ $(MODULE): $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM)
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 clean:
-	rm -rf asm/*.o *.o
+	rm -rf asm/*.o tests/*.o shell/*.o *.o *.bin *.elf 
 
 .PHONY: all clean print
