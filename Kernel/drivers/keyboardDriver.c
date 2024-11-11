@@ -122,9 +122,7 @@ void keyboard_handler() {
 		direct_write(keyboard_buffer, aux);
 		keyboard_ready();
 	}
-	else if (keyVal > 58) {
-	}
-	else {
+	else if (keyVal <= 58) {
 		if (ctrlOn && keyVal == R_MAKE_CODE) {
 			printRegisters((int8_t *)"REGISTERS", regs);
 			ctrlOn = 0;
