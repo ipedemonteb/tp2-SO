@@ -339,3 +339,39 @@ cd
 make clean
 make debug_free_array
 exit
+CD
+cd
+make debug_free_array
+make clean
+make buddy
+make clean
+make buddy
+make clean
+make buddy
+make clean
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+make clean
+make free_array
+exot
+exit

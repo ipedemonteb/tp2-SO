@@ -6,7 +6,7 @@
 
 #define MIN(a,b) a > b ? b:a
 
-void readString(uint8_t * buffer, int maxLength);
+void readString(char * buffer, int maxLength);
 void printString(uint8_t * str);
 void printInt(int num);
 
@@ -103,14 +103,14 @@ void scanf(const uint8_t * fmt, ...) {
             fmt++;
             switch (*fmt) {
                 case 'd': {
-                    int *num = va_arg(args, int *);
-                    uint8_t buffer[10];
+                    int * num = va_arg(args, int *);
+                    char buffer[10];
                     readString(buffer, 10);
                     *num = atoi(buffer);
                     break;
                 }
                 case 's': {
-                    uint8_t *str = va_arg(args, uint8_t *);
+                    char * str = (char *) va_arg(args, uint8_t *);
                     readString(str, 100);
                     break;
                 }
@@ -121,7 +121,7 @@ void scanf(const uint8_t * fmt, ...) {
     va_end(args);
 }
 
-void readString(uint8_t * buffer, int maxLength) {
+void readString(char * buffer, int maxLength) {
     int i = 0;
     uint8_t c;
     while ((c = getChar()) != '\n' && i < maxLength - 1) {
@@ -131,7 +131,7 @@ void readString(uint8_t * buffer, int maxLength) {
     buffer[i] = '\0';
 }
 
-int atoi(const char * str) {
+int atoi(char * str) {
     int res = 0;
     int sign = 1;
     if (*str == '-') {

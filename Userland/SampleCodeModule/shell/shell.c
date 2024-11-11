@@ -64,8 +64,6 @@ static command_t commands[LETTERS][WORDS] = {
     {{0,0}}  //z
 };
 
-static char * command_not_found_msg = "Command not found. Type help for a list of commands";
-
 static uint8_t exitFlag;
 
 uint8_t running_processes_pids[MAX_PID + 1] = {0};

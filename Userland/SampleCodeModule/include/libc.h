@@ -13,7 +13,7 @@ int getChar();
 char get_char();
 void cleanBuffer();
 void scanf(const uint8_t * fmt, ...);
-int atoi(const char * str);
+int atoi(char * str);
 void itos(int num, char * buffer);
 int strcmp(char * s1, char * s2);
 uint32_t strcpy(char * dest, const char * source);

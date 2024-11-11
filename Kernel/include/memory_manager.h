@@ -17,7 +17,7 @@ typedef struct mem_info {
 #define FREE     1
 #define OCCUPIED 0
 
-#define NULL ((void *) 0)
+#define NULL (void *) 0
 
 void start_mm();
 void * my_malloc(uint64_t size);

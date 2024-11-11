@@ -51,7 +51,7 @@ uint8_t fontSizeDown();
 void time(char bp[]);
 void * my_malloc(uint64_t size);
 void my_free(void * p); 
-int8_t create_process(void (*fn)(uint8_t, char **), uint8_t argc, char **argv, char *name, uint8_t fg);
+int8_t create_process(void (*fn)(uint64_t, char **), uint8_t argc, char **argv, char *name, uint8_t fg);
 uint8_t kill(uint16_t pid);
 void my_exit(); 
 uint8_t block(uint16_t pid);

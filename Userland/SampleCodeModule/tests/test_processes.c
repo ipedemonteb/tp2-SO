@@ -29,14 +29,12 @@ void test_processes(uint8_t argc, char *argv[]) {
   }
 
   p_rq p_rqs[max_processes];
-  int i = 1;
   while (1) {
-    char str[30];
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
       p_rqs[rq].pid = create_process(endless_loop, 0, argvAux, "endless_loop",0);
       if (p_rqs[rq].pid == -1) {
-        return -1;
+        return;
       } else {
         p_rqs[rq].state = RUNNING_P;
         alive++;

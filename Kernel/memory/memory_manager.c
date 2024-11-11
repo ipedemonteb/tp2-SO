@@ -1,13 +1,9 @@
 #include "../include/memory_manager.h"
 
-
-#define START 0x0000000000200000
-#define END 0x0000000000400000
-
 mmADT mm;
 
 void start_mm() {
-    mm = init_mm((void *)START, END - START);
+    mm = init_mm((void *)MEM_START, MEM_SIZE);
 }
 
 void * my_malloc(uint64_t size) {
