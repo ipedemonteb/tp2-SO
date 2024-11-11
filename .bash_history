@@ -328,3 +328,7 @@ make clean
 make buddy
 make clean
 exit
+ccd
+cd
+make free_array
+exit
