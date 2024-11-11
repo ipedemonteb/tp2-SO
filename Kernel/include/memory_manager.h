@@ -19,12 +19,6 @@ typedef struct mem_info {
 
 #define NULL ((void *) 0)
 
-typedef struct mem_info {
-	uint64_t total;
-	uint64_t used;
-	uint64_t free;
-} mem_info;
-
 void start_mm();
 void * my_malloc(uint64_t size);
 void my_free(void * p);

@@ -19,7 +19,7 @@ void test_prio(uint8_t argc, char *argv[]) {
   uint64_t i;
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    pids[i] = create_process(endless_loop_print, 1, argv1, (int8_t *)"funcion");
+    pids[i] = create_process(endless_loop_print, 1, argv1, (int8_t *)"funcion", 0);
 
   bussy_wait(WAIT);
 

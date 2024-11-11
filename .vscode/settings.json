@@ -6,6 +6,8 @@
     "semaphore": "c",
     "mutex": "c",
     "videodriver.h": "c",
-    "buddy.h": "c"
+    "buddy.h": "c",
+    "mmadt.h": "c",
+    "process_manager.h": "c"
   }
 }

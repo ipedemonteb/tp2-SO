@@ -1,51 +1,46 @@
 #include <stdint.h>
-#include "./include/moduleLoader.h"
-#include "./include/naiveConsole.h"
+#include "./include/module_loader.h"
 #include "./include/idtLoader.h"
 #include "./include/interrupts.h"
-#include "./include/memory_manager.h"
 #include "./include/scheduler.h"
 #include "./include/process_manager.h"
-#include "./include/test_sync.h"
 #include "./include/keyboardDriver.h"
 #include "./include/terminal_driver.h"
 #include "./include/sem.h"
 #include "./include/memory_manager.h"
-#include "./include/mmADT.h"
-
 
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
 extern uint8_t bss;
-extern uint8_t endOfKernelBinary;
-extern uint8_t endOfKernel;
+extern uint8_t end_of_kernel_binary;
+extern uint8_t end_of_kernel;
 
-static const uint64_t PageSize = 0x1000;
+static const uint64_t page_size = 0x1000;
 
-static void * const sampleCodeModuleAddress = (void *)0x400000;
-static void * const sampleDataModuleAddress = (void *)0x500000;
+static void * const sample_code_module_address = (void *)0x400000;
+static void * const sample_data_module_address = (void *)0x500000;
 
-typedef int (* EntryPoint)();
+typedef int (*entry_point)();
 
-void clearBSS(void *bssAddress, uint64_t bssSize) {
-	memset(bssAddress, 0, bssSize);
+void clear_BSS(void * bss_address, uint64_t bss_size) {
+	memset(bss_address, 0, bss_size);
 }
 
-void * getStackBase() {
-	return (void *)((uint64_t)&endOfKernel + PageSize * 8 // The size of the stack itself, 32KiB
+void * get_stack_base() {
+	return (void *)((uint64_t)&end_of_kernel + page_size * 8 // The size of the stack itself, 32KiB
 					- sizeof(uint64_t)					  // Begin at the top of the stack
 	);
 }
 
-void * initializeKernelBinary() {
-	void * moduleAddresses[] = {
-		sampleCodeModuleAddress,
-		sampleDataModuleAddress};
+void * initialize_kernel_binary() {
+	void * module_addresses[] = {
+		sample_code_module_address,
+		sample_data_module_address};
 
-	loadModules(&endOfKernelBinary, moduleAddresses);
-	clearBSS(&bss, &endOfKernel - &bss);
-	return getStackBase();
+	load_modules(&end_of_kernel_binary, module_addresses);
+	clear_BSS(&bss, &end_of_kernel - &bss);
+	return get_stack_base();
 }
 
 int main() {
@@ -53,10 +48,10 @@ int main() {
 	start_terminal();
 	load_idt();
 	start_mm();
-	init_scheduler(getStackBase());
+	init_scheduler(get_stack_base());
 	init_semaphores();
 	char * argv[] = {0}; 
-	create_first_process((void *)sampleCodeModuleAddress,0, argv, "init");
+	create_first_process((void *)sample_code_module_address,0, argv, "init");
 	_sti();
 	while(1) {
 	}

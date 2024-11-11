@@ -312,3 +312,19 @@ cd
 make buddy
 ./run.sh
 exit
+cd
+make buddy
+make buddy
+make buddy
+make clean
+make buddy
+make clean
+make buddy
+make clean
+make buddy
+make clean
+make buddy
+make clean
+make buddy
+make clean
+exit
