@@ -308,3 +308,7 @@ make clean
 git add .
 git commit -m "feat: makefile works for gdb too"
 exit
+cd
+make buddy
+./run.sh
+exit

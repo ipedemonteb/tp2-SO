@@ -156,6 +156,7 @@ void * my_malloc(uint64_t size) {
   remove_block(block); // saco al bloque del nivel en el que estaba (pues estará ocupado ya que lo devuelvo en el malloc)
   block->status = OCCUPIED; // todo: ver si esto va o no
 
+  buddy_man.used_mem += (1L << order);
   return (void *)((uint8_t *) block + sizeof(block_t));
 }
 
@@ -178,6 +179,7 @@ void my_free (void * address) {
 
   create_block((void *) block, block->order);
 
+  buddy_man.used_mem -= (1L << block->order);
   return;
 }
 
