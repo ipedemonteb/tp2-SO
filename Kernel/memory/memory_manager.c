@@ -21,5 +21,5 @@ void my_free(void * p) {
 void mem(mem_info * info) {
     info->total = mm_size(mm);
     info->free = mm_avail(mm);
-    info-> used = mm_size(mm) - mm_avail(mm);
+    info->used = mm_size(mm) - mm_avail(mm);
 }

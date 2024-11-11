@@ -332,3 +332,10 @@ ccd
 cd
 make free_array
 exit
+cd
+make free_array
+exit
+cd
+make clean
+make debug_free_array
+exit

@@ -2,148 +2,143 @@
 #include <stdint.h>
 #include <unistd.h> 
 
-typedef struct blockData * blockDataPtr;
+typedef struct block_data * block_data_ptr;
 
-struct blockData {
-    blockDataPtr next;
-    blockDataPtr prev;
-    uint64_t size;
-    void* block;
+struct block_data {
+  block_data_ptr next;
+  block_data_ptr prev;
+  uint64_t size;
+  void * block;
 };
 
 struct mmCDT {
-    blockDataPtr first;     //First block of free list
-    uint64_t size;
-    uint64_t avail;         //Available memory
+  block_data_ptr first;     //First block of free list
+  uint64_t size;
+  uint64_t avail;         //Available memory
 };
 
 mmADT init_mm(void * start, uint64_t size) {
-    uint8_t aux = (sizeof(struct mmCDT) + sizeof(struct blockData));
-    //@TODO: Ver si se deja
-    if(size <= aux + 1) {
-        return NULL;
-    }
+  uint8_t aux = (sizeof(struct mmCDT) + sizeof(struct block_data));
+  if (size <= aux + 1) {
+      return NULL;
+  }
 
-    mmADT mm = start;
-    mm->size = size;
-    mm->first = (blockDataPtr)((uint8_t*)start + sizeof(struct mmCDT));
-    mm->avail = size - aux;
+  mmADT mm = start;
+  mm->size = size;
+  mm->first = (block_data_ptr) ((uint8_t *) start + sizeof(struct mmCDT));
+  mm->avail = size - aux;
 
-    mm->first->size = mm->avail;
-    mm->first->block = (void*)((uint8_t*)start + aux);
-    mm->first->next = NULL;
-    mm->first->prev = NULL;
+  mm->first->size = mm->avail;
+  mm->first->block = (void *) ((uint8_t *) start + aux);
+  mm->first->next = NULL;
+  mm->first->prev = NULL;
 
-    return mm;
+  return mm;
 }
 
 
 void * mm_alloc(mmADT mm, uint64_t size) {
-    if(size == 0 || size + sizeof(struct blockData) > mm->avail) {
-        return NULL;
-    }
+  if(size == 0 || size + sizeof(struct block_data) > mm->avail) {
+      return NULL;
+  }
 
-    blockDataPtr iter = mm->first;
+  block_data_ptr iter = mm->first;
 
-    while(iter != NULL) {
-        if(iter->size >= size) {
-            break;
-        }
-        iter = iter->next;
-    }
+  while(iter != NULL) {
+      if(iter->size >= size) {
+          break;
+      }
+      iter = iter->next;
+  }
 
-    if(iter == NULL) {
-        return NULL;
-    }
-    
-    uint64_t remaining = iter->size - size;
+  if(iter == NULL) {
+      return NULL;
+  }
+  
+  uint64_t remaining = iter->size - size;
 
-    if(remaining > sizeof(struct blockData)) {
-        blockDataPtr newFreeBlock = (blockDataPtr)((uint8_t *)iter->block + size);
-        newFreeBlock->block = (void *)((uint8_t *)newFreeBlock + sizeof(struct blockData));
-        newFreeBlock->size = remaining - sizeof(struct blockData);
+  if(remaining > sizeof(struct block_data)) {
+    block_data_ptr new_free_block = (block_data_ptr) ((uint8_t *) iter->block + size);
+    new_free_block->block = (void *)((uint8_t *) new_free_block + sizeof(struct block_data));
+    new_free_block->size = remaining - sizeof(struct block_data);
 
-        if (iter->prev == NULL) {
-            newFreeBlock->next = iter->next;
-            newFreeBlock->prev = iter->prev;
-            mm->first = newFreeBlock;
-        }
-        else {
-            //disconect iter
-            iter->prev->next = iter->next;
-            if (iter->next != NULL) {
-                iter->next->prev = iter->prev;
-            }
-
-            blockDataPtr p = iter->prev;
-            while (p != NULL && p->size > newFreeBlock->size) {
-                p = p->prev;
-            }
-            if (p == NULL) {
-                newFreeBlock->next = mm->first;
-                newFreeBlock->prev = NULL;
-                if (mm->first != NULL) {
-                    mm->first->prev = newFreeBlock; 
-                }
-                mm->first = newFreeBlock;
-            }
-            else {
-                newFreeBlock->next = p->next;
-                newFreeBlock->prev = p;
-                if (p->next != NULL) {
-                    p->next->prev = newFreeBlock;
-                }
-                p->next = newFreeBlock;
-            }
-        }
-
-        iter->size = size;
-        mm->avail -= size + sizeof(struct blockData);
+    if (iter->prev == NULL) {
+        new_free_block->next = iter->next;
+        new_free_block->prev = iter->prev;
+        mm->first = new_free_block;
     }
     else {
-        if(iter->prev != NULL) {
-            iter->prev->next = iter->next;
+      //disconect iter
+      iter->prev->next = iter->next;
+      if (iter->next != NULL) {
+        iter->next->prev = iter->prev;
+      }
+
+      block_data_ptr p = iter->prev;
+      while (p != NULL && p->size > new_free_block->size) {
+        p = p->prev;
+      }
+      if (p == NULL) {
+        new_free_block->next = mm->first;
+        new_free_block->prev = NULL;
+        if (mm->first != NULL) {
+            mm->first->prev = new_free_block; 
         }
-        else {
-            mm->first = iter->next;
+        mm->first = new_free_block;
+      }
+      else {
+        new_free_block->next = p->next;
+        new_free_block->prev = p;
+        if (p->next != NULL) {
+            p->next->prev = new_free_block;
         }
-        if(iter->next != NULL) {
-            iter->next->prev = iter->prev;
-        }
-        mm->avail -= size + remaining;
+        p->next = new_free_block;
+      }
     }
-    return iter->block;
+    iter->size = size;
+    mm->avail -= size + sizeof(struct block_data);
+  }
+  else {
+    if(iter->prev != NULL) {
+      iter->prev->next = iter->next;
+    }
+    else {
+      mm->first = iter->next;
+    }
+    if(iter->next != NULL) {
+      iter->next->prev = iter->prev;
+    }
+    mm->avail -= size + remaining;
+  }
+  return iter->block;
 }
 
-//@TODO: Ver que el bloque mas chico se guarde como first
 void mm_free(mmADT mm, void * mem) {
     if(mm == NULL || mem == NULL) {
         return;
     }
-    blockDataPtr blockFreed = (blockDataPtr)((uint8_t *)mem - sizeof(struct blockData));
-    mm->avail += blockFreed->size;
-    blockDataPtr iter = mm->first;
-    blockDataPtr prev = NULL;
+    block_data_ptr block_freed = (block_data_ptr)((uint8_t *) mem - sizeof(struct block_data));
+    mm->avail += block_freed->size;
+    block_data_ptr iter = mm->first;
+    block_data_ptr prev = NULL;
 
-    while(iter != NULL && iter->size < blockFreed->size) {
+    while(iter != NULL && iter->size < block_freed->size) {
         prev = iter;
         iter = iter->next;
     }
 
-    blockFreed->next = iter;
-    blockFreed->prev = prev;
+    block_freed->next = iter;
+    block_freed->prev = prev;
 
     if(prev != NULL) {
-        prev->next = blockFreed;
+        prev->next = block_freed;
     }
     else {
-        mm->first = blockFreed;
+        mm->first = block_freed;
     }
     if(iter != NULL) {
-        iter->prev = blockFreed;
+        iter->prev = block_freed;
     }
-
-    //@TODO: chequear si fusionamos bloques
     return;
 }
 
