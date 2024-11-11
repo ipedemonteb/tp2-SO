@@ -4,8 +4,8 @@
 #include "../include/process_manager.h"
 
 #define MAX_SCREEN 6500
-
 #define MAX_FG 5
+#define CLEAR -33
 
 static uint16_t lastX;
 
@@ -79,6 +79,7 @@ static void clear_t_char(uint32_t i){
 
 void t_clear(){
     re_draw_screen(clear_t_char);
+    clear();
     currentX = 0;
     lastX = 0;
 }
@@ -232,6 +233,9 @@ void terminal() {
             case DELETE:
                 t_remove_char();
                 t_set_cursor();
+                break;
+            case CLEAR:
+                t_clear();
                 break;
             case '\n':
                 t_off_cursor();

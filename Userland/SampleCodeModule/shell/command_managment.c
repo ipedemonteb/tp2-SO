@@ -13,7 +13,7 @@ List of commands: \n\
 - loop: prints the proccess ID with a greeting\n\
 - mem: displays memory information\n\
 - move_up: moves the screen the amout of lines received as a parameter\n\
-- nice: changes the priority of the process with the given ID\n\
+- nice: changes the priority (to a number between 1 and 5) of the process with the given ID\n\
 - phylo: starts the phylosophers problem\n\
 - ps: lists all processes and their information\n\
 - test_mm: tests memory management\n\
@@ -31,7 +31,7 @@ void remove_letter(char * string, uint8_t idx) {
 }
 
 void insert_letter(char * string, int8_t len, char letter, int8_t idx) {
-    while(len + 1 > idx){
+    while(len + 1 > idx) {
         string[len + 1] = string[len];
         len--;
     }
@@ -47,8 +47,6 @@ void block_process(uint8_t argc, char * argv[]) {
     block(pid);
 }
 
-#define MAX_LINE 256
-
 void cat(uint8_t argc, char * argv[]) {
     char c, buff[MAX_LINE];
     uint16_t count = 0;
@@ -62,26 +60,30 @@ void cat(uint8_t argc, char * argv[]) {
     }
 }
 
-//implement
 void clearCmd(uint8_t argc, char * argv[]) {
-
+    char c = CLEAR;
+    write(STDOUT, &c, 1);
 }
 
 void div0(uint8_t argc, char * argv[]) {
     divZero();
 }
 
-//delete
-void eliminator(uint8_t argc, char * argv[]) {
-    /* gameMain();
-    cleanBuffer();
-    sMoveScreenUp(0);
-    reset = 1; */
+static uint8_t is_vocal(char c) {
+    return  c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || 
+            c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U';
 }
 
-//implement
 void filter(uint8_t argc, char * argv[]) {
-
+    char c, buff[MAX_LINE];
+    uint16_t count = 0;
+    while ((c = get_char()) != -1) {
+        if (!is_vocal(c)) {
+            buff[count++] = c;
+        }
+    }
+    buff[count] = 0;
+    printf("%s\n", buff);
 }
 
 void help(uint8_t argc, char * argv[]) {
@@ -130,14 +132,17 @@ void move_up(uint8_t argc, char * argv[]) {
     put_char(amount);
 }
 
-//check and check max priority
 void nice_process(uint8_t argc, char * argv[]) {
-    if (argc != 2) {
+    if (argc != 2 ) {
         printf("Usage: nice <pid> <priority>\n");
         return;
     }
     uint64_t pid = atoi(argv[0]);
     uint8_t priority = atoi(argv[1]);
+    if(priority < 1 || priority > 5) {
+        printf("Priority must be between 1 and 5\n");
+        return;
+    }
     nice(pid, priority);
 }
 
@@ -159,43 +164,36 @@ void printps(uint8_t argc, char * argv[]) {
             buffer[i] = ' ';
         }
 
-        //copy pid
         itos(info[i].pid, aux);
         strcpy(buffer, aux);
         buffer[strlen(aux)] = ' ';
         jmp += 8;
 
-        //copy name
         strcpy(buffer + jmp, info[i].name);
         buffer[jmp + strlen(info[i].name)] = ' ';
         my_free(info[i].name);
         jmp += 13;
 
-        //copy priority
         itos(info[i].priority, aux);
         strcpy(buffer + jmp, aux);
         buffer_ptr[jmp + strlen(aux)] = ' ';
         jmp += 13;
 
-        //copy stack base
         uint64ToHexStr((uint64_t)info[i].stack_base, aux);
         strcpy(buffer + jmp, aux);
         buffer[jmp + strlen(aux)] = ' ';
         jmp += 16;
 
-        //copy stack ptr
         uint64ToHexStr((uint64_t)info[i].stack_ptr, aux);
         strcpy(buffer + jmp, aux);
         buffer[jmp + strlen(aux)] = ' ';
         jmp += 16;
 
-        //copy foreground
         itos(info[i].foreground, aux);
         strcpy(buffer + jmp, aux);
         buffer[jmp + strlen(aux)] = ' ';
         jmp += 14;
 
-        //copy status
         char * msg[] = {"READY", "BLOCKED", "KILLED"};
         int index = 0;
         switch (info[i].status) {
@@ -214,14 +212,13 @@ void printps(uint8_t argc, char * argv[]) {
     }
 }
 
-//check
 void wc(uint8_t argc, char * argv[]) {
     char c;
     uint64_t count = 0;
-    while (read(STDIN, &c, 1) > 0) {
+    while ((c = get_char()) != EOF) {
         if (c == '\n') {
             count++;
         }
     }
-    printf("%d\n", count);
+    printf("Line count: %d\n", count);
 }

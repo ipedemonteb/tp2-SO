@@ -6,6 +6,6 @@
 #include "syscall.h"
 #include "test_util.h"
 
-uint8_t run_phylo();
+int8_t run_phylo();
 
 #endif

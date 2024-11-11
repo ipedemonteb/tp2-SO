@@ -130,15 +130,21 @@ void keyboard_handler() {
 		else {
 			char c = asccode[keyVal][(shiftOn ^ capsLock) + ctrlOn];
 			if (c == CTRL_C) {
-					t_insert_char('^');
-					t_insert_char('C');
-					t_kill_fg();
-					ctrlOn = 0;
-					return;
+				t_insert_char('^');
+				t_insert_char('C');
+				t_kill_fg();
+				t_off_cursor();
+				t_draw_line("", 1);
+				t_set_cursor();
+				ctrlOn = 0;
+				return;
 			}
 			if (c == CTRL_D) {
 				t_insert_char('^');
 				t_insert_char('D');
+				t_off_cursor();
+				t_draw_line("", 1);
+				t_set_cursor();
 			} else if (to_terminal) {
 				if (c == '\n') {
 					t_off_cursor();

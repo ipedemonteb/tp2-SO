@@ -8,13 +8,15 @@
 #include "test_util.h"
 #include "phylo.h"
 
+#define MAX_LINE 1024
+#define CLEAR -33
+
 void remove_letter(char * string, uint8_t idx);
 void insert_letter(char * string, int8_t len, char letter, int8_t idx);
 void block_process(uint8_t argc, char * argv[]);
 void cat(uint8_t argc, char * argv[]);
 void clearCmd(uint8_t argc, char * argv[]);
 void div0(uint8_t argc, char * argv[]);
-void eliminator(uint8_t argc, char * argv[]);
 void filter(uint8_t argc, char * argv[]);
 void help(uint8_t argc, char * argv[]);
 void invalidOpCode(uint8_t argc, char * argv[]);

@@ -8,7 +8,7 @@
 #include "lib.h"
 #include "memory_manager.h"
 
-#define SEM_MAX 30
+#define SEM_MAX 127
 #define NOT_INIT -1
 
 typedef struct semaphore {

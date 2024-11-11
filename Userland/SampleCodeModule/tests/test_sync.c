@@ -77,18 +77,16 @@ void test_sync(uint8_t argc, char * argv[]) { // { n, use_sem, 0 }
 
   global = 0;
 
-
   int8_t sem_open_result = sem_open(SEM_ID, 1);
   if(sem_open_result == -1) {
     printf("Error while opening semaphore");
     return;
   }
 
-
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    pids[i] = create_process(my_process_inc, 3, argvDec, "my_process_inc");
-    pids[i + TOTAL_PAIR_PROCESSES] = create_process(my_process_inc, 3, argvInc, "my_process_inc");
+    pids[i] = create_process(my_process_inc, 3, argvDec, "my_process_inc", 0);
+    pids[i + TOTAL_PAIR_PROCESSES] = create_process(my_process_inc, 3, argvInc, "my_process_inc", 0);
   }
 
   //wait_children();
@@ -99,7 +97,7 @@ void test_sync(uint8_t argc, char * argv[]) { // { n, use_sem, 0 }
 
   sem_close(SEM_ID);
 
-  printf("test_sync: final global value %d", global);
+  printf("test_sync: final global value %d\n", global);
 
   return;
 }
