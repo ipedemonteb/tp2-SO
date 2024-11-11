@@ -5,8 +5,8 @@
 #include "./include/syscall.h"
 
 void inactive() {
-	while (1) {//@todo: ver de cammbiar por un hlt
-		//yield();
+	nice(get_current_pid(),0);
+	while (1) {
 	}
 	
 }

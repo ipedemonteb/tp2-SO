@@ -12,6 +12,7 @@ struct listCDT {
     TList last;
     compare cmp;
     TList it;
+    uint64_t size;
 };
 
 listADT new_list(compare cmp) {
@@ -20,6 +21,7 @@ listADT new_list(compare cmp) {
     aux->first = NULL;
     aux->last = NULL;
     aux->it = NULL;
+    aux->size = 0;
     return aux;
 }
 
@@ -43,7 +45,41 @@ void add(listADT list, void * elem) {
         list->last->tail = aux;
         list->last = aux;
     }
+    list->size++;
 }
+
+
+
+void remove(listADT list, void * elem) {
+    if (list == NULL || list->first == NULL) {
+        return;
+    }
+
+    TList current = list->first;
+    TList previous = NULL;
+
+    while (current != NULL) {
+        if (list->cmp(current->head, elem) == 0) { 
+            if (previous == NULL) {
+                list->first = current->tail;
+                if (list->first == NULL) {
+                    list->last = NULL;
+                }
+            } else {
+                previous->tail = current->tail;
+                if (previous->tail == NULL) {
+                    list->last = previous;
+                }
+            }
+            my_free(current);
+            list->size--;    
+            return;
+        }
+        previous = current;
+        current = current->tail;
+    }
+}
+
 
 void free_list(listADT list) {
     free_list_rec(list->first);
@@ -78,11 +114,13 @@ void * poll(listADT list){
     TList aux = list->first;
     list->first = list->first->tail;
     my_free(aux);
+    list->size--;
     return aux->head;
 }
 
 void queue(listADT list , void * elem){
     TList aux = my_malloc(sizeof(node));
+    aux->tail = NULL;
     aux->head = elem;
     if(list->first == NULL) {
         list->first = aux;
@@ -92,4 +130,9 @@ void queue(listADT list , void * elem){
         list->last->tail = aux;
         list->last = aux;
     }
+    list->size++;
+}
+
+uint8_t is_empty(listADT list) {
+    return list->size <= 0;
 }

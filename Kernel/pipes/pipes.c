@@ -115,15 +115,15 @@ int64_t read(uint8_t bd, char * arr, int64_t size) {
     int64_t count = 0;
     while (count < size) {
         if (!has_next_pipe(pipe)) {
-            pcb->status = BLOCKED;
-            pcb->blocked_in = set_n_bit_64(pcb->blocked_in, id/2);
-            yield();
+            pipe->blocked_read[pcb->pid / 64] = set_n_bit_64(pipe->blocked_read[pcb->pid / 64], pcb->pid % 64);
+            block(pcb->pid);
         } else {
             if (pipe->buff[pipe->current % BUFF_MAX] == EOF) { //@todo: ver si solo hacerlo con el teclado esto
                 pipe->current++;
                 break;
             }
             arr[count++] = next_from_buffer(pipe);
+            pipe_ready(pipe, 0);
         }
     }
     
@@ -133,6 +133,21 @@ int64_t read(uint8_t bd, char * arr, int64_t size) {
     }
     
     return count;
+}
+
+void pipe_ready(pipe_t * pipe, uint8_t r_w) {
+    uint8_t pid;
+    uint64_t * arr;
+    if(r_w) {
+        arr = pipe->blocked_read;
+    } else {
+        arr = pipe->blocked_write;
+    }
+    while(arr[0] || arr[1]) {
+        pid = find_off_bit_128(~arr[0], ~arr[1]);
+        unblock(pid);
+        arr[pid / 64] = off_n_bit_64(arr[pid / 64], pid % 64);
+    }
 }
 
 int64_t write(uint8_t bd, char * buffer, int64_t size) {
@@ -149,13 +164,17 @@ int64_t write(uint8_t bd, char * buffer, int64_t size) {
 
     int64_t count = 0;
     while (count < size) {
+        if (pipe->last - pipe->current >= BUFF_MAX) {
+            pipe->blocked_write[pcb->pid / 64] = set_n_bit_64(pipe->blocked_write[pcb->pid / 64], pcb->pid % 64);
+            block(pcb->pid);
+        }
+        
         pipe->buff[(pipe->last++) % BUFF_MAX] = buffer[count];
         count++;
         if (id/2 == TERMINAL) terminal();
+        else pipe_ready(pipe, 1);
     }
     
-    if(id/2 != TERMINAL) avail = set_n_bit_64(avail,id/2);
-
     return count;
 }
 
@@ -176,7 +195,7 @@ pipe_t * get_terminal_buffer() {
 }
 
 void keyboard_ready(){
-    avail |= 1;
+    pipe_ready(&pipes[0], 1);
 }
 
 void direct_write(pipe_t * p, char c) {

@@ -6,7 +6,6 @@
 #include "./include/memory_manager.h"
 #include "./include/scheduler.h"
 #include "./include/process_manager.h"
-#include "./include/test_sync.h"
 #include "./include/keyboardDriver.h"
 #include "./include/terminal_driver.h"
 #include "include/sem.h"

@@ -16,7 +16,8 @@ void * stacks = (void *)0x1000000;
 uint64_t occupied[2];
 
 void my_exit() {
-    kill(get_current_pid());
+    uint16_t pid = get_current_pid();
+    kill(pid);
 }
 
 void launch_process(void (*fn)(uint8_t,char **), uint8_t argc , char * argv[]) {
@@ -26,12 +27,12 @@ void launch_process(void (*fn)(uint8_t,char **), uint8_t argc , char * argv[]) {
 
 void load_proc_stack(process_struct * p_struct, void * stack) {
     p_struct->stack_base = stack;
-    p_struct->priority = 1; 
+    p_struct->priority = 3; 
     p_struct->status = READY;
     p_struct->parent_pcb = &processes[get_current_pid()];
     
     p_struct->parent_pcb->children_processes[(p_struct->pid)/64] = set_n_bit_64(p_struct->parent_pcb->children_processes[(p_struct->pid)/64], (p_struct->pid) % 64);
-    p_struct->children_processes[0] = 0; //@todo: ver si son necesarias estas inicializaciones
+    p_struct->children_processes[0] = 0;
     p_struct->children_processes[1] = 0;
     p_struct->killed_children[0] = 0;
     p_struct->killed_children[1] = 0;
@@ -114,13 +115,10 @@ void create_first_process(void (*fn)(uint8_t,char **), uint8_t argc, char * argv
     void * stack = stacks + STACKSIZE;
 
     p_struct->stack_base = stack;
-    p_struct->priority = 1; 
+    p_struct->priority = 3; 
     p_struct->status = READY;
     p_struct->parent_pcb = &processes[0];//@todo: ver si es preferible que el primero apunte a si mismo
-    p_struct->children_processes[0] = 0;
-    p_struct->children_processes[1] = 0;
-    p_struct->killed_children[0] = 0;
-    p_struct->killed_children[1] = 0;
+
     p_struct->count = 1;
 
     for (uint8_t i = 0; i < MAX_BUFFERS; i++) {
@@ -152,8 +150,23 @@ uint8_t kill(uint16_t pid) { //@todo: chequeos
     for (uint8_t i = 0; i < MAX_BUFFERS * 2; i++) {
         internal_close(&processes[pid], i);
     }
+    if (processes[pid].fg) {
+        rm_from_fg(pid);
+    }
+    
+    uint8_t idx = pid/64;
+    processes[pid].parent_pcb->killed_children[idx] = set_n_bit_64(processes[pid].parent_pcb->killed_children[idx],pid % 64);
+    if (processes[pid].parent_pcb->status == BLOCKED) { // si esta esperando a que terminen sus hijos @todo: status mas creativo
+        unblock(processes[pid].parent_pcb->pid);
+    }
+    processes[pid].parent_pcb->children_processes[0] |= processes[pid].children_processes[0];
+    processes[pid].parent_pcb->children_processes[1] |= processes[pid].children_processes[1];
+    processes[pid].parent_pcb->killed_children[0] |= processes[pid].killed_children[0];
+    processes[pid].parent_pcb->killed_children[1] |= processes[pid].killed_children[1];
     if (get_current_pid() == pid) {
         yield();
+    } else {
+        deschedule_process(&processes[pid]);
     }
     return 0;
 }
@@ -162,15 +175,18 @@ uint8_t block(uint16_t pid) {
     processes[pid].status = BLOCKED;
     if (get_current_pid() == pid) {
         yield();
+    } else {
+        deschedule_process(&processes[pid]);
     }
     return 0;
 }
 
 uint8_t unblock(uint16_t pid) {
-  if (processes[pid].status != KILLED) {
-    processes[pid].status = READY;
-  }
-  return 0;
+    if (processes[pid].status == BLOCKED) {
+        processes[pid].status = READY;
+        schedule_process(&processes[pid]);
+    }
+    return 0;
 }
 
 void nice(uint16_t pid, uint8_t priority) {
@@ -178,7 +194,6 @@ void nice(uint16_t pid, uint8_t priority) {
 }
 
 void yield() {
-    get_next_process();
     int20();
 }
 

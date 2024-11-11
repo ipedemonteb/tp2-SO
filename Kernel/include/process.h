@@ -5,6 +5,7 @@
 
 #define STACKSIZE   4096
 #define MAX_BUFFERS 64
+#define QUANT		128
 
 enum Status {READY, BLOCKED, KILLED};
 

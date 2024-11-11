@@ -8,8 +8,6 @@
 #include "lib.h"
 #include "syscall.h"
 
-#define QUANT		128
-
 typedef struct process_stack {
     void * r15;
 	void * r14;

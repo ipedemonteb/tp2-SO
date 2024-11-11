@@ -18,6 +18,8 @@ typedef struct pipe_t {
     uint64_t last;
     uint64_t current;
     char buff[BUFF_MAX];
+    uint64_t blocked_read[2];
+    uint64_t blocked_write[2];
     uint8_t opened_read;
     uint8_t opened_write;
 } pipe_t;

@@ -18,4 +18,7 @@ void * next(listADT list);
 void * peek(listADT list);
 void * poll(listADT list);
 void queue(listADT list , void * elem);
+uint8_t is_empty(listADT list);
+void remove(listADT list, void * elem);
+
 #endif

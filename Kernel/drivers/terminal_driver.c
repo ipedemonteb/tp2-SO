@@ -5,7 +5,7 @@
 
 #define MAX_SCREEN 6500
 
-#define MAX_FG 5
+#define MAX_FG 128
 
 static uint16_t lastX;
 
@@ -22,19 +22,20 @@ static pipe_t * terminal_buffer;
 
 static t_char blanck = {0, BLACK, BLACK};
 
-static int32_t fg[MAX_FG];
-static uint8_t fg_count = 0;
+static int32_t fg[MAX_FG] = {0};
 
 void add_to_fg(uint16_t pid) {
-    fg[fg_count % MAX_FG] = pid;
-    fg_count++;
+    fg[pid] = 1;
+}
+
+void rm_from_fg(uint16_t pid) {
+    fg[pid] = 0;
 }
 
 void t_kill_fg() {
     for (uint8_t i = 0; i < MAX_FG; i++){
-        if (fg[i] != -1) {
-            kill(fg[i]);
-            fg[i] = -1;
+        if (fg[i]) {
+            kill(i);
         }   
     }
 }
@@ -197,10 +198,6 @@ int8_t t_decrease_font_size() {
 }
 
 void start_terminal() {
-    for (uint8_t i = 0; i < MAX_FG; i++) {
-        fg[i] = -1;
-    }
-    
     terminal_buffer = get_terminal_buffer();
     char_height = 16;
     char_width = 8;

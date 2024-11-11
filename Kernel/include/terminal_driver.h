@@ -31,6 +31,8 @@ void t_kill_fg();
 
 void add_to_fg(uint16_t pid);
 
+void rm_from_fg(uint16_t pid);
+
 void start_terminal();
 
 void terminal();

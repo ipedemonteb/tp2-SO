@@ -63,7 +63,6 @@ static command_t commands[LETTERS][WORDS] = {
     {{0,0}}  //z
 };
 
-static char * command_not_found_msg = "Command not found. Type help for a list of commands";
 
 static uint8_t exitFlag;
 
@@ -168,7 +167,9 @@ void check_command(){
         if (c == NULL) {
             printf("%s: Command not found. Type help for a list of commands\n", command_tokens[0]);
         } else {
-            running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name, !bg)] = 1 + bg;
+            uint16_t pid = create_process(c->function,command_argc, command_tokens + 1, c->name, !bg);
+            running_processes_pids[pid] = 1 + bg;
+            nice(pid, bg ? 3 : 4);
         }
         swap(STDIN, p[READ_END]);
     } else {
@@ -181,7 +182,9 @@ void check_command(){
     if (c == NULL) {
         printf("%s: Command not found. Type help for a list of commands\n", command_tokens[0]);
     } else { 
-        running_processes_pids[create_process(c->function,command_argc, command_tokens + 1, c->name, !bg)] = 1 + bg;
+        uint16_t pid = create_process(c->function,command_argc, command_tokens + 1, c->name, !bg);
+        running_processes_pids[pid] = 1 + bg;
+        nice(pid, bg ? 3 : 4);
     }
     swap(STDOUT, p[WRITE_END]);
     close(p[WRITE_END]);
@@ -203,7 +206,7 @@ void handle_up_down(int8_t (*condition)(string_arrayADT), char * (*fn)(string_ar
 
 void launchShell() {
     copy(STDOUT,TERMINAL);
-
+    nice(get_current_pid(), 4);
     write(TERMINAL, prompt, 3);
     saved_commands = start_string_array(BUFF_MAX);
     char key;
