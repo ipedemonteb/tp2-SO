@@ -2,14 +2,24 @@ include Makefile.inc
 
 KERNEL=kernel.bin
 KERNEL_ELF=$(KERNEL:.bin=.elf)
-SOURCES=$(wildcard *.c) $(wildcard drivers/*.c) $(wildcard idt/*.c) $(wildcard libc/*.c) $(wildcard memory/*.c) $(wildcard process/*.c) $(wildcard tests/*.c) $(wildcard sync/*.c) $(wildcard pipes/*.c)
+SOURCES=$(wildcard *.c) $(wildcard drivers/*.c) $(wildcard idt/*.c) $(wildcard libc/*.c) $(wildcard process/*.c) $(wildcard sync/*.c) $(wildcard pipes/*.c)
+GCCFLAGS += -I./include -Wall -std=c11
+
+ifeq ($(MEMORY_MANAGER), buddy)
+	MEMORY_SOURCES=memory/buddy.c
+	GCCFLAGS += -DMEMORY_MANAGER_BUDDY
+else ifeq ($(MEMORY_MANAGER), free_array)
+	MEMORY_SOURCES=memory/mmADT.c memory/memory_manager.c
+	GCCFLAGS += -DMEMORY_MANAGER_FREE_ARRAY
+endif
+
+SOURCES +=$(MEMORY_SOURCES)
+
 SOURCES_ASM=$(wildcard asm/*.asm)
 OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
 LOADERSRC=loader.asm
-
 LOADEROBJECT=$(LOADERSRC:.asm=.o)
-STATICLIBS=
 
 all: $(KERNEL)
 
@@ -29,6 +39,6 @@ $(LOADEROBJECT):
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf asm/*.o tests/*.o *.o drivers/*.o idt/*.o libc/*.o memory/*.o process/*.o sync/*.o *.bin *.elf
+	rm -rf asm/*.o drivers/*.o idt/*.o libc/*.o memory/*.o process/*.o sync/*.o pipes/*.o *.o *.bin *.elf
 
 .PHONY: all clean

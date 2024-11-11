@@ -1,4 +1,4 @@
-#include "buddy.h"
+#include "memory_manager.h"
 
 #define MIN_LEVEL 5 // nivel minimo de la memoria (2^5 = 32 bytes)
 #define MAX_ORDER 25 // maximo nivel hardcodeado (por el tamaño de la memoria es el maximo nivel que deberia tener, lo pongo como proteccion x las)
@@ -88,7 +88,7 @@ void split_block(int8_t order) {
 
 block_t * merge(block_t * block, block_t * buddy_block) { // a esta funcion se la llama ya habiendo chequeado que el buddy este libre y sea del mismo nivel que el block, por lo que tiene que mergear a ciegas
   if (block == NULL || buddy_block == NULL) {
-    return; // @todo: handle error
+    return NULL; // @todo: handle error
   }
 
   block_t * left = block < buddy_block ? block : buddy_block;
@@ -139,7 +139,6 @@ void * my_malloc(uint64_t size) {
     }
 
     if (order_approx == 0) {
-      drawString("could not malloc", 20, 20, RED, BLACK);
       return NULL;
     }
 
@@ -154,10 +153,7 @@ void * my_malloc(uint64_t size) {
   remove_block(block); // saco al bloque del nivel en el que estaba (pues estará ocupado ya que lo devuelvo en el malloc)
   block->status = OCCUPIED; // todo: ver si esto va o no
 
-  //mem_status(); // @todo: borrar
-
   return (void *)((uint8_t *) block + sizeof(block_t));
-
 }
 
 void my_free (void * address) {
@@ -179,63 +175,5 @@ void my_free (void * address) {
 
   create_block((void *) block, block->order);
 
-  //mem_status(); // @todo: borrar
-
   return;
-}
-
-uint32_t itoa(uint32_t num, uint8_t *str) {
-  uint32_t digits = 1;
-  for (uint32_t n = num / 10; n != 0; digits++, n /= 10)
-    ;
-
-  if (digits == 1) {
-    str[0] = num + '0';
-    str[1] = '\0';
-    return digits;
-  }
-
-  str[digits] = '\0';
-  for (int32_t i = digits - 1; i >= 0; i--) {
-    str[i] = (num % 10) + '0';
-    num /= 10;
-  }
-
-  return digits;
-}
-
-void mem_status() {
-  int debug = 3;
-  drawString("MEMORY STATE:", 0, debug++, WHITE, BLACK);
-  void * null = NULL;
-  for (uint32_t level = MIN_LEVEL; level <= buddy_man.max_order; level++) {
-    block_t * current = buddy_man.free_blocks[level];
-    uint8_t aux[10];
-    if (current != null) {
-      itoa(level, aux); // @todo: incluir itoa
-      drawString("Level ", 3, debug, BLUE, BLACK);
-      drawString(aux, 10, debug++, BLUE, BLACK);
-      // Imprimir cada bloque de la lista
-      while (current != null) {
-        itoa((void *)current - (void *)MEM_START, aux);
-        drawString("Block at address: ", 5, debug, GREEN, BLACK);
-        drawString(aux, 30, debug, WHITE, BLACK);
-        itoa((1UL << current->order), aux);
-        drawString("size: ",50, debug, WHITE, BLACK);
-        drawString(aux, 55, debug++, WHITE, BLACK);
-        itoa((void *)current->next - MEM_START, aux);
-        drawString("next: ", 0, debug, WHITE, BLACK);
-        drawString(aux, 7, debug, WHITE, BLACK);
-        itoa(current->status, aux);
-        drawString("is_free: ", 25, debug, WHITE, BLACK);
-        drawString(aux, 35, debug++, WHITE, BLACK);
-        current = current->next; // Mover al siguiente bloque
-      }
-    } else {
-      itoa(level, aux);
-      drawString("Level ", 3, debug, BLUE, BLACK);
-      drawString(aux, 10, debug++, BLUE, BLACK);
-      drawString("No blocks available", 5, debug++, GREEN, BLACK);
-    }
-  }
 }

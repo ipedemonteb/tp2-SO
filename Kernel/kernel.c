@@ -10,8 +10,8 @@
 #include "./include/keyboardDriver.h"
 #include "./include/terminal_driver.h"
 #include "./include/sem.h"
-#include "./include/buddy.h"
-#include "./include/test_buddy.h"
+#include "./include/memory_manager.h"
+#include "./include/mmADT.h"
 
 
 extern uint8_t text;
@@ -48,16 +48,21 @@ void * initializeKernelBinary() {
 	return getStackBase();
 }
 
+void init_memory_manager() {
+  #ifdef MEMORY_MANAGER_BUDDY
+    init_buddy();
+  #elif defined(MEMORY_MANAGER_FREE_ARRAY)
+    start_mm();
+  #endif
+}
+
 int main() {
 	start_keyboard_driver();
 	start_terminal();
 	load_idt();
 	//_sti();
 	//((EntryPoint)sampleCodeModuleAddress)();
-	// start_mm();
-  init_buddy(); // PARA USAR EL OTRO MM COMENTAR ESTO Y DESCOMENTAR LA LINEA DE ARRIBA
-  // TAMBIEN DESCOMENTAR TODOS LOS ARCHIVOS DEL OTRO MM Y COMENTAR TODOS LOS ARCHIVOS DEL BUDDY (LOS .H TAMBIEN)
-  // despues cuando hagamos el makefile quedará bien
+	init_memory_manager();
 	init_scheduler(getStackBase());
 	init_semaphores();
 	uint8_t * argv[] = {0}; 

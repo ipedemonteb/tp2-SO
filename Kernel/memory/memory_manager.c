@@ -1,4 +1,4 @@
-/*#include "../include/mmADT.h"
+#include "../include/mmADT.h"
 
 
 #define START 0x0000000000200000
@@ -16,4 +16,4 @@ void * my_malloc(uint64_t size) {
 
 void my_free(void * p) {
     mm_free(mm, p);
-}*/
+}

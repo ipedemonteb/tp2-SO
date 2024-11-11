@@ -1,4 +1,4 @@
-/*#include "../include/mmADT.h"
+#include "../include/mmADT.h"
 #include <stdint.h>
 #include <unistd.h> 
 
@@ -145,4 +145,4 @@ void mm_free(mmADT mm, void * mem) {
 
     //@TODO: chequear si fusionamos bloques
     return;
-}*/
+}

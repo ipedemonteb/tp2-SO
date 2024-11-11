@@ -137,3 +137,47 @@ cd
 gdb
 q
 exit
+cd
+make all
+make all
+make clean
+make all
+make all
+make clean
+make all
+make all
+make clean
+make all
+make all
+make all
+make all
+make all
+make buddy
+make buddy
+make buddy
+make buddy
+make buddy
+make buddy
+clear
+make buddy
+make clean
+make clean
+make clean
+make buddy
+make buddy
+make buddy
+make clena
+make clean
+make
+make clean
+make
+make clean
+make buddy
+make clean
+make
+make clean
+git add ,
+make clean
+git add .
+git commit -m "feat: makefile changes to define used mm"
+exit
