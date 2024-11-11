@@ -14,6 +14,8 @@ typedef struct block_t {
 typedef struct buddy_manager {
   int8_t max_order;
   block_t * free_blocks[MAX_ORDER];   // arreglo de listas de bloques libres x nivel. en el arreglo hay un solo bloque representativo que arranca la lista
+  uint64_t total_mem;
+  uint64_t used_mem;
 } buddy_manager;
 
 buddy_manager buddy_man;
@@ -98,7 +100,7 @@ block_t * merge(block_t * block, block_t * buddy_block) { // a esta funcion se l
   return left;
 }
   
-void init_buddy() {
+void start_mm() {
   int current_size = 2;
   int level = 1;
   while (current_size < MEM_SIZE) {
@@ -106,7 +108,8 @@ void init_buddy() {
       current_size *= 2;
   }
   buddy_man.max_order = level; // me guardo el ultimo nivel real
-
+  buddy_man.total_mem = MEM_SIZE;
+  buddy_man.used_mem = 0;
   for (int i=0; i < MAX_ORDER; i++) {
     buddy_man.free_blocks[i] = NULL;
   }
@@ -176,4 +179,10 @@ void my_free (void * address) {
   create_block((void *) block, block->order);
 
   return;
+}
+
+void mem(mem_info * info) {
+  info->total = buddy_man.total_mem;
+  info-> free = buddy_man.total_mem - buddy_man.used_mem;
+  info->used = buddy_man.used_mem;
 }

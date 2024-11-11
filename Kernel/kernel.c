@@ -48,21 +48,13 @@ void * initializeKernelBinary() {
 	return getStackBase();
 }
 
-void init_memory_manager() {
-  #ifdef MEMORY_MANAGER_BUDDY
-    init_buddy();
-  #elif defined(MEMORY_MANAGER_FREE_ARRAY)
-    start_mm();
-  #endif
-}
-
 int main() {
 	start_keyboard_driver();
 	start_terminal();
 	load_idt();
 	//_sti();
 	//((EntryPoint)sampleCodeModuleAddress)();
-	init_memory_manager();
+	start_mm();
 	init_scheduler(getStackBase());
 	init_semaphores();
 	uint8_t * argv[] = {0}; 

@@ -1,11 +1,18 @@
-MEMORY_MANAGER ?= free_array
+free_array: MEMORY_MANAGER = free_array
+free_array: all
+buddy: MEMORY_MANAGER = buddy
+buddy: all
 
-all:  bootloader kernel userland toolchain image
-buddy: MEMORY_MANAGER=buddy
-buddy: bootloader kernel userland toolchain image
+all: bootloader kernel userland toolchain image
 
-debug: all
-	cd Kernel; make debug
+debug_buddy:
+	make buddy
+	cd Kernel; make MEMORY_MANAGER=buddy debug
+	cd Userland; make debug
+
+debug_free_array: 
+	make free_array
+	cd Kernel; make MEMORY_MANAGER=free_array debug
 	cd Userland; make debug
 
 bootloader:
