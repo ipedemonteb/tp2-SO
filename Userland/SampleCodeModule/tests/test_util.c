@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include <stdint.h>
-#include "../include/syscall.h"
 #include "../include/libc.h"
+#include "../include/syscall.h"
+#include <stdint.h>
 
 // Random
 static uint32_t m_z = 362436069;
@@ -33,17 +33,17 @@ uint8_t memcheck(void *start, uint8_t value, uint32_t size) {
   return 1;
 }
 
-void * my_memset(void * destination, int32_t c, uint64_t length) {
-	uint8_t chr = (uint8_t)c;
-	char * dst = (char *)destination;
-	while(length--) {
-		dst[length] = chr;
-	}
-	return destination;
+void *my_memset(void *destination, int32_t c, uint64_t length) {
+  uint8_t chr = (uint8_t)c;
+  char *dst = (char *)destination;
+  while (length--) {
+    dst[length] = chr;
+  }
+  return destination;
 }
 
 // Parameters
-int64_t satoi(char * str) {
+int64_t satoi(char *str) {
   uint64_t i = 0;
   int64_t res = 0;
   int8_t sign = 1;
@@ -71,33 +71,32 @@ void bussy_wait(uint64_t n) {
     ;
 }
 
-void endless_loop(uint8_t argc, char ** argv) {
-  int i = 0 , j = 10;
-  while (1){
-    if (i == 3)
-    {
+void endless_loop(uint8_t argc, char **argv) {
+  int i = 0, j = 10;
+  while (1) {
+    if (i == 3) {
       j += 1;
     }
     i++;
   }
 }
 
-void numToStr(int num, int8_t * str) {
-    int i = 0, j;
-    int8_t temp;
-    do {
-        str[i++] = (num % 10) + '0';
-        num /= 10;
-    } while (num > 0);
-    str[i] = '\0';
-    for (j = 0; j < i / 2; ++j) {
-        temp = str[j];
-        str[j] = str[i - j - 1];
-        str[i - j - 1] = temp;
-    }
+void numToStr(int num, int8_t *str) {
+  int i = 0, j;
+  int8_t temp;
+  do {
+    str[i++] = (num % 10) + '0';
+    num /= 10;
+  } while (num > 0);
+  str[i] = '\0';
+  for (j = 0; j < i / 2; ++j) {
+    temp = str[j];
+    str[j] = str[i - j - 1];
+    str[i - j - 1] = temp;
+  }
 }
 
-void endless_loop_print(uint8_t wait, char ** argv) {
+void endless_loop_print(uint8_t wait, char **argv) {
   int64_t pid = get_current_pid();
   int8_t buffer[20];
   numToStr(pid, buffer);

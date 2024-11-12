@@ -375,3 +375,8 @@ make clean
 make free_array
 exot
 exit
+cd
+make buddy
+make clean
+make buddy
+exit

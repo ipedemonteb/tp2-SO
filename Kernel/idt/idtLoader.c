@@ -14,11 +14,11 @@ typedef struct {
   uint8_t cero, access;
   uint16_t offset_m;
   uint32_t offset_h, other_cero;
-} DESCR_INT;  // interruption descriptor struct
+} DESCR_INT; // interruption descriptor struct
 
 #pragma pack(pop) // rest old alignment
 
-DESCR_INT * idt = (DESCR_INT *) 0; // idt of 255 entries
+DESCR_INT *idt = (DESCR_INT *)0; // idt of 255 entries
 
 void setup_IDT_entry(uint32_t index, uint64_t offset) {
   idt[index].selector = 0x08;
