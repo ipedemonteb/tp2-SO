@@ -163,6 +163,12 @@ uint8_t kill(uint16_t pid) { //@todo: chequeos
     processes[pid].parent_pcb->children_processes[1] |= processes[pid].children_processes[1];
     processes[pid].parent_pcb->killed_children[0] |= processes[pid].killed_children[0];
     processes[pid].parent_pcb->killed_children[1] |= processes[pid].killed_children[1];
+    char ** argv = processes[pid].argv;
+    while (*argv) {
+        my_free(argv);
+        argv++;
+    }
+    my_free(processes[pid].argv);
     if (get_current_pid() == pid) {
         yield();
     } else {

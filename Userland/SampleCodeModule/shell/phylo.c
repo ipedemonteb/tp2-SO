@@ -95,7 +95,7 @@ int8_t new_phylo(uint8_t idx) {
     argv[0] = my_malloc(10);
     itos(idx, argv[0]);
     argv[1] = NULL;
-    phylo_pids[idx] = create_process((uint64_t (*)) phylo_process, 1, argv, phylo_names[idx], 0);
+    phylo_pids[idx] = create_process(phylo_process, 1, argv, phylo_names[idx], 0);
 
     if(phylo_pids[idx] != NO_PID) {
         phylo_count++;

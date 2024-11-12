@@ -70,7 +70,7 @@ void bussy_wait(uint64_t n) {
     ;
 }
 
-void endless_loop() {
+void endless_loop(uint8_t argc, char ** argv) {
   int i = 0 , j = 10;
   while (1){
     if (i == 3)
@@ -96,15 +96,11 @@ void numToStr(int num, int8_t * str) {
     }
 }
 
-void endless_loop_print(uint64_t wait) {
+void endless_loop_print(uint8_t wait, char ** argv) {
   int64_t pid = get_current_pid();
   int8_t buffer[20];
   numToStr(pid, buffer);
   while (1) {
-    /* int8_t pid_s[8];
-    itos(pid, pid_s);
-    s_draw_line(pid_s,0,1);
-    s_off_cursor(); */
     bussy_wait(wait);
   }
 }

@@ -1,4 +1,4 @@
-#include "../include/command_manager.h"
+#include "../include/command_management.h"
 
 static char * helpMsg = "\
 List of commands: \n\
@@ -179,12 +179,12 @@ void printps(uint8_t argc, char * argv[]) {
         buffer_ptr[jmp + strlen(aux)] = ' ';
         jmp += 13;
 
-        uint64ToHexStr((uint64_t)info[i].stack_base, aux);
+        uint64_to_hex_str((uint64_t)info[i].stack_base, aux);
         strcpy(buffer + jmp, aux);
         buffer[jmp + strlen(aux)] = ' ';
         jmp += 16;
 
-        uint64ToHexStr((uint64_t)info[i].stack_ptr, aux);
+        uint64_to_hex_str((uint64_t)info[i].stack_ptr, aux);
         strcpy(buffer + jmp, aux);
         buffer[jmp + strlen(aux)] = ' ';
         jmp += 16;

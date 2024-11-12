@@ -20,5 +20,5 @@ uint32_t strcpy(char * dest, const char * source);
 int64_t char_idx(const char *s, char c);
 char * strtok(char * string, const char * delim);
 uint32_t strlen(const char * str);
-void uint64ToHexStr(uint64_t value, char *buffer);
+void uint64_to_hex_str(uint64_t value, char *buffer);
 #endif

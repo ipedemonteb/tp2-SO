@@ -62,7 +62,7 @@ section .text
 %macro irqHandlerMaster 1
 	pushState
 
-	mov rdi, %1 ; pasaje de parametro
+	mov rdi, %1 ; passing argument to fn
 	call irqDispatcher
 
 	; signal pic EOI (End of Interrupt)
@@ -102,7 +102,7 @@ section .text
 %macro exceptionHandler 1
 	getRegs
 	pushState
-	mov rdi, %1 ; pasaje de parametro
+	mov rdi, %1 ; passing argument to fn
 	mov rsi, regs
 	call exceptionDispatcher
 	popState
@@ -137,7 +137,7 @@ picMasterMask:
 picSlaveMask:
 	push    rbp
     mov     rbp, rsp
-    mov     ax, di  ; ax = mascara de 16 bits
+    mov     ax, di  ; ax = 16 bit mask
     out	0A1h,al
     pop     rbp
     retn

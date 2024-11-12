@@ -1,10 +1,4 @@
-#include <stdint.h>
 #include "../include/shell.h"
-#include "../include/libc.h"
-#include "../include/syscall.h"
-#include "../include/tests.h"
-#include "../include/string_arrayADT.h"
-#include "../include/command_manager.h"
 
 #define BUFF_MAX 4096
 #define WHITE 0x00FFFFFF
@@ -23,7 +17,7 @@
 
 typedef struct command_t{
     char * name;
-    void (*function)(uint8_t, char **);
+    void (* function)(uint8_t, char **);
 } command_t;
 
 string_arrayADT saved_commands;

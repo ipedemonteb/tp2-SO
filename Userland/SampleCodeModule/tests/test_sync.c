@@ -19,32 +19,25 @@ argv[1] = inc --> 1 o -1 para saber si hacgo dec o inc
 argv[2] = use_sem --> 0 o 1 para saber si uso semaforos o no
 */
 
-uint64_t my_process_inc(uint64_t argc, char * argv[]) {
+void my_process_inc(uint8_t argc, char * argv[]) {
   uint64_t n;
   int8_t inc;
   int8_t use_sem;
 
   if(argc != 3) {
-    return -1;
+    return;
   }
 
   if((n = satoi(argv[0])) <= 0) {
-    return -1;
+    return;
   }
 
   if((inc = satoi(argv[1])) == 0) { 
-    return -1;
+    return;
   }
   if((use_sem = satoi(argv[2])) < 0) { 
-    return -1;
+    return;
   }
-
-  /* if(use_sem) {
-     int8_t sem_open_result = sem_open(SEM_ID, 1);
-     if(sem_open_result == -1) {
-       return -1;
-     }
-  } */
 
   uint64_t i;
   for(i = 0; i < n; i++) {
@@ -57,11 +50,7 @@ uint64_t my_process_inc(uint64_t argc, char * argv[]) {
     }
   }
 
-   /* if(use_sem) {
-     sem_close(SEM_ID);
-  } */
-
-  return 0;
+  return;
 }
 
 void test_sync(uint8_t argc, char * argv[]) { // { n, use_sem, 0 }

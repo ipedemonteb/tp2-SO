@@ -36,6 +36,5 @@ clean:
 	cd Image; make clean
 	cd Kernel; make clean
 	cd Userland; make clean
-	cd Memory; make clean
 
 .PHONY: toolchain bootloader image collections kernel userland all clean

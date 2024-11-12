@@ -100,6 +100,21 @@ static uint8_t next_from_buffer(pipe_t * p) {
 	return p->buff[(p->current++) % BUFF_MAX];
 }
 
+void pipe_ready(pipe_t * pipe, uint8_t r_w) {
+    uint8_t pid;
+    uint64_t * arr;
+    if(r_w) {
+        arr = pipe->blocked_read;
+    } else {
+        arr = pipe->blocked_write;
+    }
+    while(arr[0] || arr[1]) {
+        pid = find_off_bit_128(~arr[0], ~arr[1]);
+        unblock(pid);
+        arr[pid / 64] = off_n_bit_64(arr[pid / 64], pid % 64);
+    }
+}
+
 int64_t read(uint8_t bd, char * arr, int64_t size) {
     process_struct * pcb = get_process_info(get_current_pid());
     int8_t id = pcb->open_buffers[bd];
@@ -135,20 +150,6 @@ int64_t read(uint8_t bd, char * arr, int64_t size) {
     return count;
 }
 
-void pipe_ready(pipe_t * pipe, uint8_t r_w) {
-    uint8_t pid;
-    uint64_t * arr;
-    if(r_w) {
-        arr = pipe->blocked_read;
-    } else {
-        arr = pipe->blocked_write;
-    }
-    while(arr[0] || arr[1]) {
-        pid = find_off_bit_128(~arr[0], ~arr[1]);
-        unblock(pid);
-        arr[pid / 64] = off_n_bit_64(arr[pid / 64], pid % 64);
-    }
-}
 
 int64_t write(uint8_t bd, char * buffer, int64_t size) {
     process_struct * pcb = get_process_info(get_current_pid());

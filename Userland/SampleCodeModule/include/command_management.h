@@ -1,5 +1,5 @@
-#ifndef COMMAND_MANAGER_H
-#define COMMAND_MANAGER_H
+#ifndef COMMAND_MANAGEMENT_H
+#define COMMAND_MANAGEMENT_H
 
 #include <stdint.h>
 #include "userLib.h"
