@@ -1,3 +1,7 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/videoDriver.h"
 #include "../include/font.h"
 
@@ -7,7 +11,7 @@
 #define BYTES_PER_PIXEL 3
 
 // area in bytes of said pop up window
-#define POP_UP_AREA POP_UP_HEIGHT * POP_UP_WIDTH * BYTES_PER_PIXEL
+#define POP_UP_AREA (POP_UP_HEIGHT * POP_UP_WIDTH * BYTES_PER_PIXEL)
 
 // top left vertex's position of said pop up window
 #define TOP_LEFT_X 160

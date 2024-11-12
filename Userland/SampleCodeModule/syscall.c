@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "./include/syscall.h"
 #define EMPTY (void *)0
 
@@ -65,24 +67,24 @@ int8_t create_process(void (*fn)(uint8_t, char **), uint8_t argc, char **argv, c
     return (int8_t)(uintptr_t)syscaller(15, (void *)fn, (void *)(uintptr_t)argc, (void *)argv, (void *)name, (void *)(uintptr_t)fg);
 }
 
-uint8_t kill(uint16_t pid) {
-    return (uint8_t)(uintptr_t)syscaller(16, (void *)(uintptr_t)pid, EMPTY, EMPTY, EMPTY, EMPTY);
+int8_t kill(uint16_t pid) {
+    return (int8_t)(uintptr_t)syscaller(16, (void *)(uintptr_t)pid, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void my_exit() {
     syscaller(17, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
-uint8_t block(uint16_t pid) {
-    return (uint8_t)(uintptr_t)syscaller(18, (void *)(uintptr_t)pid, EMPTY, EMPTY, EMPTY, EMPTY);
+int8_t block(uint16_t pid) {
+    return (int8_t)(uintptr_t)syscaller(18, (void *)(uintptr_t)pid, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
-uint8_t unblock(uint16_t pid) {
-    return (uint8_t)(uintptr_t)syscaller(19, (void *)(uintptr_t)pid, EMPTY, EMPTY, EMPTY, EMPTY);
+int8_t unblock(uint16_t pid) {
+    return (int8_t)(uintptr_t)syscaller(19, (void *)(uintptr_t)pid, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
-uint8_t nice(uint16_t pid, uint8_t priority) {
-    return (uint8_t)(uintptr_t)syscaller(20, (void *)(uintptr_t)pid, (void *)(uintptr_t)priority, EMPTY, EMPTY, EMPTY);
+int8_t nice(uint16_t pid, uint8_t priority) {
+    return (int8_t)(uintptr_t)syscaller(20, (void *)(uintptr_t)pid, (void *)(uintptr_t)priority, EMPTY, EMPTY, EMPTY);
 }
 
 void yield() {

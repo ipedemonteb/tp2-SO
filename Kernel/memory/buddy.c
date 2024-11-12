@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/memory_manager.h"
 
 #define MIN_LEVEL 5 // nivel minimo de la memoria (2^5 = 32 bytes)
@@ -30,9 +32,12 @@ block_t * create_block(void * address, int8_t order) {
 }
 
 void remove_block(block_t * block) {
+  if (block == NULL) {
+    return;
+  }
   uint8_t order = block->order;
   block_t * curr_block = buddy_man.free_blocks[order];
-  if (block == NULL || curr_block == NULL) {
+  if (curr_block == NULL) {
     return;
   }
 
@@ -140,21 +145,29 @@ void * my_malloc(uint64_t size) {
 
 void my_free (void * address) {
   block_t * block = (block_t *) (address - sizeof(block_t));
-  if (block->status == FREE) {
-    return; // @todo: handle error
+  if (block == NULL || block->status == FREE) {
+    return;
   }
   block->status = FREE;
   
   uint64_t block_pos = (uint64_t) ((void *) block - MEM_START);
   block_t * buddy_block = (block_t *) ((uint64_t) MEM_START + (((uint64_t) block_pos) ^ ((1L << block->order))));
-
-  while (block->order < buddy_man.max_order && buddy_block->status == FREE && buddy_block->order == block->order) {
+  if (buddy_block == NULL) {
+    return;
+  }
+  while (block && buddy_block && block->order < buddy_man.max_order && buddy_block->status == FREE && buddy_block->order == block->order) {
     block = merge(block, buddy_block);
+    if (block == NULL) {  // excessive checking to avoid PVS warning
+      return;
+    }
     block->status = FREE;
     block_pos = (uint64_t)((void *) block - ((uint64_t) MEM_START));
     buddy_block = (block_t *) (block_t *) ((uint64_t) MEM_START + (((uint64_t) block_pos) ^ ((1L << block->order))));
   }
 
+  if (block == NULL) {
+    return;
+  }
   create_block((void *) block, block->order);
 
   buddy_man.used_mem -= (1L << block->order);

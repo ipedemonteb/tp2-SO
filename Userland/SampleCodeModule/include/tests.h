@@ -3,7 +3,6 @@
 
 #include "./test_util.h"
 #include "./syscall.h"
-#include "./shell_graphics.h"
 
 void test_mm(uint8_t argc, char * argv[]);
 void test_processes(uint8_t argc, char *argv[]);

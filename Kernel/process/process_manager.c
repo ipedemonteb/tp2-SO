@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/memory_manager.h"
 #include "../include/process_manager.h"
 #include "../include/lib.h"
@@ -145,7 +147,10 @@ void create_first_process(void (*fn)(uint8_t,char **), uint8_t argc, char * argv
     schedule_process(p_struct);
 }
 
-uint8_t kill(uint16_t pid) { //@todo: chequeos
+int8_t kill(uint16_t pid) { //@todo: chequeos
+    if (pid >= QUANT) {
+        return -1;
+    }
     processes[pid].status = KILLED;
     for (uint8_t i = 0; i < MAX_BUFFERS * 2; i++) {
         internal_close(&processes[pid], i);
@@ -177,7 +182,10 @@ uint8_t kill(uint16_t pid) { //@todo: chequeos
     return 0;
 }
 
-uint8_t block(uint16_t pid) {
+int8_t block(uint16_t pid) {
+    if (pid >= QUANT) {
+        return -1;
+    }
     processes[pid].status = BLOCKED;
     if (get_current_pid() == pid) {
         yield();
@@ -187,7 +195,10 @@ uint8_t block(uint16_t pid) {
     return 0;
 }
 
-uint8_t unblock(uint16_t pid) {
+int8_t unblock(uint16_t pid) {
+    if (pid >= QUANT) {
+        return -1;
+    }
     if (processes[pid].status == BLOCKED) {
         processes[pid].status = READY;
         schedule_process(&processes[pid]);
@@ -196,7 +207,10 @@ uint8_t unblock(uint16_t pid) {
 }
 
 void nice(uint16_t pid, uint8_t priority) {
-    processes[pid].priority = priority;
+  if (priority > 4) {
+    return;
+  }
+  processes[pid].priority = priority;
 }
 
 void yield() {

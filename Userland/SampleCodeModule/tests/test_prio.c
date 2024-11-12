@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include "../include/tests.h"
 #include "../include/libc.h"
@@ -10,7 +12,6 @@
 #define MEDIUM 2  // TODO: Change as required
 #define HIGHEST 3 // TODO: Change as required
 
-uint8_t y = 0;
 int64_t prio[TOTAL_PROCESSES] = {LOWEST, MEDIUM, HIGHEST};
 
 void test_prio(uint8_t argc, char *argv[]) {

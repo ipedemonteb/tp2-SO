@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/string_arrayADT.h"
 #include "../include/syscall.h"
 #include "../include/libc.h"
@@ -29,14 +31,17 @@ string_arrayADT start_string_array(uint64_t max_size) {
 }
 
 int8_t add(string_arrayADT arr, char * string, uint32_t len) {
-    if (arr->written + len >= arr->max_size) {
-        return -1;
-    }
-    uint32_t count = strcpy(&arr->array[arr->offsets[arr->count++]], string);
-    arr->written += count + 1;
-    arr->array[arr->written] = 0;
-    arr->offsets[arr->count] = arr->written;
-    return len - count;
+  if (arr == (void*)0) {
+    return -1;
+  }
+  if (arr->written + len >= arr->max_size) {
+    return -1;
+  }
+  uint32_t count = strcpy(&arr->array[arr->offsets[arr->count++]], string);
+  arr->written += count + 1;
+  arr->array[arr->written] = 0;
+  arr->offsets[arr->count] = arr->written;
+  return len - count;
 }
 
 int8_t to_begin(string_arrayADT arr) {
@@ -90,38 +95,4 @@ void reset_string_array(string_arrayADT rta) {
     rta->array[0] = 0;
     rta->count = 0;
     rta->offsets[0] = 0;    
-}
-
-int test() {
-    string_arrayADT test = start_string_array(4096);
-    uint8_t count = 10;
-    char * h = "hola";
-    char * t = "t";
-    char * e = "";
-    for (uint8_t i = 0; i < count; i++) {
-        if (i % 3 == 0) {
-            add(test, h, 4);
-        }else if (i % 3 == 1) {
-            add(test,t,1);
-        } else {
-            add(test, e, 0);
-        }
-        
-    }
-    to_begin(test);
-    char * aux;
-    uint16_t len;
-    while(has_previous(test)){
-        aux = previous(test, &len);
-        printf(aux);
-        printf("%d",len);
-    }
-    while (has_next(test)) {
-        aux = next(test, &len);
-        printf(aux);
-        printf("%d",len);
-    }
-    
-    free_string_array(test);
-    return 0;
 }

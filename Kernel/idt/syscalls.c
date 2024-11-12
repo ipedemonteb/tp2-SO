@@ -1,3 +1,7 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/syscalls.h"
 #include "../include/time.h"
 #include "../include/audioDriver.h"
@@ -81,10 +85,11 @@ uint8_t fontSizeDown() {
 }
 
 void getTime(uint8_t pb[]) {
-	uint8_t buff[64] = {'0'};
+	uint8_t buff[64] = {0};
+  buff[0] = '0';
 	uint8_t t;
 	uint8_t idx = 0;
-	for (uint8_t i = 2; i >= 0; i--) {
+	for (int8_t i = 2; i >= 0; i--) {
 		t = getCurrentTime(i);
 		if (i == 2) {
 			if (t <= 2) {

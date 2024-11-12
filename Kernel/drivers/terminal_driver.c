@@ -1,3 +1,7 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/terminal_driver.h"
 #include "../include/videoDriver.h"
 #include "../include/pipes.h"
@@ -9,7 +13,7 @@
 
 static uint16_t lastX;
 
-static uint32_t currentX;
+static int32_t currentX;
 
 t_char screen[MAX_SCREEN];
 
@@ -218,10 +222,6 @@ void terminal() {
                 t_move_cursor(-1);
                 break;
             case UP_ARROW:
-                t_off_cursor();
-                t_draw_line("", 0);
-                t_set_cursor();
-                break;
             case DOWN_ARROW:
                 t_off_cursor();
                 t_draw_line("", 0);

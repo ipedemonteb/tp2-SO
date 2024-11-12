@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/scheduler.h"
 #include <stdint.h>
 #include "../include/videoDriver.h"
@@ -29,7 +31,7 @@ void deschedule_process(process_struct * pcb) {
 }
 
 void schedule_process(process_struct * pcb) {
-    add(scheduler->schedule[pcb->priority],pcb);
+    queue(scheduler->schedule[pcb->priority],pcb);
 }
 
 void * schedule(void * rsp) {
@@ -39,7 +41,7 @@ void * schedule(void * rsp) {
         queue(scheduler->schedule[scheduler->current_running_pcb->priority], scheduler->current_running_pcb);
     }
     
-    for (uint8_t i = MAX_PRIO - 1; i >= 0; i--) {
+    for (int8_t i = MAX_PRIO - 1; i >= 0; i--) {
         if (!is_empty(scheduler->schedule[i])) {
             scheduler->current_running_pcb = poll(scheduler->schedule[i]);
             break;

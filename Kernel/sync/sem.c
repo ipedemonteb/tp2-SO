@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/sem.h"
 #include <stdint.h>
 
@@ -92,7 +94,7 @@ int8_t sem_wait(int8_t id) {
   int16_t my_pid = get_current_pid();
 
   if(semaphores[id].value == 0) {
-    add(semaphores[id].waiting_sem, (void *)(uintptr_t) my_pid);
+    queue(semaphores[id].waiting_sem, (void *)(uintptr_t) my_pid);
     release_sem_lock(&semaphores[id]);
     block(my_pid);
     return 0;

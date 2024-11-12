@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/mmADT.h"
 #include <stdint.h>
 #include <unistd.h> 
@@ -23,26 +25,26 @@ mmADT init_mm(void * start, uint64_t size) {
       return NULL;
   }
 
-  mmADT mm = start;
-  mm->size = size;
-  mm->first = (block_data_ptr) ((uint8_t *) start + sizeof(struct mmCDT));
-  mm->avail = size - aux;
+  mmADT memory_man = start;
+  memory_man->size = size;
+  memory_man->first = (block_data_ptr) ((uint8_t *) start + sizeof(struct mmCDT));
+  memory_man->avail = size - aux;
 
-  mm->first->size = mm->avail;
-  mm->first->block = (void *) ((uint8_t *) start + aux);
-  mm->first->next = NULL;
-  mm->first->prev = NULL;
+  memory_man->first->size = memory_man->avail;
+  memory_man->first->block = (void *) ((uint8_t *) start + aux);
+  memory_man->first->next = NULL;
+  memory_man->first->prev = NULL;
 
-  return mm;
+  return memory_man;
 }
 
 
-void * mm_alloc(mmADT mm, uint64_t size) {
-  if(size == 0 || size + sizeof(struct block_data) > mm->avail) {
+void * mm_alloc(mmADT memory_man, uint64_t size) {
+  if(size == 0 || size + sizeof(struct block_data) > memory_man->avail) {
       return NULL;
   }
 
-  block_data_ptr iter = mm->first;
+  block_data_ptr iter = memory_man->first;
 
   while(iter != NULL) {
       if(iter->size >= size) {
@@ -61,11 +63,11 @@ void * mm_alloc(mmADT mm, uint64_t size) {
     block_data_ptr new_free_block = (block_data_ptr) ((uint8_t *) iter->block + size);
     new_free_block->block = (void *)((uint8_t *) new_free_block + sizeof(struct block_data));
     new_free_block->size = remaining - sizeof(struct block_data);
-
     if (iter->prev == NULL) {
         new_free_block->next = iter->next;
+        iter->next->prev = new_free_block;
         new_free_block->prev = iter->prev;
-        mm->first = new_free_block;
+        memory_man->first = new_free_block;
     }
     else {
       //disconect iter
@@ -79,12 +81,12 @@ void * mm_alloc(mmADT mm, uint64_t size) {
         p = p->prev;
       }
       if (p == NULL) {
-        new_free_block->next = mm->first;
+        new_free_block->next = memory_man->first;
         new_free_block->prev = NULL;
-        if (mm->first != NULL) {
-            mm->first->prev = new_free_block; 
+        if (memory_man->first != NULL) {
+            memory_man->first->prev = new_free_block; 
         }
-        mm->first = new_free_block;
+        memory_man->first = new_free_block;
       }
       else {
         new_free_block->next = p->next;
@@ -96,30 +98,30 @@ void * mm_alloc(mmADT mm, uint64_t size) {
       }
     }
     iter->size = size;
-    mm->avail -= size + sizeof(struct block_data);
+    memory_man->avail -= size + sizeof(struct block_data);
   }
   else {
     if(iter->prev != NULL) {
       iter->prev->next = iter->next;
     }
     else {
-      mm->first = iter->next;
+      memory_man->first = iter->next;
     }
     if(iter->next != NULL) {
       iter->next->prev = iter->prev;
     }
-    mm->avail -= size + remaining;
+    memory_man->avail -= size + remaining;
   }
   return iter->block;
 }
 
-void mm_free(mmADT mm, void * mem) {
-    if(mm == NULL || mem == NULL) {
+void mm_free(mmADT memory_man, void * mem) {
+    if(memory_man == NULL || mem == NULL) {
         return;
     }
     block_data_ptr block_freed = (block_data_ptr)((uint8_t *) mem - sizeof(struct block_data));
-    mm->avail += block_freed->size;
-    block_data_ptr iter = mm->first;
+    memory_man->avail += block_freed->size;
+    block_data_ptr iter = memory_man->first;
     block_data_ptr prev = NULL;
 
     while(iter != NULL && iter->size < block_freed->size) {
@@ -134,7 +136,7 @@ void mm_free(mmADT mm, void * mem) {
         prev->next = block_freed;
     }
     else {
-        mm->first = block_freed;
+        memory_man->first = block_freed;
     }
     if(iter != NULL) {
         iter->prev = block_freed;
@@ -142,10 +144,10 @@ void mm_free(mmADT mm, void * mem) {
     return;
 }
 
-uint64_t mm_avail(mmADT mm) {
-    return mm->avail;
+uint64_t mm_avail(mmADT memory_man) {
+    return memory_man->avail;
 }
 
-uint64_t mm_size(mmADT mm) {
-    return mm->size;
+uint64_t mm_size(mmADT memory_man) {
+    return memory_man->size;
 }

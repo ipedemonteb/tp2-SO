@@ -11,7 +11,6 @@
 typedef int (*compare)(void * e1, void * e2);
 typedef struct listCDT * listADT;
 
-void add(listADT list, void * elem);
 listADT new_list(compare cmp);
 void free_list(listADT list);
 void to_begin(listADT list);

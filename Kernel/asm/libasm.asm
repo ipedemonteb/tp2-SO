@@ -9,7 +9,6 @@ GLOBAL setTimerTick
 GLOBAL int20
 GLOBAL halt_cpu
 GLOBAL find_off_bit_64
-;GLOBAL find_off_bit_128
 GLOBAL set_n_bit_64
 GLOBAL off_n_bit_64
 

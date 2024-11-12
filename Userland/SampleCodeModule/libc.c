@@ -1,9 +1,11 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <stdarg.h>
 #include "./include/libc.h"
 #include "./include/syscall.h"
 
-#define MIN(a,b) a > b ? b:a
+#define MIN(a,b) ((a) > (b) ? (b) : (a))
 
 int64_t put_char(char c) {
     return write(STDOUT, &c, 1);
@@ -13,7 +15,7 @@ void print_string(char * str) {
     write(STDOUT, str, strlen(str));
 }
 
-void print_int(int num) {
+void print_int(int64_t num) {
     if (num == 0) {
         put_char('0');
         return;
@@ -42,7 +44,7 @@ int printf(const char * fmt, ...) {
             fmt++;
             switch (*fmt) {
                 case 'd':
-                    print_int(va_arg(args, int));
+                    print_int(va_arg(args, int64_t));
                     break;
                 case 'c':
                     put_char(va_arg(args, int));
@@ -161,13 +163,13 @@ void itos(int num, char * buffer) {
 }
 
 int strcmp(char * s1, char * s2) {
-    if (s1 == NULL && s2 == NULL) {
-        return 0;
+    if (s1 == NULL || s2 == NULL) {
+      return 0;
     }
     int ret = 0;
     int i = 0;
     do {
-        ret = s1[i] - s2[i]; 
+      ret = s1[i] - s2[i]; 
     } while (s1[i] && s2[i++] && !ret);
     return ret;
 }

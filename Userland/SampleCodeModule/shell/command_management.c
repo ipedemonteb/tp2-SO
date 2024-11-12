@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/command_management.h"
 
 static char * helpMsg = "\
@@ -48,13 +50,14 @@ void block_process(uint8_t argc, char * argv[]) {
 }
 
 void cat(uint8_t argc, char * argv[]) {
-    char c, buff[MAX_LINE];
+    int c;
+    char buff[MAX_LINE];
     uint16_t count = 0;
-    while ((c = get_char()) != -1) {
+    while ((c = get_char()) != EOF) {
         buff[count++] = c;
         if (c == '\n' || count - 1 >= MAX_LINE ) {
             buff[count] = 0;
-            printf(buff);
+            printf("%s", buff);
             count = 0;
         }
     }
@@ -75,9 +78,10 @@ static uint8_t is_vocal(char c) {
 }
 
 void filter(uint8_t argc, char * argv[]) {
-    char c, buff[MAX_LINE];
+    int c;
+    char buff[MAX_LINE];
     uint16_t count = 0;
-    while ((c = get_char()) != -1) {
+    while ((c = get_char()) != EOF) {
         if (!is_vocal(c)) {
             buff[count++] = c;
         }
@@ -213,7 +217,7 @@ void printps(uint8_t argc, char * argv[]) {
 }
 
 void wc(uint8_t argc, char * argv[]) {
-    char c;
+    int c;
     uint64_t count = 0;
     while ((c = get_char()) != EOF) {
         if (c == '\n') {

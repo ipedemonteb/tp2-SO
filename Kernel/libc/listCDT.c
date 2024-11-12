@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/listADT.h"
 //@todo: switch case type
 typedef struct node {
@@ -32,23 +34,6 @@ static void free_list_rec(TList list) {
     free_list_rec(list->tail);
     my_free(list);
 }
-
-void add(listADT list, void * elem) {
-    TList aux = my_malloc(sizeof(node));
-    aux->tail = NULL;
-    aux->head = elem;
-    if(list->first == NULL) {
-        list->first = aux;
-        list->last = aux;
-        to_begin(list);
-    } else {
-        list->last->tail = aux;
-        list->last = aux;
-    }
-    list->size++;
-}
-
-
 
 void remove(listADT list, void * elem) {
     if (list == NULL || list->first == NULL) {
