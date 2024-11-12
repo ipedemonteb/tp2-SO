@@ -10,6 +10,7 @@
     "mmadt.h": "c",
     "process_manager.h": "c",
     "syscall.h": "c",
-    "command_manager.h": "c"
+    "command_manager.h": "c",
+    "memory_resource": "c"
   }
 }
