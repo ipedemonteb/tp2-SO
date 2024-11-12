@@ -3,10 +3,10 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/syscalls.h"
-#include "../include/audioDriver.h"
-#include "../include/keyboardDriver.h"
+#include "../include/audio_driver.h"
+#include "../include/keyboard_driver.h"
 #include "../include/time.h"
-#include "../include/videoDriver.h"
+#include "../include/video_driver.h"
 
 static uint32_t uintToBase(uint64_t value, uint8_t *buffer, uint32_t base);
 

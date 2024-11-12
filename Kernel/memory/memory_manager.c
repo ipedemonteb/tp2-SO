@@ -4,20 +4,14 @@
 
 mmADT memory_man;
 
-void start_mm() {
-    memory_man = init_mm((void *)MEM_START, MEM_SIZE);
-}
+void start_mm() { memory_man = init_mm((void *)MEM_START, MEM_SIZE); }
 
-void * my_malloc(uint64_t size) {
-    return mm_alloc(memory_man, size);
-}
+void *my_malloc(uint64_t size) { return mm_alloc(memory_man, size); }
 
-void my_free(void * p) {
-    mm_free(memory_man, p);
-}
+void my_free(void *p) { mm_free(memory_man, p); }
 
-void mem(mem_info * info) {
-    info->total = mm_size(memory_man);
-    info->free = mm_avail(memory_man);
-    info->used = mm_size(memory_man) - mm_avail(memory_man);
+void mem(mem_info *info) {
+  info->total = mm_size(memory_man);
+  info->free = mm_avail(memory_man);
+  info->used = mm_size(memory_man) - mm_avail(memory_man);
 }

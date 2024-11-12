@@ -1,7 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-#include "../include/audioDriver.h"
+#include "../include/audio_driver.h"
 #include "../include/lib.h"
 #include "../include/time.h"
 

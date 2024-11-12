@@ -5,7 +5,7 @@
 #include "../include/terminal_driver.h"
 #include "../include/pipes.h"
 #include "../include/process_manager.h"
-#include "../include/videoDriver.h"
+#include "../include/video_driver.h"
 
 #define MAX_SCREEN 6500
 #define MAX_FG 128

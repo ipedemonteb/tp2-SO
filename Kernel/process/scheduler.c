@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/scheduler.h"
 #include "../include/pipes.h"
-#include "../include/videoDriver.h"
+#include "../include/video_driver.h"
 #include <stdint.h>
 
 #define AVAILABLE 1

@@ -1,8 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "./include/idtLoader.h"
+#include "./include/idt_loader.h"
 #include "./include/interrupts.h"
-#include "./include/keyboardDriver.h"
+#include "./include/keyboard_driver.h"
 #include "./include/memory_manager.h"
 #include "./include/module_loader.h"
 #include "./include/process_manager.h"

@@ -2,9 +2,9 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "../include/regsDump.h"
-#include "../include/keyboardDriver.h"
-#include "../include/videoDriver.h"
+#include "../include/regs_dump.h"
+#include "../include/keyboard_driver.h"
+#include "../include/video_driver.h"
 #include <stdint.h>
 
 static const int8_t *registers[19] = {

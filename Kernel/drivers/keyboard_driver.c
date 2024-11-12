@@ -1,6 +1,6 @@
-#include "../include/keyboardDriver.h"
+#include "../include/keyboard_driver.h"
 #include "../include/pipes.h"
-#include "../include/regsDump.h"
+#include "../include/regs_dump.h"
 #include "../include/terminal_driver.h"
 #include <stdint.h>
 
