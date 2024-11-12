@@ -3,7 +3,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/interrupts.h"
-#include "../include/regsDump.h"
+#include "../include/regs_dump.h"
 #include <stdint.h>
 
 #define ZERO_EXCEPTION_ID 0

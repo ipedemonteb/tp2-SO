@@ -35,7 +35,6 @@ void schedule_process(process_struct *pcb) {
 }
 
 void *schedule(void *rsp) {
-  drawchar(get_current_pid() + '0', debug++, 1, WHITE, BLACK);
   scheduler->current_running_pcb->stack_ptr = rsp;
   if (scheduler->current_running_pcb->status == READY) {
     queue(scheduler->schedule[scheduler->current_running_pcb->priority],
