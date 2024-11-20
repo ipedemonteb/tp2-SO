@@ -61,6 +61,9 @@ void cat(uint8_t argc, char *argv[]) {
       count = 0;
     }
   }
+  buff[count] = 0;
+  printf("%s", buff);
+  count = 0;
 }
 
 void clearCmd(uint8_t argc, char *argv[]) {
@@ -104,7 +107,7 @@ void kill_process(uint8_t argc, char *argv[]) {
 void loop(uint8_t argc, char *argv[]) {
   while (1) {
     printf("Hello from process %d\n", get_current_pid());
-    wait(100);
+    bussy_wait(1000000000);
   }
 }
 

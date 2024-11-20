@@ -24,6 +24,9 @@ void init_scheduler(void *stack_base) {
   scheduler->current_running_pcb = my_malloc(sizeof(process_struct));
   scheduler->current_running_pcb->status = KILLED;
   scheduler->current_running_pcb->stack_base = stack_base;
+  for (uint8_t i = 0; i < MAX_PRIO; i++) {
+      scheduler->count[i] = 0;
+  }
 }
 
 void deschedule_process(process_struct *pcb) {
@@ -36,14 +39,21 @@ void schedule_process(process_struct *pcb) {
 
 void *schedule(void *rsp) {
   scheduler->current_running_pcb->stack_ptr = rsp;
-  if (scheduler->current_running_pcb->status == READY) {
+  if (scheduler->count[0] == 1) {
+    for (uint8_t i = 0; i < MAX_PRIO; i++) {
+      scheduler->count[i] = 0;
+    }
+  }
+  
+  if (scheduler->current_running_pcb->status == READY ) {
     queue(scheduler->schedule[scheduler->current_running_pcb->priority],
           scheduler->current_running_pcb);
   }
 
   for (int8_t i = MAX_PRIO - 1; i >= 0; i--) {
-    if (!is_empty(scheduler->schedule[i])) {
+    if (!is_empty(scheduler->schedule[i]) && scheduler->count[i] <= (i * 5 + 1)) {
       scheduler->current_running_pcb = poll(scheduler->schedule[i]);
+      (scheduler->count[i])++;
       break;
     }
   }

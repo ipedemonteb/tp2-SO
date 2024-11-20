@@ -46,6 +46,21 @@ int8_t pipe(int8_t id, uint8_t pipe_bd[2]) {
   return id;
 }
 
+void pipe_ready(pipe_t *pipe, uint8_t r_w) {
+  uint8_t pid;
+  uint64_t *arr;
+  if (r_w) {
+    arr = pipe->blocked_read;
+  } else {
+    arr = pipe->blocked_write;
+  }
+  while (arr[0] || arr[1]) {
+    pid = find_off_bit_128(~arr[0], ~arr[1]);
+    unblock(pid);
+    arr[pid / 64] = off_n_bit_64(arr[pid / 64], pid % 64);
+  }
+}
+
 void internal_close(process_struct *pcb, uint8_t bd) {
   if (pcb->open_buffers[bd] == -1)
     return;
@@ -54,6 +69,7 @@ void internal_close(process_struct *pcb, uint8_t bd) {
     pipes[id].opened_write--;
     if (!pipes[id].opened_write) {
       pipes[id].buff[(pipes[id].last++) % BUFF_MAX] = EOF;
+      pipe_ready(&pipes[id], 1);
     }
   } else {
     pipes[id].opened_read--;
@@ -98,21 +114,6 @@ static uint8_t has_next_pipe(pipe_t *p) { return p->last > p->current; }
 
 static uint8_t next_from_buffer(pipe_t *p) {
   return p->buff[(p->current++) % BUFF_MAX];
-}
-
-void pipe_ready(pipe_t *pipe, uint8_t r_w) {
-  uint8_t pid;
-  uint64_t *arr;
-  if (r_w) {
-    arr = pipe->blocked_read;
-  } else {
-    arr = pipe->blocked_write;
-  }
-  while (arr[0] || arr[1]) {
-    pid = find_off_bit_128(~arr[0], ~arr[1]);
-    unblock(pid);
-    arr[pid / 64] = off_n_bit_64(arr[pid / 64], pid % 64);
-  }
 }
 
 int64_t read(uint8_t bd, char *arr, int64_t size) {

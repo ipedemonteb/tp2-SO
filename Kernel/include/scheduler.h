@@ -11,6 +11,7 @@
 
 typedef struct scheduler_struct {
   listADT schedule[MAX_PRIO];
+  uint16_t count[MAX_PRIO];
   process_struct *current_running_pcb;
 } scheduler_struct;
 
