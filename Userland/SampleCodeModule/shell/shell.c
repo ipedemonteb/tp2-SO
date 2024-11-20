@@ -243,6 +243,7 @@ void launchShell() {
     case '\n':
       write(TERMINAL, &key, 1);
       wait_for_processes(NO_BLOCK);
+      wait_children(NO_BLOCK);
       current_command[current_command_length] = 0;
       if (current_command_length != 0) {
         add(saved_commands, current_command, current_command_length);

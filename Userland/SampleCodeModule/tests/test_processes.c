@@ -82,6 +82,6 @@ void test_processes(uint8_t argc, char *argv[]) {
           p_rqs[rq].state = RUNNING_P;
         }
     }
-    wait_children();
+    wait_children(BLOCK);
   }
 }

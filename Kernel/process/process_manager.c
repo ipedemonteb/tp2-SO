@@ -170,6 +170,15 @@ int8_t kill(uint16_t pid) {
   if (processes[pid].parent_pcb->status == BLOCKED) {
     unblock(processes[pid].parent_pcb->pid);
   }
+
+  uint64_t aux[] = { processes[pid].children_processes[0], processes[pid].children_processes[1] };
+  uint8_t child;
+  while( aux[0] || aux[1] ) {
+    child = find_off_bit_128( ~aux[0] , ~aux[1]);
+    aux[child / 64] = off_n_bit_64( aux[child / 64], child % 64);
+    processes[child].parent_pcb = processes[pid].parent_pcb;
+  }
+
   processes[pid].parent_pcb->children_processes[0] |=
       processes[pid].children_processes[0];
   processes[pid].parent_pcb->children_processes[1] |=
@@ -253,21 +262,34 @@ void clear_child(process_struct *parent_pcb, uint16_t pid) {
   my_free(processes[pid].name);
 }
 
-void wait_children() {
-  uint16_t pid = get_current_pid();
+void wait_children_no_block(process_struct * pcb) {
   uint8_t child;
-  process_struct *pcb = &processes[pid];
-  while (pcb->children_processes[0] || pcb->children_processes[1]) {
-    while (pcb->killed_children[0] || pcb->killed_children[1]) {
+  while (pcb->killed_children[0] || pcb->killed_children[1]) {
       child =
           find_off_bit_128(~pcb->killed_children[0], ~pcb->killed_children[1]);
       clear_child(pcb, child);
     }
+}
+
+void wait_children_block(process_struct * pcb) {
+  while (pcb->children_processes[0] || pcb->children_processes[1]) {
+    wait_children_no_block(pcb);
     if (pcb->children_processes[0] || pcb->children_processes[1]) {
       pcb->status = BLOCKED;
       yield();
     }
   }
+}
+
+void wait_children(uint8_t block) {
+  uint16_t pid = get_current_pid();
+  process_struct *pcb = &processes[pid];
+  if (block) {
+    wait_children_block(pcb);
+  } else {
+    wait_children_no_block(pcb);
+  }
+  
 }
 
 uint8_t wait_pid_no_block(uint16_t pid) {

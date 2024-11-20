@@ -104,7 +104,7 @@ uint8_t ps(process_info *info) {
                                        EMPTY);
 }
 
-void wait_children() { syscaller(23, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY); }
+void wait_children(uint8_t block) { syscaller(23, (void *)(uintptr_t)block, EMPTY, EMPTY, EMPTY, EMPTY); }
 
 uint8_t wait_pid(uint16_t pid, uint8_t block) {
   return (uint8_t)(uintptr_t)syscaller(24, (void *)(uintptr_t)pid,

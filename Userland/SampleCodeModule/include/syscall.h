@@ -63,7 +63,7 @@ int8_t nice(uint16_t pid, uint8_t priority);
 void my_exit();
 void yield();
 uint8_t ps(process_info *info);
-void wait_children();
+void wait_children(uint8_t block);
 uint8_t wait_pid(uint16_t pid, uint8_t block);
 uint16_t get_current_pid();
 int8_t sem_open(int8_t id, int8_t value);

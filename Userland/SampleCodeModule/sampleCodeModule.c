@@ -14,6 +14,6 @@ int main() {
   char *argv[] = {0};
   create_process((void *)inactive, 0, argv, "inactive", 0);
   create_process((void *)launchShell, 0, argv, "Shell", 0);
-  wait_children();
+  wait_children(BLOCK);
   return 0;
 }
